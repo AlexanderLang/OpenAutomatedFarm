@@ -29,14 +29,14 @@ hardware can be used.
 Used Software
 -------------
 
-For programming the arduinos:
-[Ino](http://inotool.org/) will be used.
-For designing printed circuit boards (pcb):
+* For programming the arduinos:
+[Ino](http://inotool.org/)
+* For designing printed circuit boards (pcb):
 [Kicad](http://www.kicad-pcb.org/)
-As database we use:
+* As database we use:
 [MariaDB](https://mariadb.org/)
-For the web-ui:
-[Pyramid](http://www.pylonsproject.org/)
+* For the web-ui:
+[Pyramid](http://www.pylonsproject.org/),
 [Sqlalchemy](www.sqlalchemy.org/)
-The preffered programming language is:
+* The preffered programming language is:
 [Python 3](www.python.org)
