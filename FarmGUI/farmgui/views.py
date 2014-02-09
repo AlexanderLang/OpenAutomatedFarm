@@ -3,19 +3,13 @@ from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
 
-from .models import (
-    DBSession,
-    MyModel,
-    )
+from plant_settings_database import DBSession
+from plant_settings_database import Parameter
 
 
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
-def my_view(request):
-    try:
-        one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
-    except DBAPIError:
-        return Response(conn_err_msg, content_type='text/plain', status_int=500)
-    return {'one': one, 'project': 'FarmGUI'}
+def home(request):
+    return {'project': 'FarmGUI'}
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
@@ -33,8 +27,8 @@ After you fix the problem, please restart the Pyramid application to
 try it again.
 """
 
-@view_config(route_name='paramters', renderer='templates/parameters.pt')
+@view_config(route_name='parameters', renderer='templates/parameters.pt')
 def parameters(request):
-	params = DBSession.query(Parameters)
+	params = DBSession.query(Parameter)
 	return { 'params': params}
 

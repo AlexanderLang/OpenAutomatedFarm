@@ -1,11 +1,8 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from .models import (
-    DBSession,
-    Base,
-    )
-
+from plant_settings_database import DBSession
+from plant_settings_database import Base
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
