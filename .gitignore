@@ -16,6 +16,9 @@ sdist/
 .installed.cfg
 *.egg
 
+# virtual environment
+env33/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
