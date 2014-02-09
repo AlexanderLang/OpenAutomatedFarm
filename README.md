@@ -40,3 +40,10 @@ Used Software
 [Sqlalchemy](www.sqlalchemy.org/)
 * The preffered programming language is:
 [Python 3](www.python.org)
+
+
+Getting Started
+---------------
+
+Chnage directory to FarmGUI and follow the instructions provided there.
+
