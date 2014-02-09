@@ -17,6 +17,7 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'waitress',
+    'mysql-connector-python',
     ]
 
 setup(name='FarmGUI',

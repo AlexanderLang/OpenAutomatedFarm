@@ -33,3 +33,8 @@ After you fix the problem, please restart the Pyramid application to
 try it again.
 """
 
+@view_config(route_name='paramters', renderer='templates/parameters.pt')
+def parameters(request):
+	params = DBSession.query(Parameters)
+	return { 'params': params}
+

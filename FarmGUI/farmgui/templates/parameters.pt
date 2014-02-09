@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="${request.locale_name}">
+  <head>
+    <meta charset="utf-8">
+    <title>FarmGUI Parameters</title>
+  </head>
+
+  <body>
+<ul>
+<li tal:repeat="param params">${param.name}</li>
+</ul>
+  </body>
+</html>
