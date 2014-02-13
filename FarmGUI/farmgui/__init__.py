@@ -12,11 +12,11 @@ def main(global_config, **settings):
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
     config.include('pyramid_chameleon')
-    config.add_static_view('static', 'static', cache_max_age=3600)
+    config.add_static_view('static', 'views/static', cache_max_age=3600)
     config.include(add_routes)
     config.scan()
     return config.make_wsgi_app()
 
 def add_routes(config):
-	config.add_route('home', '/')
-	config.add_route('parameters', '/parameters')
+    config.add_route('home', '/')
+    config.add_route('about', '/about')
