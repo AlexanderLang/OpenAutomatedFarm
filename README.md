@@ -45,5 +45,22 @@ Used Software
 Getting Started
 ---------------
 
-Chnage directory to FarmGUI and follow the instructions provided there.
+1) Create a virtual python environment
+
+	pyvenv-3.3 env33
+	source env33/bin/activate
+	cd env33
+	curl -O http://python-distribute.org/distribute_setup.py
+	python3.3 distribute_setup.py
+	easy_install pip
+	pip install pyramid
+
+2) Install our database library(s)
+
+	cd ../lib/plant_settings_database
+	python3.3 setup.py develop
+
+3) follow the instructions from the readme file inside the FarmGUI folder
+
+4) start hacking :)
 
