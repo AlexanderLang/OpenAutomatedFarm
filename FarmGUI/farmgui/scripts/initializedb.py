@@ -11,10 +11,12 @@ from pyramid.paster import (
 
 from pyramid.scripts.common import parse_vars
 
-from plant_settings_database import DBSession
-from plant_settings_database import Base
-from plant_settings_database import Parameter
+from plant_settings_database import DBSession as PlantSettings_Session
+from plant_settings_database import Base as PlantSettings_Base
 from plant_settings_database import init_Parameters
+
+from field_controller_database import DBSession as FieldController_Session
+from field_controller_database import Base as FieldController_Base
 
 def usage(argv):
 	cmd = os.path.basename(argv[0])
@@ -29,10 +31,16 @@ def main(argv=sys.argv):
 	config_uri = argv[1]
 	options = parse_vars(argv[2:])
 	setup_logging(config_uri)
-	settings = get_appsettings(config_uri, options=options)
-	engine = engine_from_config(settings, 'sqlalchemy.')
-	DBSession.configure(bind=engine)
-	Base.metadata.create_all(engine)
+	settings = get_appsettings(config_uri)
+	
+	plant_settings_engine = engine_from_config(settings, 'plant_settings_database.')
+	PlantSettings_Session.configure(bind=plant_settings_engine)
+	PlantSettings_Base.metadata.create_all(plant_settings_engine)
+	
+	field_controller_engine = engine_from_config(settings, 'field_controller_database.')
+	FieldController_Session.configure(bind=field_controller_engine)
+	FieldController_Base.metadata.create_all(field_controller_engine)
+	
 	with transaction.manager:
-		init_Parameters(DBSession)
+		init_Parameters(PlantSettings_Session)
 		pass
