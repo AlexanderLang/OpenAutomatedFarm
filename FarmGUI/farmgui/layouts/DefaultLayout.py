@@ -1,7 +1,7 @@
 
 from pyramid_layout.layout import layout_config
 
-@layout_config(template='templates/layouts/default_layout.pt')
+@layout_config(name='default', template='farmgui:layouts/templates/default_layout.pt')
 class DefaultLayout(object):
     '''
     '''
