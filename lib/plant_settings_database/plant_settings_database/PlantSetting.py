@@ -26,7 +26,7 @@ class PlantSetting(Base):
 	stages = relationship("Stage", backref="PlantSettings")
 
 
-	def __init__(self, plant, variety, method, description):
+	def __init__(self, plant, variety, method, description=None):
 		'''
 		Constructor
 		'''

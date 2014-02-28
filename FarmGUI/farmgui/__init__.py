@@ -19,3 +19,4 @@ def main(global_config, **settings):
 def add_routes(config):
     config.add_route('home_view', '/')
     config.add_route('about_view', '/about')
+    config.add_route('plant_settings_view', '/plant_settings')

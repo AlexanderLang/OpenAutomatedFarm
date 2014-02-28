@@ -19,6 +19,7 @@ def Navbar(context, request):
         return item
     nav_items = [
         nav_item('Home', request.route_url('home_view')),
+        nav_item('Plant Settings', request.route_url('plant_settings_view')),
         nav_item('About', request.route_url('about_view')),
         ]
     return {'nav_items': nav_items}
