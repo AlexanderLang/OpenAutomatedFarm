@@ -23,7 +23,7 @@ class PlantSetting(Base):
 	variety = Column(Unicode(250), nullable=False)
 	method = Column(Unicode(250), nullable=False)
 	description = Column(Text, nullable=True)
-	stages = relationship("Stage", backref="PlantSettings")
+	stages = relationship("Stage", backref="plantSetting")
 
 
 	def __init__(self, plant, variety, method, description=None):

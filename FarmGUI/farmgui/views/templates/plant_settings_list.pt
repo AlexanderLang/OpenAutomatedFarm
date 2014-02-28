@@ -5,6 +5,7 @@
     <table class="table table-striped table-bordered">
       <thead>
         <tr>
+          <th>View</th>
           <th>Plant</th>
           <th>Variety</th>
           <th>Method</th>
@@ -13,6 +14,7 @@
       </thead>
       <tbody>
         <tr tal:repeat="ps plant_settings">
+          <td><a class="btn" href="${request.route_url('plant_settings_view', _id=ps._id)}">view</a></td>
           <td>${ps.plant}</td>
           <td>${ps.variety}</td>
           <td>${ps.method}</td>
@@ -20,6 +22,6 @@
         </tr>
       </tbody>
     </table>
-    <a class="btn btn-primary btn-lg" href="${request.route_url('add_plant_settings_view')}">Add</a>
+    <a class="btn btn-primary btn-lg" href="${request.route_url('plant_settings_new')}">Add</a>
   </div>
 </metal:block>
