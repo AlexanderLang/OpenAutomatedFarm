@@ -19,6 +19,7 @@ requires = [
     'zope.sqlalchemy',
     'waitress',
     'mysql-connector-python',
+    'deform_bootstrap',
     ]
 
 setup(name='FarmGUI',

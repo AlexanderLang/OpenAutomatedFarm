@@ -59,6 +59,8 @@ Getting Started
 
 	cd ../lib/plant_settings_database
 	python3.3 setup.py develop
+	cd ../field_controller_database
+	python3.3 setup.py develop
 
 3) follow the instructions from the readme file inside the FarmGUI folder
 
