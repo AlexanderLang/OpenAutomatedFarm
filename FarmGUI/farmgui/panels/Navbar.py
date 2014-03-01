@@ -20,6 +20,7 @@ def Navbar(context, request):
     nav_items = [
         nav_item('Home', request.route_url('home_view')),
         nav_item('Plant Settings', request.route_url('plant_settings_list')),
+        nav_item('Parameters', request.route_url('parameters_list')),
         nav_item('About', request.route_url('about_view')),
         ]
     return {'nav_items': nav_items}
