@@ -24,5 +24,6 @@ def add_routes(config):
     config.add_route('plant_settings_list', '/plant_settings')
     config.add_route('plant_settings_new', '/plant_settings/add')
     config.add_route('plant_settings_view', '/plant_settings/{_id}')
-    config.add_route('stage_new', '/plant_settings/{_id}/stage_new')
+    config.add_route('stage_new', '/plant_settings/{_id}/new_stage')
     config.add_route('stage_view', '/stages/{_id}')
+    config.add_route('stage_configuration_new', 'stages/{_id}/new_configuration')

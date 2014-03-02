@@ -15,5 +15,6 @@
         </tr>
       </tbody>
     </table>
+    <a class="btn btn-primary btn-lg" href="${request.route_url('stage_configuration_new', _id=stage._id)}">Add Configuration</a>
   </div>
 </metal:block>

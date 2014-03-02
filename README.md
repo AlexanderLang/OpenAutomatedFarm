@@ -47,22 +47,15 @@ Getting Started
 
 1) Create a virtual python environment
 
-	pyvenv-3.3 env33
-	source env33/bin/activate
-	cd env33
-	curl -O http://python-distribute.org/distribute_setup.py
-	python3.3 distribute_setup.py
-	easy_install pip
-	pip install pyramid
+	./setup_virtualenv.sh
 
-2) Install our database library(s)
+2) Initialize the database(s)
 
-	cd ../lib/plant_settings_database
-	python3.3 setup.py develop
-	cd ../field_controller_database
-	python3.3 setup.py develop
+	initialize_FarmGUI_db
 
-3) follow the instructions from the readme file inside the FarmGUI folder
+3) Run pserve
+
+	pserve development.ini --reload
 
 4) start hacking :)
 

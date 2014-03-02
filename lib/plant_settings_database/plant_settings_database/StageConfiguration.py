@@ -29,10 +29,11 @@ class StageConfiguration(Base):
 	upperLimit = Column(Float, nullable=False)
 	lowerLimit = Column(Float, nullable=False)
 
-	def __init__(self, parameter, time, setpoint, upperLimit, lowerLimit):
+	def __init__(self, stage, parameter, time, setpoint, upperLimit, lowerLimit):
 		'''
 		Constructor
 		'''
+		self.stage = stage
 		self.parameter = parameter
 		self.time = time
 		self.setpoint = setpoint

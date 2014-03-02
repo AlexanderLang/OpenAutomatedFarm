@@ -26,7 +26,7 @@ class Stage(Base):
 	duration = Column(SmallInteger, nullable=False)
 	name = Column(Unicode(250), nullable=True)
 	description = Column(Text, nullable=True)
-	configurations = relationship("StageConfiguration", backref="Stages")
+	configurations = relationship("StageConfiguration", backref="stage")
 
 
 	def __init__(self, plantSetting, number, duration, name, description):
