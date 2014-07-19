@@ -16,5 +16,13 @@
       </tbody>
     </table>
     <a class="btn btn-primary btn-lg" href="${request.route_url('stage_configuration_new', _id=stage._id)}">Add Configuration</a>
+    <div class="demo-container">
+      <div id="placeholder" class="demo-placeholder"></div>
+    </div>
+    <script>
+      $(document).ready(function(){
+      get_configurations_data(${stage._id});
+      });
+    </script>
   </div>
 </metal:block>

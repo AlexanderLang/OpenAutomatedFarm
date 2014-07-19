@@ -25,7 +25,7 @@ class ParameterViews(object):
         try:
             parameters = PlantSettings_Session.query(Parameter).all()
         except DBAPIError:
-            return Response('database error.', content_type='text/plain', status_int=500)
+            return Response('database error (query Parameters)', content_type='text/plain', status_int=500)
         return {'parameters': parameters}
     
     @view_config(route_name='parameters_new', renderer='farmgui:views/templates/parameters_new.pt', layout='default')

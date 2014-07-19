@@ -38,6 +38,8 @@ Used Software
 * For the web-ui:
 [Pyramid](http://www.pylonsproject.org/),
 [Sqlalchemy](www.sqlalchemy.org/)
+[redis-py](https://github.com/andymccurdy/redis-py)
+[pyserial](http://pyserial.sourceforge.net/)
 * The preffered programming language is:
 [Python 3](www.python.org)
 
@@ -48,14 +50,22 @@ Getting Started
 1) Create a virtual python environment
 
 	./setup_virtualenv.sh
+	source env34/bin/activate
 
 2) Initialize the database(s)
 
 	initialize_FarmGUI_db
 
-3) Run pserve
+3) Start the workers
+
+	measurement_scheduler &
+	measurement_logger &
+	periphery_controller_manager &
+	periphery_controller_worker /dev/ttyACM0
+
+4) Run pserve
 
 	pserve development.ini --reload
 
-4) start hacking :)
+5) start hacking :)
 

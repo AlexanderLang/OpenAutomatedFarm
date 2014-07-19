@@ -1,0 +1,46 @@
+<metal:block use-macro="main_template">
+  <div metal:fill-slot="content">
+    <h1 id="measurement-title" data-measurement-id="${measurement._id}">Measurement</h1>
+    <div tal:condition="not error">
+      <form role="form" action="" method="post">
+        <table class="table table-striped table-bordered">
+          <tbody>
+            <tr>
+              <th>${structure:form['location'].title}</th>
+              <td>${measurement.location.name}</td>
+            </tr>
+            <tr>
+              <th>${structure:form['measurand'].title}</th>
+              <td>${measurement.measurand.name + ' [' + measurement.measurand.unit + ']'} </td>
+            </tr>
+            <tr>
+              <th>${structure:form['sensor'].title}</th>
+              <td>
+                ${structure:form['sensor'].serialize(measurement=measurement)}
+              </td>
+            </tr>
+            <tr>
+              <th>${structure:form['interval'].title}</th>
+              <td id="interval" data-interval="${measurement.interval}">
+                ${structure:form['interval'].serialize(measurement=measurement)}
+              </td>
+            </tr>
+            <tr>
+              <th>${structure:form['description'].title}</th>
+              <td>
+                ${structure:form['description'].serialize(measurement=measurement)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button id="save-button" name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
+      </form>
+    </div>
+    <div tal:condition="error">
+    <tal:form replace="structure form" />
+    </div>
+    <div class="demo-container">
+      <div id="placeholder" class="demo-placeholder"></div>
+    </div>
+  </div>
+</metal:block>

@@ -2,10 +2,9 @@
   <div metal:fill-slot="content">
     <h1>Plant Settings</h1>
 
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered table-hover">
       <thead>
         <tr>
-          <th>View</th>
           <th>Plant</th>
           <th>Variety</th>
           <th>Method</th>
@@ -13,8 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr tal:repeat="ps plant_settings">
-          <td><a class="btn" href="${request.route_url('plant_settings_view', _id=ps._id)}">view</a></td>
+        <tr tal:repeat="ps plant_settings" onclick="document.location = '${request.route_url('plant_settings_view', _id=ps._id)}';">
           <td>${ps.plant}</td>
           <td>${ps.variety}</td>
           <td>${ps.method}</td>

@@ -35,3 +35,7 @@ class PlantSetting(Base):
 		self.method = method
 		self.description = description
 
+
+def init_PlantSettings(db_session):
+	db_session.add(PlantSetting('tomato', 'unkown', 'hydroponic', 'tomato test settings'))
+

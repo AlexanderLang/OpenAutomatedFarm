@@ -1,0 +1,44 @@
+<metal:block use-macro="main_template">
+  <div metal:fill-slot="content">
+    <h1>Periphery Controller</h1>
+
+    <form role="form" action="" method="post">
+      <table class="table table-striped table-bordered table-hover">
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <td>
+              <input type="text" name="name" value="${periphery_controller.name}"></input>
+            </td>
+          </tr>
+          <tr>
+            <th>Firmware</th>
+            <td>${periphery_controller.firmwareName+' '+periphery_controller.firmwareVersion}</td>
+          </tr>
+        </tbody>
+      </table>
+      <button id="save-button" name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
+    </form>
+
+    <h2>Sensors</h2>
+
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Unit</th>
+          <th>Sampling time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr tal:repeat="s periphery_controller.sensors" onclick="document.location = '${request.route_url('sensor_view', _id=s._id)}';">
+          <td>${s.name}</td>
+          <td></td>
+          <td>${s.unit}</td>
+          <td>${s.samplingTime}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</metal:block>

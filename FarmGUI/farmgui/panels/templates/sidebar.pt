@@ -1,0 +1,8 @@
+<div class="col-sm-2">
+  <ul id="sidebar" class="nav nav-stacked affix">
+    <li tal:repeat="item sidebar_items" tal:attributes="class 'active' if item.active else ''">
+      <a href="${item.url}">${item.name}</a>
+    </li>
+  </ul>
+</div>
+      

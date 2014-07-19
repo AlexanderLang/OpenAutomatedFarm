@@ -1,6 +1,7 @@
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.txt')) as f:
@@ -14,6 +15,7 @@ requires = [
     'pyramid_debugtoolbar',
     'pyramid_layout',
     'pyramid_tm',
+    'pyramid_redis'
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
@@ -32,7 +34,7 @@ setup(name='FarmGUI',
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
+      author='Alexander Lang',
       author_email='',
       url='',
       keywords='web wsgi bfg pylons pyramid',

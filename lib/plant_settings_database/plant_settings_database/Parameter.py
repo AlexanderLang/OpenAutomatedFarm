@@ -19,7 +19,7 @@ class Parameter(Base):
 	__tablename__ = 'Parameters'
 
 	_id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
-	name = Column(Unicode(250), nullable=False)
+	name = Column(Unicode(250), nullable=False, unique=True)
 	unit = Column(Unicode(50), nullable=False)
 	min = Column(Float, nullable=False)
 	max = Column(Float, nullable=False)
@@ -38,11 +38,11 @@ class Parameter(Base):
 		
 
 def init_Parameters(db_session):
-	names = ["Air Temperature", "Water Temperature", "Air Humidity", "pH", "EC"]
-	units = ["°C", "°C", "%", "", "mS"]
-	min =   [0,     0,    5,   0,  0]
-	max =   [40,    40,   100, 14, 5000]
-	descriptions = ["", "", "", "", ""]
+	names = ["Air Temperature", "Water Temperature", "Air Humidity", "pH", "EC", "Blue Light", "Red Light", "White Light"]
+	units = ["°C", "°C", "%", "", "mS", "%", "%", "%"]
+	min =   [0,     0,    5,   0,  0, 0, 0, 0]
+	max =   [40,    40,   100, 14, 5000, 100, 100, 100]
+	descriptions = ["", "", "", "", "", "", "", ""]
 	for i in range(len(names)):
 		param = Parameter(names[i], units[i], min[i], max[i], descriptions[i])
 		db_session.add(param)

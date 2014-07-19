@@ -25,7 +25,7 @@ class PlantSettingViews(object):
         try:
             plant_settings = PlantSettings_Session.query(PlantSetting).all()
         except DBAPIError:
-            return Response('database error.', content_type='text/plain', status_int=500)
+            return Response('database error (query PlantSettings)', content_type='text/plain', status_int=500)
         return {'plant_settings': plant_settings}
     
     @view_config(route_name='plant_settings_new', renderer='farmgui:views/templates/plant_settings_new.pt', layout='default')
@@ -50,5 +50,5 @@ class PlantSettingViews(object):
             plant_setting = PlantSettings_Session.query(PlantSetting).filter(PlantSetting._id==self.request.matchdict['_id']).first()
             return {'plant_setting': plant_setting}
         except DBAPIError:
-            return Response('database error.', content_type='text/plain', status_int=500)
+            return Response('database error (query PlantSettings for id)', content_type='text/plain', status_int=500)
         

@@ -31,7 +31,7 @@ class StageViews(object):
             try:
                 plant_setting = PlantSettings_Session.query(PlantSetting).filter(PlantSetting._id==self.request.matchdict['_id']).first()
             except DBAPIError:
-                return Response('database error.', content_type='text/plain', status_int=500)
+                return Response('database error (query PlantSettings for id)', content_type='text/plain', status_int=500)
             try:
                 values = addForm.validate(controls)
                 new_stage = Stage(plant_setting, values['Number'], values['Duration'], values['Name'], values['Description'])
@@ -43,9 +43,14 @@ class StageViews(object):
     
     @view_config(route_name='stage_view', renderer='farmgui:views/templates/stage_view.pt', layout='default')
     def stage_view(self):
+        layout = self.request.layout_manager.layout
+        layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.time.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/plot_configuration.js'))
+        layout.add_css(self.request.static_url('farmgui:static/css/plot_configuration.css'))
         try:
             stage = PlantSettings_Session.query(Stage).filter(Stage._id==self.request.matchdict['_id']).first()
             return {'stage': stage}
         except DBAPIError:
-            return Response('database error.', content_type='text/plain', status_int=500)
+            return Response('database error (query Stages for id)', content_type='text/plain', status_int=500)
     

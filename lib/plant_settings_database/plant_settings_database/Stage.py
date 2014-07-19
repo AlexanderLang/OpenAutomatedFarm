@@ -13,6 +13,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .meta import Base
+from .PlantSetting import PlantSetting
 
 class Stage(Base):
 	'''
@@ -38,4 +39,10 @@ class Stage(Base):
 		self.duration = duration
 		self.name = name
 		self.description = description
+
+
+def init_Stages(db_session):
+	plantSetting = db_session.query(PlantSetting).filter(PlantSetting.plant=='tomato').first()
+	db_session.add(Stage(plantSetting, 1, 15, 'groth', 'plant must get bigger :)'))
+	db_session.add(Stage(plantSetting, 2, 45, 'stage name', 'some description'))
 

@@ -26,5 +26,12 @@ class MeasurementLog(Base):
     
     def __init__(self, measurement, time, value):
         self.measurement = measurement
+        self.measurementId = measurement._id
         self.time = time
         self.value = value
+    
+    def __str__(self):
+        name = self.measurement.location.name + ': '
+        name = name + self.measurement.measurand.name + ' = '
+        name = name + str(self.value) + ' [' + self.measurement.measurand.unit + ']'
+        return name
