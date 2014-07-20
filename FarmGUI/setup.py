@@ -15,13 +15,15 @@ requires = [
     'pyramid_debugtoolbar',
     'pyramid_layout',
     'pyramid_tm',
-    'pyramid_redis'
+    'pyramid_redis',
+    'hiredis',
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
     'waitress',
     'mysql-connector-python',
     'deform_bootstrap',
+    'pyserial',
     ]
 
 setup(name='FarmGUI',
@@ -48,5 +50,7 @@ setup(name='FarmGUI',
       main = farmgui:main
       [console_scripts]
       initialize_FarmGUI_db = farmgui.scripts.initializedb:main
+      oaf_pc = farmgui.workers:periphery_controller_main
+      oaf_ms = farmgui.workers:measurement_scheduler_main
       """,
       )

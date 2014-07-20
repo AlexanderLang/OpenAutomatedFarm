@@ -15,8 +15,8 @@ class SerialShell(object):
     def get_id(self):
         return int(self.execute_cmd('i'))
     
-    def set_id(self, id):
-        self.execute_cmd('I'+str(id))
+    def set_id(self, _id):
+        self.execute_cmd('I'+str(_id))
     
     def get_firmware_name(self):
         return self.execute_cmd('f')
@@ -51,7 +51,7 @@ class SerialShell(object):
             try:
                 tmp = self.serial.read(1)
                 c = tmp.decode()
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 tmp = tmp+self.serial.read(1)
                 c = tmp.decode()
                 

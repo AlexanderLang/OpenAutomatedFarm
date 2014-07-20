@@ -7,8 +7,8 @@ from deform import ValidationFailure
 
 from sqlalchemy.exc import DBAPIError
 
-from field_controller_database import DBSession as Field_Controller_Session
-from field_controller_database import Sensor
+from ..models.field_controller import DBSession as Field_Controller_Session
+from ..models.field_controller import Sensor
 
 from ..schemas import ParameterSchema
 

@@ -15,10 +15,11 @@ redis_conn = Redis('localhost', 6379)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from field_controller_database import Base as Field_Controller_Base
-from field_controller_database import PeripheryController
-from field_controller_database import Sensor
-from field_controller_database import Measurement
+from ..models.field_controller import Base as Field_Controller_Base
+from ..models.field_controller import PeripheryController
+from ..models.field_controller import Sensor
+from ..models.field_controller import Measurement
+from ..models.field_controller import MeasurementLog
 
 db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/FieldController')
 db_sessionmaker = sessionmaker(bind=db_engine)
@@ -33,8 +34,8 @@ class MeasurementScheduler(object):
         self.redis_conn = redis_conn
         self.db_sessionmaker = db_sessionmaker
         # listen for changes in measurements (and controller connections)
-        self.pubsub = redis_conn.pubsub(ignore_subscribe_messages=False)
-        self.pubsub.subscribe('measurement_changes')
+        self.pubsub = redis_conn.pubsub(ignore_subscribe_messages=True)
+        self.pubsub.subscribe('measurement_changes', 'log_measurements')
         self.schedule = {}
         self.db_session = self.db_sessionmaker()
         self.recalculate_schedule()
@@ -45,11 +46,18 @@ class MeasurementScheduler(object):
             # listen for messages
             message = self.pubsub.get_message()
             if message is not None:
-                if message['type'] == 'message':
+                print('got message: '+str(message))
+                if message['channel'] == b'measurement_changes':
                     # something changed
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.recalculate_schedule()
+                if message['channel'] == b'log_measurements':
+                    data = eval(message['data'])
+                    m = self.db_session.query(Measurement).filter(Measurement._id == data['caller_id']).first()
+                    log = MeasurementLog(m, data['time'], data['value'])
+                    self.db_session.add(log)
+                    self.db_session.commit()
             # get time
             now = datetime.now()
             #print(str(now)+':')

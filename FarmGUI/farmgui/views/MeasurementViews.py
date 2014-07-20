@@ -10,12 +10,12 @@ from sqlalchemy import cast
 from sqlalchemy import asc
 from sqlalchemy import Time
 
-from field_controller_database import DBSession as Field_Controller_Session
-from field_controller_database import Location
-from field_controller_database import Measurand
-from field_controller_database import Sensor
-from field_controller_database import Measurement
-from field_controller_database import MeasurementLog
+from ..models.field_controller import DBSession as Field_Controller_Session
+from ..models.field_controller import Location
+from ..models.field_controller import Measurand
+from ..models.field_controller import Sensor
+from ..models.field_controller import Measurement
+from ..models.field_controller import MeasurementLog
 
 from ..schemas import MeasurementSchema
 

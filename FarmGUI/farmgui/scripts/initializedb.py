@@ -9,21 +9,21 @@ from pyramid.paster import setup_logging
 
 from pyramid.scripts.common import parse_vars
 
-from plant_settings_database import DBSession as Plant_Settings_Session
-from plant_settings_database import Base as PlantSettings_Base
-from plant_settings_database import init_Parameters
-from plant_settings_database import init_PlantSettings
-from plant_settings_database import init_Stages
-from plant_settings_database import init_StageConfigurations
+from ..models.plant_settings import DBSession as Plant_Settings_Session
+from ..models.plant_settings import Base as PlantSettings_Base
+from ..models.plant_settings import init_Parameters
+from ..models.plant_settings import init_PlantSettings
+from ..models.plant_settings import init_Stages
+from ..models.plant_settings import init_StageConfigurations
 
-from field_controller_database import DBSession as Field_Controller_Session
-from field_controller_database import Base as FieldController_Base
-from field_controller_database import init_Locations
-from field_controller_database import init_Measurands
-from field_controller_database import init_PeripheryControllers
-from field_controller_database import init_Sensors
-from field_controller_database import init_Measurements
-from field_controller_database import init_FieldSettings
+from ..models.field_controller import DBSession as Field_Controller_Session
+from ..models.field_controller import Base as FieldController_Base
+from ..models.field_controller import init_Locations
+from ..models.field_controller import init_Measurands
+from ..models.field_controller import init_PeripheryControllers
+from ..models.field_controller import init_Sensors
+from ..models.field_controller import init_Measurements
+from ..models.field_controller import init_FieldSettings
 
 def usage(argv):
 	cmd = os.path.basename(argv[0])

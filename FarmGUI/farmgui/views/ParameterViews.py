@@ -7,8 +7,8 @@ from deform import ValidationFailure
 
 from sqlalchemy.exc import DBAPIError
 
-from plant_settings_database import DBSession as PlantSettings_Session
-from plant_settings_database import Parameter
+from ..models.plant_settings import DBSession as PlantSettings_Session
+from ..models.plant_settings import Parameter
 
 from ..schemas import ParameterSchema
 

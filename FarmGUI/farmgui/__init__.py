@@ -1,11 +1,11 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from plant_settings_database import DBSession as Plant_Settings_Session
-from plant_settings_database import Base as Plant_Settings_Base
+from .models.plant_settings import DBSession as Plant_Settings_Session
+from .models.plant_settings import Base as Plant_Settings_Base
 
-from field_controller_database import DBSession as Field_Controller_Session
-from field_controller_database import Base as Field_Controller_Base
+from .models.field_controller import DBSession as Field_Controller_Session
+from .models.field_controller import Base as Field_Controller_Base
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.

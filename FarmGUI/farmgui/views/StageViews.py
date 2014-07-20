@@ -7,9 +7,9 @@ from deform import ValidationFailure
 
 from sqlalchemy.exc import DBAPIError
 
-from plant_settings_database import DBSession as PlantSettings_Session
-from plant_settings_database import PlantSetting
-from plant_settings_database import Stage
+from ..models.plant_settings import DBSession as PlantSettings_Session
+from ..models.plant_settings import PlantSetting
+from ..models.plant_settings import Stage
 
 from ..schemas import StageSchema
 

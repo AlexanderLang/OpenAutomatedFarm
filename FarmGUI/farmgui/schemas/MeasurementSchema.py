@@ -11,10 +11,10 @@ from colander import Range
 from deform.widget import SelectWidget
 from deform.widget import TextInputWidget
 
-from field_controller_database import DBSession as Field_Controller_Session
-from field_controller_database import Location
-from field_controller_database import Measurand
-from field_controller_database import Sensor
+from ..models.field_controller import DBSession as Field_Controller_Session
+from ..models.field_controller import Location
+from ..models.field_controller import Measurand
+from ..models.field_controller import Sensor
 
 @colander.deferred
 def deferred_location_default(node, kw):

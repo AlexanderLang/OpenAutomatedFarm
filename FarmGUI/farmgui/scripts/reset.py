@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 import os
 import sys
 
-from .SerialShell import SerialShell
+from ..communication import SerialShell
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
