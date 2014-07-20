@@ -21,28 +21,28 @@ class Parameter(Base):
 	_id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
 	name = Column(Unicode(250), nullable=False, unique=True)
 	unit = Column(Unicode(50), nullable=False)
-	min = Column(Float, nullable=False)
-	max = Column(Float, nullable=False)
+	lower_limit = Column(Float, nullable=False)
+	upper_limit = Column(Float, nullable=False)
 	description = Column(Text, nullable=True)
 
 
-	def __init__(self, name, unit, min, max, description):
+	def __init__(self, name, unit, lower_limit, upper_limit, description):
 		'''
 		Constructor
 		'''
 		self.name = name
 		self.unit = unit
-		self.min = min
-		self.max = max
+		self.lower_limit = lower_limit
+		self.upper_limit = upper_limit
 		self.description = description
 		
 
 def init_Parameters(db_session):
 	names = ["Air Temperature", "Water Temperature", "Air Humidity", "pH", "EC", "Blue Light", "Red Light", "White Light"]
 	units = ["°C", "°C", "%", "", "mS", "%", "%", "%"]
-	min =   [0,     0,    5,   0,  0, 0, 0, 0]
-	max =   [40,    40,   100, 14, 5000, 100, 100, 100]
+	_min =   [0,     0,    5,   0,  0, 0, 0, 0]
+	_max =   [40,    40,   100, 14, 5000, 100, 100, 100]
 	descriptions = ["", "", "", "", "", "", "", ""]
 	for i in range(len(names)):
-		param = Parameter(names[i], units[i], min[i], max[i], descriptions[i])
+		param = Parameter(names[i], units[i], _min[i], _max[i], descriptions[i])
 		db_session.add(param)

@@ -14,7 +14,7 @@
       <tbody>
         <tr tal:repeat="m measurements" onclick="document.location = '${request.route_url('measurement_view', measurement_id=m._id)}';">
           <td>${m.location.name}</td>
-          <td>${m.measurand.name} ${m.measurand.unit}</td>
+          <td>${m.parameter.name} ${m.parameter.unit}</td>
           <td>${m.description}</td>
           <td>
 <?python

@@ -7,8 +7,8 @@ from deform import ValidationFailure
 
 from sqlalchemy.exc import DBAPIError
 
-from ..models.plant_settings import DBSession as PlantSettings_Session
-from ..models.plant_settings import Parameter
+from ..models import DBSession
+from ..models import Parameter
 
 from ..schemas import ParameterSchema
 
@@ -23,14 +23,13 @@ class ParameterViews(object):
     @view_config(route_name='parameters_list', renderer='farmgui:views/templates/parameters_list.pt', layout='default')
     def parameters_list(self):
         try:
-            parameters = PlantSettings_Session.query(Parameter).all()
+            parameters = DBSession.query(Parameter).all()
         except DBAPIError:
             return Response('database error (query Parameters)', content_type='text/plain', status_int=500)
         return {'parameters': parameters}
     
     @view_config(route_name='parameters_new', renderer='farmgui:views/templates/parameters_new.pt', layout='default')
     def parameters_new(self):
-        response_dict = dict()
         addForm = Form(ParameterSchema(), formid='addForm', buttons=('Save',), use_ajax=True)
         form = addForm.render()
         if 'Save' in self.request.POST:
@@ -38,7 +37,7 @@ class ParameterViews(object):
             try:
                 values = addForm.validate(controls)
                 new_parameter = Parameter(values['Name'], values['Unit'], values['Minimum'], values['Maximum'], values['Description'])
-                PlantSettings_Session.add(new_parameter)
+                DBSession.add(new_parameter)
                 return HTTPFound(location=self.request.route_url('parameters_list'))
             except ValidationFailure as e:
                 form = e.render()

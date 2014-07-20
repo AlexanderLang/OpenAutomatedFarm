@@ -32,6 +32,6 @@ class MeasurementLog(Base):
     
     def __str__(self):
         name = self.measurement.location.name + ': '
-        name = name + self.measurement.measurand.name + ' = '
-        name = name + str(self.value) + ' [' + self.measurement.measurand.unit + ']'
+        name = name + self.measurement.parameter.name + ' = '
+        name = name + str(self.value) + ' [' + self.measurement.parameter.unit + ']'
         return name

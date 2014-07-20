@@ -10,14 +10,14 @@ redis_conn = Redis('localhost', 6379)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from ..models.field_controller import Base as Field_Controller_Base
-from ..models.field_controller import PeripheryController
-from ..models.field_controller import Sensor
-from ..models.field_controller import Measurement
+from ..models import Base
+from ..models import PeripheryController
+from ..models import Sensor
+from ..models import Measurement
 
-db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/FieldController')
+db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
 db_sessionmaker = sessionmaker(bind=db_engine)
-Field_Controller_Base.metadata.bind = db_engine
+Base.metadata.bind = db_engine
 
 
 from ..communication import SerialShell

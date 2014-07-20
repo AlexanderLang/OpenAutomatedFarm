@@ -1,22 +1,15 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from .models.plant_settings import DBSession as Plant_Settings_Session
-from .models.plant_settings import Base as Plant_Settings_Base
-
-from .models.field_controller import DBSession as Field_Controller_Session
-from .models.field_controller import Base as Field_Controller_Base
+from .models import DBSession
+from .models import Base
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    plant_settings_engine = engine_from_config(settings, 'plant_settings_database.')
-    Plant_Settings_Session.configure(bind=plant_settings_engine)
-    Plant_Settings_Base.metadata.bind = plant_settings_engine
-    
-    field_controller_engine = engine_from_config(settings, 'field_controller_database.')
-    Field_Controller_Session.configure(bind=field_controller_engine)
-    Field_Controller_Base.metadata.bind = field_controller_engine
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    DBSession.configure(bind=engine)
+    Base.metadata.bind = engine
     
     config = Configurator(settings=settings)
     config.add_static_view(name='static', path='farmgui:static', cache_max_age=3600)

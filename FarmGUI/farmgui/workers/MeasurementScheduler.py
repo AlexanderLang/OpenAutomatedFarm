@@ -15,15 +15,15 @@ redis_conn = Redis('localhost', 6379)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from ..models.field_controller import Base as Field_Controller_Base
-from ..models.field_controller import PeripheryController
-from ..models.field_controller import Sensor
-from ..models.field_controller import Measurement
-from ..models.field_controller import MeasurementLog
+from ..models import Base
+from ..models import PeripheryController
+from ..models import Sensor
+from ..models import Measurement
+from ..models import MeasurementLog
 
-db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/FieldController')
+db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
 db_sessionmaker = sessionmaker(bind=db_engine)
-Field_Controller_Base.metadata.bind = db_engine
+Base.metadata.bind = db_engine
 
 class MeasurementScheduler(object):
     '''
@@ -46,7 +46,6 @@ class MeasurementScheduler(object):
             # listen for messages
             message = self.pubsub.get_message()
             if message is not None:
-                print('got message: '+str(message))
                 if message['channel'] == b'measurement_changes':
                     # something changed
                     self.db_session.close()
@@ -58,6 +57,7 @@ class MeasurementScheduler(object):
                     log = MeasurementLog(m, data['time'], data['value'])
                     self.db_session.add(log)
                     self.db_session.commit()
+                    print('oaf_ms: saved '+str(log))
             # get time
             now = datetime.now()
             #print(str(now)+':')
@@ -95,7 +95,7 @@ class MeasurementScheduler(object):
             # schedule measurements
             for m in measurements:
                 new_schedule[m] = datetime.now() + timedelta(seconds=m.interval)
-                logging.info('every '+str(m.interval)+' seconds measure: '+m.measurand.name+' of '+m.location.name)
+                logging.info('every '+str(m.interval)+' seconds measure: '+m.parameter.name+' of '+m.location.name)
         else:
             logging.info('no measurements to schedule')
         self.schedule = new_schedule

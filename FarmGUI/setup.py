@@ -49,8 +49,9 @@ setup(name='FarmGUI',
       [paste.app_factory]
       main = farmgui:main
       [console_scripts]
-      initialize_FarmGUI_db = farmgui.scripts.initializedb:main
+      oaf_init_db = farmgui.scripts:initialize_db_main
       oaf_pc = farmgui.workers:periphery_controller_main
+      oaf_pc_reset = farmgui.scripts:reset_main
       oaf_ms = farmgui.workers:measurement_scheduler_main
       """,
       )

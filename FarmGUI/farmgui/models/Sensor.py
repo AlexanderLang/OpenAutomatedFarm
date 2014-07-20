@@ -13,7 +13,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .meta import Base
-from .PeripheryController import PeripheryController
 
 class Sensor(Base):
     '''
@@ -35,7 +34,3 @@ class Sensor(Base):
         self.name = name
         self.unit = unit
         self.samplingTime = samplingTime
-        
-
-def init_Sensors(db_session):
-    pass

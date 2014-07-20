@@ -10,6 +10,7 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Float
 from sqlalchemy.types import Unicode
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from .meta import Base
 
@@ -21,10 +22,12 @@ class Actuator(Base):
 
     _id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
     peripheryControllerId = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
+    controller = relationship('PeripheryController', back_populates='actuators')
     name = Column(Unicode(250), nullable=False)
     setPoint = Column(Float, nullable=False)
     
     def __init__(self, peripheryController, name, setPoint):
         self.peripheryController = peripheryController
+        self.peripheryControllerId = peripheryController._id
         self.name = name
         self.setPoint = setPoint

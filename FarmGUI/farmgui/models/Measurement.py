@@ -14,10 +14,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
 
 from .meta import Base
-from .Location import Location
-from .Measurand import Measurand
-from .PeripheryController import PeripheryController
-from .Sensor import Sensor
 
 class Measurement(Base):
 	'''
@@ -28,8 +24,8 @@ class Measurement(Base):
 	_id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
 	locationId = Column(SmallInteger, ForeignKey('Locations._id'), nullable=False)
 	location = relationship('Location')
-	measurandId = Column(SmallInteger, ForeignKey('Measurands._id'), nullable=False)
-	measurand = relationship('Measurand')
+	parameterId = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
+	parameter = relationship('Parameter')
 	sensorId = Column(Integer, ForeignKey('Sensors._id'), nullable=True)
 	sensor = relationship("Sensor", backref="measurement")
 	interval = Column(Float(), nullable=False)
@@ -37,14 +33,14 @@ class Measurement(Base):
 	logs = relationship("MeasurementLog", order_by="MeasurementLog.time")
 
 
-	def __init__(self, location, measurand, sensor, interval, description):
+	def __init__(self, location, parameter, sensor, interval, description):
 		'''
 		Constructor
 		'''
 		self.location = location
 		self.locationId = location._id
-		self.measurand = measurand
-		self.measurandId = measurand._id
+		self.parameter = parameter
+		self.parameterId = parameter._id
 		self.sensor = sensor
 		self.sensorId = sensor._id
 		self.interval = interval
@@ -52,7 +48,3 @@ class Measurement(Base):
 	
 	def __str__(self):
 		return '{ ' + self.location.name + ': ' + self.measurand.name + ' }'
-		
-
-def init_Measurements(db_session):
-	pass

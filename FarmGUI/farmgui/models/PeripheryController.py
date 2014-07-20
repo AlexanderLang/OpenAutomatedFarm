@@ -24,14 +24,10 @@ class PeripheryController(Base):
     name = Column(Unicode(250), nullable=True, unique=True)
     active = Column(Boolean, nullable=False, default=False, unique=False)
     sensors = relationship("Sensor", order_by="Sensor._id", back_populates='controller')
-    actuators = relationship("Actuator", order_by="Actuator._id", backref="controller")
+    actuators = relationship("Actuator", order_by="Actuator._id", back_populates='controller')
     
     def __init__(self, fwName, fwVersion, name, active=True):
         self.firmwareName = fwName
         self.firmwareVersion = fwVersion
         self.name = name
         self.active = active
-        
-
-def init_PeripheryControllers(db_session):
-    pass

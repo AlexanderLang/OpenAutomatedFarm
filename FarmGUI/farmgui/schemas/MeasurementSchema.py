@@ -11,30 +11,30 @@ from colander import Range
 from deform.widget import SelectWidget
 from deform.widget import TextInputWidget
 
-from ..models.field_controller import DBSession as Field_Controller_Session
-from ..models.field_controller import Location
-from ..models.field_controller import Measurand
-from ..models.field_controller import Sensor
+from ..models import DBSession
+from ..models import Location
+from ..models import Parameter
+from ..models import Sensor
 
 @colander.deferred
 def deferred_location_default(node, kw):
     if len(kw) > 0:
         return kw['measurement'].location._id
-    location = Field_Controller_Session.query(Location).first()
+    location = DBSession.query(Location).first()
     return location._id
 
 @colander.deferred
-def deferred_measurand_default(node, kw):
+def deferred_parameter_default(node, kw):
     if len(kw) > 0:
-        return kw['measurement'].measurand._id
-    measurand = Field_Controller_Session.query(Measurand).first()
-    return measurand._id
+        return kw['measurement'].parameter._id
+    parameter = DBSession.query(Parameter).first()
+    return parameter._id
 
 @colander.deferred
 def deferred_sensor_default(node, kw):
     if len(kw) > 0:
         return kw['measurement'].sensor._id
-    sensor = Field_Controller_Session.query(Sensor).first()
+    sensor = DBSession.query(Sensor).first()
     return sensor._id
 
 @colander.deferred
@@ -51,23 +51,23 @@ def deferred_interval_default(node, kw):
 
 @colander.deferred
 def deferred_location_widget(node, kw):
-    locations = Field_Controller_Session.query(Location).all()
+    locations = DBSession.query(Location).all()
     choises = []
     for l in locations:
         choises.append((l._id, l.name))
     return SelectWidget(values=choises)
 
 @colander.deferred
-def deferred_measurand_widget(node, kw):
-    measurands = Field_Controller_Session.query(Measurand).all()
+def deferred_parameter_widget(node, kw):
+    parameters = DBSession.query(Parameter).all()
     choises = []
-    for m in measurands:
-        choises.append((m._id, m.name+' ['+m.unit+']'))
+    for p in parameters:
+        choises.append((p._id, p.name+' ['+p.unit+']'))
     return SelectWidget(values=choises)
 
 @colander.deferred
 def deferred_sensor_widget(node, kw):
-    sensors = Field_Controller_Session.query(Sensor).all()
+    sensors = DBSession.query(Sensor).all()
     choises = []
     for s in sensors:
         choises.append((s._id, s.controller.name+'->'+s.name))
@@ -79,11 +79,11 @@ class MeasurementSchema(MappingSchema):
                       description='Place where the measurement is taken',
                       default=deferred_location_default,
                       widget=deferred_location_widget)
-    measurand = SchemaNode(typ=Int(),
-                      title='Measurand',
+    parameter = SchemaNode(typ=Int(),
+                      title='Parameter',
                       description='what is beeing measured',
-                      default=deferred_measurand_default,
-                      widget=deferred_measurand_widget)
+                      default=deferred_parameter_default,
+                      widget=deferred_parameter_widget)
     sensor = SchemaNode(typ=Int(),
                         title='Sensor',
                         default=deferred_sensor_default,
@@ -95,7 +95,7 @@ class MeasurementSchema(MappingSchema):
                            widget=TextInputWidget())
     description = SchemaNode(typ=String(),
                              title='Description',
-                             description='additional information about the measurand',
+                             description='additional information about the measurement',
                              validation=Length(max=250),
                              default=deferred_description_default,
                              widget=TextInputWidget(),

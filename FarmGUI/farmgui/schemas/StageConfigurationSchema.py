@@ -7,8 +7,8 @@ from colander import Float
 
 from deform.widget import SelectWidget
 
-from ..models.plant_settings import DBSession
-from ..models.plant_settings import Parameter
+from ..models import DBSession
+from ..models import Parameter
 
 from datetime import time
 

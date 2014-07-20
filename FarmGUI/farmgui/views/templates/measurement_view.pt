@@ -10,8 +10,8 @@
               <td>${measurement.location.name}</td>
             </tr>
             <tr>
-              <th>${structure:form['measurand'].title}</th>
-              <td>${measurement.measurand.name + ' [' + measurement.measurand.unit + ']'} </td>
+              <th>${structure:form['parameter'].title}</th>
+              <td>${measurement.parameter.name + ' [' + measurement.parameter.unit + ']'} </td>
             </tr>
             <tr>
               <th>${structure:form['sensor'].title}</th>
