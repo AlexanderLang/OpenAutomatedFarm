@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 15, 2014
 
 @author: alex
-'''
+"""
 
 from sqlalchemy import Column
 from sqlalchemy.types import SmallInteger
@@ -12,10 +12,11 @@ from sqlalchemy.orm import relationship
 
 from .meta import Base
 
+
 class PeripheryController(Base):
-    '''
+    """
     classdocs
-    '''
+    """
     __tablename__ = 'PeripheryControllers'
 
     _id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
@@ -25,9 +26,13 @@ class PeripheryController(Base):
     active = Column(Boolean, nullable=False, default=False, unique=False)
     sensors = relationship("Sensor", order_by="Sensor._id", back_populates='periphery_controller')
     actuators = relationship("Actuator", order_by="Actuator._id", back_populates='periphery_controller')
-    
-    def __init__(self, fwName, fwVersion, name, active=True):
-        self.firmwareName = fwName
-        self.firmwareVersion = fwVersion
+
+    def __init__(self, fw_name, fw_version, name, active=True):
+        self.firmwareName = fw_name
+        self.firmwareVersion = fw_version
         self.name = name
         self.active = active
+
+    @property
+    def id(self):
+        return self._id

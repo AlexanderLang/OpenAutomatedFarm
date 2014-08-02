@@ -1,8 +1,8 @@
-'''
+"""
 Created on Nov 17, 2013
 
 @author: alex
-'''
+"""
 
 from sqlalchemy import Column
 from sqlalchemy.types import BigInteger
@@ -13,40 +13,36 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .meta import Base
-from .PlantSetting import PlantSetting
-from .Stage import Stage
-from .Parameter import Parameter
 
-import datetime
 
 class StageConfiguration(Base):
-	'''
-	classdocs
-	'''
-	__tablename__ = 'StageConfigurations'
+    """
+    classdocs
+    """
+    __tablename__ = 'StageConfigurations'
 
-	_id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
-	stageId = Column(BigInteger, ForeignKey('Stages._id'), nullable=False)
-	parameterId = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
-	parameter = relationship("Parameter")
-	time = Column(Time, nullable=False)
-	setpoint = Column(Float, nullable=False)
-	upperLimit = Column(Float, nullable=False)
-	lowerLimit = Column(Float, nullable=False)
+    _id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
+    stageId = Column(BigInteger, ForeignKey('Stages._id'), nullable=False)
+    parameterId = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
+    parameter = relationship("Parameter")
+    time = Column(Time, nullable=False)
+    setpoint = Column(Float, nullable=False)
+    upperLimit = Column(Float, nullable=False)
+    lowerLimit = Column(Float, nullable=False)
 
-	def __init__(self, stage, parameter, time, setpoint, upperLimit, lowerLimit):
-		'''
-		Constructor
-		'''
-		self.stage = stage
-		self.parameter = parameter
-		self.parameterId = parameter._id
-		self.time = time
-		self.setpoint = setpoint
-		self.upperLimit = upperLimit
-		self.lowerLimit = lowerLimit
-		
+    def __init__(self, stage, parameter, time, setpoint, upper_limit, lower_limit):
+        """
+        Constructor
+        """
+        self.stage = stage
+        self.parameter = parameter
+        self.parameterId = parameter.id
+        self.time = time
+        self.setpoint = setpoint
+        self.upperLimit = upper_limit
+        self.lowerLimit = lower_limit
 
-def init_StageConfigurations(db_session):
-	pass
+
+def init_stage_configurations(db_session):
+    pass
 

@@ -1,7 +1,7 @@
-
 from colander import MappingSchema
 from colander import SchemaNode
 from colander import String
+
 
 class PlantSettingsSchema(MappingSchema):
     Plant = SchemaNode(String())

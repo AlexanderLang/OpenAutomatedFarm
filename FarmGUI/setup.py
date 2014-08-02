@@ -24,18 +24,18 @@ requires = [
     'mysql-connector-python',
     'deform_bootstrap',
     'pyserial',
-    ]
+]
 
 setup(name='FarmGUI',
       version='0.1',
       description='FarmGUI',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
-        "Programming Language :: Python",
-        "Framework :: Pyramid",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        ],
+          "Programming Language :: Python",
+          "Framework :: Pyramid",
+          "Topic :: Internet :: WWW/HTTP",
+          "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+      ],
       author='Alexander Lang',
       author_email='',
       url='',
@@ -54,4 +54,4 @@ setup(name='FarmGUI',
       oaf_pc_reset = farmgui.scripts:reset_main
       oaf_ms = farmgui.workers:measurement_scheduler_main
       """,
-      )
+)

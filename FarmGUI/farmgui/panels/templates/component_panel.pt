@@ -1,30 +1,29 @@
-
 <div class="container-fluid">
-  <h3>${component.name}</h3>
+    <h3>${component.name}</h3>
 
-  <table class="table table-striped table-bordered table-hover">
-    <tbody>
-      <tr tal:repeat="p component.parameters">
-        <td>${panel('parameter_panel', p._id)}</td>
-      </tr>
-    </tbody>
-  </table>
+    <table class="table table-striped table-bordered table-hover">
+        <tbody>
+        <tr tal:repeat="p component.parameters">
+            <td>${panel('parameter_panel', p._id)}</td>
+        </tr>
+        </tbody>
+    </table>
 
-  <a data-toggle="modal" href="#add_parameter_modal_${component._id}" class="btn btn-primary">Add Parameter</a>
-  <a href="${delete_href}" class="btn btn-primary">Delete Component</a>
+    <a data-toggle="modal" href="#add_parameter_modal_${component._id}" class="btn btn-primary">Add Parameter</a>
+    <a href="${delete_href}" class="btn btn-primary">Delete Component</a>
 
-  <div class="modal" id="add_parameter_modal_${component._id}">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          <h4 class="modal-title">Define new Parameter for ${component.name}</h4>
+    <div class="modal" id="add_parameter_modal_${component._id}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Define new Parameter for ${component.name}</h4>
+                </div>
+                <div class="modal-body">
+                    <tal:form replace="structure add_parameter_form"/>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          <tal:form replace="structure add_parameter_form" />
-        </div>
-      </div>
     </div>
-  </div>
 
 </div><!-- /.container-fluid -->

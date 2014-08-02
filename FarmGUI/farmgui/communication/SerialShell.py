@@ -1,65 +1,63 @@
 import serial
 
+
 class SerialShell(object):
-    '''
+    """
     classdocs
-    '''
-    
+    """
+
     def __init__(self, devicename):
         self.serial = serial.Serial(devicename, 57600)
         self.serial.flushInput()
         self.serial.flushOutput()
         # wait for "ready!" greeting from arduino 
-        self.readLine()
-    
+        self.read_line()
+
     def get_id(self):
         return int(self.execute_cmd('i'))
-    
+
     def set_id(self, _id):
-        self.execute_cmd('I'+str(_id))
-    
+        self.execute_cmd('I' + str(_id))
+
     def get_firmware_name(self):
         return self.execute_cmd('f')
-    
+
     def get_firmware_version(self):
         return self.execute_cmd('v')
 
     def get_sensors(self):
-        sensorListString = self.execute_cmd('l').split('|')
-        sensorListString.pop()
+        sensor_list_string = self.execute_cmd('l').split('|')
+        sensor_list_string.pop()
         sensors = []
-        for sensorString in sensorListString:
+        for sensorString in sensor_list_string:
             values = sensorString.split(';')
-            sensorDict = {}
-            sensorDict['name'] = values[0]
-            sensorDict['unit'] = values[1]
-            sensorDict['samplingTime'] = float(values[2])
-            sensors.append(sensorDict)
+            sensor_dict = {'name': values[0],
+                           'unit': values[1],
+                           'samplingTime': float(values[2])}
+            sensors.append(sensor_dict)
         return sensors
-    
+
     def get_sensor_value(self, name):
-        return float(self.execute_cmd('s'+name))
-        
+        return float(self.execute_cmd('s' + name))
 
     def execute_cmd(self, cmd):
         self.serial.write(bytearray(cmd + '\n', 'ascii'))
-        return self.readLine()
-        
-    def readLine(self):
+        return self.read_line()
+
+    def read_line(self):
         line = ''
-        while(True):
+        tmp = ''
+        while True:
             try:
                 tmp = self.serial.read(1)
                 c = tmp.decode()
             except UnicodeDecodeError:
-                tmp = tmp+self.serial.read(1)
+                tmp = tmp + self.serial.read(1)
                 c = tmp.decode()
-                
-            if(c == '\r'):
+
+            if c == '\r':
                 self.serial.read(1)
                 break
             else:
                 line += c
-        self.status = 0
-        #print('recived: \"' + line + '\"')
         return line

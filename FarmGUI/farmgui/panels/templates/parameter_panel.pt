@@ -1,5 +1,10 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <a href="${delete_href}" class="close">delete</a>
+        <h4>${parameter.name} [ ${parameter.parameter_type.unit} ]</h4>
+    </div>
+    <div class="panel-body">
 
-<div class="container-fluid">
-  <h4>${parameter.name}</h4>
-  <a href="${delete_href}" class="close">x</a>
-</div><!-- /.container-fluid -->
+    </div>
+    <!-- /.panel-body -->
+</div><!-- /.panel -->

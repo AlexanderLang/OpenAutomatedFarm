@@ -6,12 +6,14 @@ import sys
 
 from ..communication import SerialShell
 
+
 def usage(argv):
     cmd = os.path.basename(argv[0])
     print('usage: %s <dev_name>\n'
           '(example: "%s /dev/ttyACM0")' % (cmd, cmd))
     sys.exit(1)
-    
+
+
 def main(argv=sys.argv):
     if len(argv) < 2:
         usage(argv)

@@ -17,7 +17,7 @@ sdist/
 *.egg
 
 # virtual environment
-env33/
+env34/
 
 # Installer logs
 pip-log.txt

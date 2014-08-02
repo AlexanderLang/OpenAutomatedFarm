@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-      <title>${layout.project_title}</title>
-      <!-- Le styles -->
-      <link href="${request.static_url('farmgui:static/css/bootstrap.min.css')}" rel="stylesheet" />
-      <link href="${request.static_url('farmgui:static/css/farmgui.css')}" rel="stylesheet" />
-      <link tal:repeat="css layout.additional_css" href="${css}" rel="stylesheet" />
-      <!-- Le javascript -->
-      <script language="javascript" type="text/javascript" src="${request.static_url('farmgui:static/js/jquery-2.1.0.min.js')}"></script>
-      <script language="javascript" type="text/javascript" src="${request.static_url('farmgui:static/js/bootstrap.min.js')}"></script>
-      <script tal:repeat="js layout.additional_javascript" language="javascript" type="text/javascript" src="${js}"></script>
-  </head>
+<head>
+    <meta charset="utf-8"/>
+    <title>${layout.project_title}</title>
+    <!-- Le styles -->
+    <link href="${request.static_url('farmgui:static/css/bootstrap.min.css')}" rel="stylesheet"/>
+    <link href="${request.static_url('farmgui:static/css/farmgui.css')}" rel="stylesheet"/>
+    <link tal:repeat="css layout.additional_css" href="${css}" rel="stylesheet"/>
+    <!-- Le javascript -->
+    <script language="javascript" type="text/javascript"
+            src="${request.static_url('farmgui:static/js/jquery-2.1.0.min.js')}"></script>
+    <script language="javascript" type="text/javascript"
+            src="${request.static_url('farmgui:static/js/bootstrap.min.js')}"></script>
+    <script tal:repeat="js layout.additional_javascript" language="javascript" type="text/javascript"
+            src="${js}"></script>
+</head>
 
-  <body>
-    ${panel('navbar')}
-    
-    ${panel('sidebar')}
-    
-    <div class="container" id="main_container">
-    
-      <metal:content define-slot="content" />
-    
-    </div><!-- main_container -->
-    
-  </body>
+<body>
+${panel('navbar')}
+
+${panel('sidebar')}
+
+<div class="container" id="main_container">
+
+    <metal:content define-slot="content"/>
+
+</div>
+<!-- main_container -->
+
+</body>
 </html>

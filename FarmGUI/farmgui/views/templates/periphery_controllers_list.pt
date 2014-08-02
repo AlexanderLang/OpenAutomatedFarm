@@ -1,22 +1,23 @@
 <metal:block use-macro="main_template">
-  <div metal:fill-slot="content">
-    <h1>Periphery Controllers</h1>
+    <div metal:fill-slot="content">
+        <h1>Periphery Controllers</h1>
 
-    <table class="table table-striped table-bordered table-hover">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Firmware</th>
-          <th>Active</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr tal:repeat="pc periphery_controllers" onclick="document.location = '${request.route_url('periphery_controller_view', _id=pc._id)}';">
-          <td>${pc.name}</td>
-          <td>${pc.firmwareName+' '+pc.firmwareVersion}</td>
-          <td>${str(pc.active)}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Firmware</th>
+                <th>Active</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr tal:repeat="pc periphery_controllers"
+                onclick="document.location = '${request.route_url('periphery_controller_view', _id=pc._id)}';">
+                <td>${pc.name}</td>
+                <td>${pc.firmwareName+' '+pc.firmwareVersion}</td>
+                <td>${str(pc.active)}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </metal:block>

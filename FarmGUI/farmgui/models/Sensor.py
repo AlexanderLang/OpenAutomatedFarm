@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 15, 2014
 
 @author: alex
-'''
+"""
 
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -14,10 +14,11 @@ from sqlalchemy.orm import relationship
 
 from .meta import Base
 
+
 class Sensor(Base):
-    '''
+    """
     classdocs
-    '''
+    """
     __tablename__ = 'Sensors'
 
     _id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
@@ -26,11 +27,14 @@ class Sensor(Base):
     name = Column(Unicode(250), nullable=False)
     unit = Column(Unicode(50), nullable=False)
     sampling_time = Column(Float(), nullable=False)
-    
-    
+
     def __init__(self, periphery_controller, name, unit, sampling_time):
         self.peripheryController = periphery_controller
-        self.periphery_controller_id = periphery_controller._id
+        self.periphery_controller_id = periphery_controller.id
         self.name = name
         self.unit = unit
         self.sampling_time = sampling_time
+
+    @property
+    def id(self):
+        return self._id

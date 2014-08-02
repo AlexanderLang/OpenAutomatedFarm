@@ -1,6 +1,6 @@
 <metal:block use-macro="main_template">
-  <div metal:fill-slot="content">
-  <h1>Add new stage configuration</h1>
-    <tal:form replace="structure addForm" />
-  </div>
+    <div metal:fill-slot="content">
+        <h1>Add new stage configuration</h1>
+        <tal:form replace="structure addForm"/>
+    </div>
 </metal:block>

@@ -1,5 +1,5 @@
 <metal:block use-macro="main_template">
-  <div metal:fill-slot="content">
-    <tal:form replace="structure addForm" />
-  </div>
+    <div metal:fill-slot="content">
+        <tal:form replace="structure addForm"/>
+    </div>
 </metal:block>

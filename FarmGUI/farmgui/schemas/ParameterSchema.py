@@ -1,4 +1,3 @@
-
 import colander
 from colander import MappingSchema
 from colander import SchemaNode
@@ -21,15 +20,17 @@ def deferred_type_widget(node, kw):
     parameters = DBSession.query(ParameterType).all()
     choises = []
     for p in parameters:
-        choises.append((p._id, p.name + ' [' + p.unit + ']'))
+        choises.append((p.id, p.name + ' [' + p.unit + ']'))
     return SelectWidget(values=choises)
+
 
 @colander.deferred
 def deferred_type_default(node, kw):
     if len(kw) > 0:
         return kw['parameter'].parameter_type_id
     parameter_type = DBSession.query(ParameterType).first()
-    return parameter_type._id
+    return parameter_type.id
+
 
 @colander.deferred
 def deferred_interval_default(node, kw):
@@ -37,13 +38,15 @@ def deferred_interval_default(node, kw):
         return kw['parameter'].interval
     return 15
 
+
 @colander.deferred
 def deferred_sensor_widget(node, kw):
     sensors = DBSession.query(Sensor).all()
     choises = []
     for s in sensors:
-        choises.append((s._id, s.periphery_controller.name+'->'+s.name))
+        choises.append((s.id, s.periphery_controller.name + '->' + s.name))
     return SelectWidget(values=choises)
+
 
 class ParameterSchema(MappingSchema):
     component = SchemaNode(typ=Int(),
@@ -52,10 +55,10 @@ class ParameterSchema(MappingSchema):
                            widget=HiddenWidget(readonly=True))
     name = SchemaNode(String())
     parameter_type = SchemaNode(typ=Int(),
-                      title='Parameter Type',
-                      descripition='the type of physical quantity that is being measured',
-                      default=deferred_type_default,
-                      widget=deferred_type_widget)
+                                title='Parameter Type',
+                                descripition='the type of physical quantity that is being measured',
+                                default=deferred_type_default,
+                                widget=deferred_type_widget)
     interval = SchemaNode(typ=Float(),
                           title='Measurement interval [s]',
                           validation=Range(0, 10),
