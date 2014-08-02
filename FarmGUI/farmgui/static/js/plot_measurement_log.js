@@ -31,8 +31,8 @@ $(document).ready(
 			}
 
 			function get_measurement_log_data(measurement_id) {
-				$.getJSON("/field_controller/measurements/" + measurement_id
-						+ "/logs_json", function(data) {
+				$.getJSON("/json/measurements/" + measurement_id
+						+ "/logs", function(data) {
 					update_plot(data);
 				});
 			}

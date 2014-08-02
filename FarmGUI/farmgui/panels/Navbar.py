@@ -18,9 +18,9 @@ def Navbar(context, request):
             )
         return item
     nav_items = [
-        nav_item('Plant Database', request.route_url('plant_settings_list')),
-        nav_item('Field Controller', request.route_url('field_settings_list')),
-        nav_item('About', request.route_url('about_view')),
+        nav_item('Home', request.route_url('project_views_home')),
+        nav_item('Configuration', request.route_url('configuration_views_home')),
+        nav_item('About', request.route_url('project_views_about')),
         ]
     return {'nav_items': nav_items}
         

@@ -7,15 +7,15 @@ from sqlalchemy import engine_from_config
 from pyramid.paster import get_appsettings
 from pyramid.paster import setup_logging
 
-from pyramid.scripts.common import parse_vars
-
 from ..models import DBSession
 from ..models import Base
+
 from ..models import init_Parameters
+from ..models import init_ParameterTypes
 from ..models import init_PlantSettings
 from ..models import init_Stages
 from ..models import init_StageConfigurations
-from ..models import init_Locations
+from ..models import init_FarmComponents
 from ..models import init_FieldSettings
 
 def usage(argv):
@@ -38,10 +38,10 @@ def main(argv=sys.argv):
 	
 	# populate databases
 	with transaction.manager:
+		init_FarmComponents(DBSession)
+		init_ParameterTypes(DBSession)
 		init_Parameters(DBSession)
-		init_Locations(DBSession)
 		init_PlantSettings(DBSession)
 		init_Stages(DBSession)
 		init_StageConfigurations(DBSession)
 		init_FieldSettings(DBSession)
-		

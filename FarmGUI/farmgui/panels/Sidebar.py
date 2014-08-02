@@ -20,15 +20,10 @@ def sidebar(context, request):
     
     sidebar_items = []
     
-    if request.current_route_url().startswith(request.route_url('plant_settings_list')):
-        # plant database sidebar
-        sidebar_items.append(sidebar_item('Plant Settings', request.route_url('plant_settings_list')))
-        sidebar_items.append(sidebar_item('Parameters', request.route_url('parameters_list')))
-    elif request.current_route_url().startswith(request.route_url('field_settings_list')):
-        # field controller sidebar
+    if request.current_route_url().startswith(request.route_url('configuration_views_home')):
+        # configuration sidebar
         sidebar_items.append(sidebar_item('Field Settings', request.route_url('field_settings_list')))
-        sidebar_items.append(sidebar_item('Periphery Controllers', request.route_url('periphery_controllers_list')))
-        sidebar_items.append(sidebar_item('Measurements', request.route_url('measurements_list')))
+        sidebar_items.append(sidebar_item('Farm Components', request.route_url('components_list')))
         
     return {'sidebar_items': sidebar_items}
         

@@ -19,8 +19,17 @@ def main(global_config, **settings):
     return config.make_wsgi_app()
 
 def add_routes(config):
-    config.add_route('home_view', '/')
-    config.add_route('about_view', '/about')
+    # project views
+    config.add_route('project_views_root', '/')
+    config.add_route('project_views_home', '/farm/home')
+    config.add_route('project_views_about', '/farm/about')
+    # configuration views
+    config.add_route('configuration_views_home', '/configuration')
+    config.add_route('components_list', '/configuration/components')
+    config.add_route('parameter_save', '/configuration/parameters/add')
+    config.add_route('parameter_delete', '/configuration/parameters/{_id}/delete')
+    config.add_route('component_delete', '/configuration/component/{_id}/delete')
+    config.add_route('field_settings_list', '/configuration/field_settings')
     
     config.add_route('plant_settings_list', '/plant_settings')
     config.add_route('plant_settings_new', '/plant_settings/add')
@@ -32,11 +41,12 @@ def add_routes(config):
     config.add_route('stage_configuration_new', '/plant_settingsstages/{_id}/new_configuration')
     config.add_route('stage_configurations_data', '/plant_settings/stages/{_id}/configurations_data')
     
-    config.add_route('field_settings_list', '/field_controller')
-    config.add_route('measurements_list', '/field_controller/measurements')
-    config.add_route('measurements_new', '/field_controller/measurements/new')
-    config.add_route('measurement_view', '/field_controller/measurements/{measurement_id}')
-    config.add_route('measurement_log_json', '/field_controller/measurements/{measurement_id}/logs_json')
+    config.add_route('measurements_new', '/config/measurements/new')
+    config.add_route('measurement_view', '/config/measurements/{measurement_id}')
+    config.add_route('measurements_list', '/config/measurements/')
+    
     config.add_route('periphery_controllers_list', '/field_controller/periphery_controllers')
     config.add_route('periphery_controller_view', '/field_controller/periphery_controllers/{_id}')
     config.add_route('sensor_view', '/field_controller/sensors/{_id}')
+    
+    config.add_route('measurement_log_json', '/json/measurements/{measurement_id}/logs')

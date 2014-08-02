@@ -18,7 +18,7 @@ from sqlalchemy.orm import sessionmaker
 from ..models import Base
 from ..models import PeripheryController
 from ..models import Sensor
-from ..models import Measurement
+from ..models import Parameter
 from ..models import MeasurementLog
 
 db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
@@ -53,7 +53,7 @@ class MeasurementScheduler(object):
                     self.recalculate_schedule()
                 if message['channel'] == b'log_measurements':
                     data = eval(message['data'])
-                    m = self.db_session.query(Measurement).filter(Measurement._id == data['caller_id']).first()
+                    m = self.db_session.query(Parameter).filter(Parameter._id == data['caller_id']).first()
                     log = MeasurementLog(m, data['time'], data['value'])
                     self.db_session.add(log)
                     self.db_session.commit()
@@ -71,7 +71,7 @@ class MeasurementScheduler(object):
                 
     
     def execute_measurement(self, m):
-        channel_name = 'periphery_controller_'+str(m.sensor.peripheryControllerId)
+        channel_name = 'periphery_controller_'+str(m.sensor.periphery_controller_id)
         data = {}
         data['cmd'] = 's'+m.sensor.name
         data['result_channel'] = 'log_measurements'
@@ -91,7 +91,7 @@ class MeasurementScheduler(object):
                 sensor_ids.append(sensor._id)
         if len(sensor_ids) > 0:
             # get measurements with present sensors
-            measurements = self.db_session.query(Measurement).filter(Measurement.sensorId.in_(sensor_ids))
+            measurements = self.db_session.query(Parameter).filter(Parameter.sensor_id.in_(sensor_ids))
             # schedule measurements
             for m in measurements:
                 new_schedule[m] = datetime.now() + timedelta(seconds=m.interval)

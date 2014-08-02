@@ -20,18 +20,12 @@ class MeasurementLog(Base):
     __tablename__ = 'MeasurementLogs'
 
     _id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
-    measurementId = Column(SmallInteger, ForeignKey('Measurements._id'), nullable=False)
+    parameter_id = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
     time = Column(DateTime, nullable=False)
     value = Column(Float, nullable=False)
     
-    def __init__(self, measurement, time, value):
-        self.measurement = measurement
-        self.measurementId = measurement._id
+    def __init__(self, parameter, time, value):
+        self.parameter = parameter
+        self.parameter_id = parameter._id
         self.time = time
         self.value = value
-    
-    def __str__(self):
-        name = self.measurement.location.name + ': '
-        name = name + self.measurement.parameter.name + ' = '
-        name = name + str(self.value) + ' [' + self.measurement.parameter.unit + ']'
-        return name

@@ -13,7 +13,6 @@ from sqlalchemy.orm import sessionmaker
 from ..models import Base
 from ..models import PeripheryController
 from ..models import Sensor
-from ..models import Measurement
 
 db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
 db_sessionmaker = sessionmaker(bind=db_engine)

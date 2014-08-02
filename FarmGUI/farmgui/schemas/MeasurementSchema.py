@@ -12,7 +12,7 @@ from deform.widget import SelectWidget
 from deform.widget import TextInputWidget
 
 from ..models import DBSession
-from ..models import Location
+from ..models import FarmComponent
 from ..models import Parameter
 from ..models import Sensor
 
@@ -20,7 +20,7 @@ from ..models import Sensor
 def deferred_location_default(node, kw):
     if len(kw) > 0:
         return kw['measurement'].location._id
-    location = DBSession.query(Location).first()
+    location = DBSession.query(FarmComponent).first()
     return location._id
 
 @colander.deferred
@@ -51,7 +51,7 @@ def deferred_interval_default(node, kw):
 
 @colander.deferred
 def deferred_location_widget(node, kw):
-    locations = DBSession.query(Location).all()
+    locations = DBSession.query(FarmComponent).all()
     choises = []
     for l in locations:
         choises.append((l._id, l.name))
@@ -70,7 +70,7 @@ def deferred_sensor_widget(node, kw):
     sensors = DBSession.query(Sensor).all()
     choises = []
     for s in sensors:
-        choises.append((s._id, s.controller.name+'->'+s.name))
+        choises.append((s._id, s.periphery_controller.name+'->'+s.name))
     return SelectWidget(values=choises)
 
 class MeasurementSchema(MappingSchema):

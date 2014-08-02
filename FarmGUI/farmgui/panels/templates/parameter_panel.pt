@@ -1,0 +1,5 @@
+
+<div class="container-fluid">
+  <h4>${parameter.name}</h4>
+  <a href="${delete_href}" class="close">x</a>
+</div><!-- /.container-fluid -->

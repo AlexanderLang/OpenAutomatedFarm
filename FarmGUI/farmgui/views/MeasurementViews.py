@@ -11,10 +11,9 @@ from sqlalchemy import asc
 from sqlalchemy import Time
 
 from ..models import DBSession
-from ..models import Location
+from ..models import FarmComponent
 from ..models import Parameter
 from ..models import Sensor
-from ..models import Measurement
 from ..models import MeasurementLog
 
 from ..schemas import MeasurementSchema
@@ -48,7 +47,7 @@ class MeasurementViews(object):
             controls = self.request.POST.items()
             try:
                 values = addForm.validate(controls)
-                location = DBSession.query(Location).filter(Location._id==values['location']).first()
+                location = DBSession.query(FarmComponent).filter(FarmComponent._id==values['location']).first()
                 parameter = DBSession.query(Parameter).filter(Parameter._id==values['parameter']).first()
                 sensor = DBSession.query(Sensor).filter(Sensor._id==values['sensor']).first()
                 DBSession.add(Measurement(location, parameter, sensor, values['interval'], values['description']))

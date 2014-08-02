@@ -21,13 +21,13 @@ class Actuator(Base):
     __tablename__ = 'Actuators'
 
     _id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
-    peripheryControllerId = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
-    controller = relationship('PeripheryController', back_populates='actuators')
+    periphery_controller_id = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
+    periphery_controller = relationship('PeripheryController', back_populates='actuators')
     name = Column(Unicode(250), nullable=False)
     setPoint = Column(Float, nullable=False)
     
-    def __init__(self, peripheryController, name, setPoint):
-        self.peripheryController = peripheryController
-        self.peripheryControllerId = peripheryController._id
+    def __init__(self, periphery_controller, name, setPoint):
+        self.peripheryController = periphery_controller
+        self.periphery_controller_id = periphery_controller._id
         self.name = name
         self.setPoint = setPoint

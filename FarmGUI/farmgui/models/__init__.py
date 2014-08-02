@@ -1,10 +1,12 @@
 from .meta import Base
 from .meta import DBSession
 
+from .FarmComponent import FarmComponent
+from .FarmComponent import init_FarmComponents
+from .ParameterType import ParameterType
+from .ParameterType import init_ParameterTypes
 from .Parameter import Parameter
 from .Parameter import init_Parameters
-from .Location import Location
-from .Location import init_Locations
 
 from .PlantSetting import PlantSetting
 from .PlantSetting import init_PlantSettings
@@ -18,5 +20,4 @@ from .FieldSetting import init_FieldSettings
 from .PeripheryController import PeripheryController
 from .Sensor import Sensor
 from .Actuator import Actuator
-from .Measurement import Measurement
 from .MeasurementLog import MeasurementLog
