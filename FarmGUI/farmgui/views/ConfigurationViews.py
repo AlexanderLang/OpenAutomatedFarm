@@ -115,7 +115,7 @@ class ConfigurationViews(object):
             p = add_form.validate(controls.items())
             comp = DBSession.query(FarmComponent).filter_by(_id=p['component']).first()
             parameter_type = DBSession.query(ParameterType).filter_by(_id=p['parameter_type']).first()
-            sensor = DBSession.query(Sensor).filter(Sensor.id == p['sensor']).first()
+            sensor = DBSession.query(Sensor).filter_by(_id=p['sensor']).first()
             new_par = Parameter(comp, p['name'], parameter_type, p['interval'], sensor, p['description'])
             DBSession.add(new_par)
         except ValidationFailure as e:
@@ -155,7 +155,6 @@ class ConfigurationViews(object):
         if values['sensor'] is not None:
             p.sensor_id = values['sensor']
         p.description = values['description']
-        print('\nDescription: '+p.description)
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='periphery_controllers_list',
