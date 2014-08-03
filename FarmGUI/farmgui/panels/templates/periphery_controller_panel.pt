@@ -1,8 +1,35 @@
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h2>${periphery_controller.name}</h2>
-    </div>
-    <div class="panel-body">
-    </div>
+    <form role="form" action="${request.route_url('periphery_controller_update', _id=periphery_controller.id)}"
+          method="post">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h2>${structure:edit_form['name'].title}</h2>
+                </div>
+                <div class="col-sm-8">
+                    <h2>${structure:edit_form['name'].serialize(periphery_controller=periphery_controller)}</h2>
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h3>Firmware</h3>
+                </div>
+                <div class="col-sm-8">
+                    <h3>${periphery_controller.firmwareName + ' (' + periphery_controller.firmwareVersion + ')'}</h3>
+                </div>
+            </div>
+            <!-- /.row -->
+            <h2>Sensors:</h2>
 
-</div><!-- /.container-fluid -->
+            <div tal:repeat="s periphery_controller.sensors">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-11">
+                    ${panel('sensor_panel', s.id)}
+                </div>
+            </div>
+        </div>
+    </form>
+</div><!-- /.panel -->

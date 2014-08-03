@@ -1,0 +1,54 @@
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-sm-1">
+            <div class="row">
+                <h4>Name</h4>
+            </div>
+            <div class="row">
+                <h4>${sensor.name}</h4>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <h4>Type</h4>
+            </div>
+            <div class="row">
+                <h4>${sensor.parameter_type.name + ' [' + sensor.parameter_type.unit + ']'}</h4>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <h4>Precision</h4>
+            </div>
+            <div class="row">
+                <h4>${sensor.precision}</h4>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <h4>Sampling Time</h4>
+            </div>
+            <div class="row">
+                <h4>${sensor.sampling_time}</h4>
+            </div>
+        </div>
+        <div class="col-sm-1">
+            <div class="row">
+                <h4>Min</h4>
+            </div>
+            <div class="row">
+                <h4>${sensor.minimum}</h4>
+            </div>
+        </div>
+        <div class="col-sm-1">
+            <div class="row">
+                <h4>Max</h4>
+            </div>
+            <div class="row">
+                <h4>${sensor.maximum}</h4>
+            </div>
+        </div>
+    </div>
+    <!-- /.panel-body -->
+
+</div><!-- /.panel -->

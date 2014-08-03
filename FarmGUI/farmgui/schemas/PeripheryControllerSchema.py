@@ -3,6 +3,8 @@ from colander import MappingSchema
 from colander import SchemaNode
 from colander import String
 
+from deform.widget import TextInputWidget
+
 
 @colander.deferred
 def deferred_name_default(node, kw):
@@ -12,6 +14,7 @@ def deferred_name_default(node, kw):
 
 
 class PeripheryControllerSchema(MappingSchema):
-    Name = SchemaNode(typ=String(),
-                      title='Description',
-                      default=deferred_name_default)
+    name = SchemaNode(typ=String(),
+                      title='Name',
+                      default=deferred_name_default,
+                      widget=TextInputWidget(size=40))

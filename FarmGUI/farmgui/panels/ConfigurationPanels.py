@@ -14,6 +14,7 @@ from ..models import PeripheryController
 from ..models import FarmComponent
 from ..models import Parameter
 from ..models import FieldSetting
+from ..models import Sensor
 
 from ..schemas import ParameterSchema
 from ..schemas import FieldSettingSchema
@@ -73,4 +74,10 @@ def periphery_controller_panel(context, request, periphery_controller_id):
                      buttons=('Save',))
     return {'periphery_controller': periphery_controller,
             'edit_form': edit_form}
+
+
+@panel_config(name='sensor_panel', renderer='farmgui:panels/templates/sensor_panel.pt')
+def sensor_panel(context, request, sensor_id):
+    sensor = DBSession.query(Sensor).filter_by(_id=sensor_id).first()
+    return {'sensor': sensor}
 

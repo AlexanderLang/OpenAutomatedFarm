@@ -12,6 +12,7 @@ redis_conn = Redis('localhost', 6379)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
+from ..models import ParameterType
 from ..models import PeripheryController
 from ..models import Sensor
 
@@ -49,12 +50,12 @@ class PeripheryControllerWorker(object):
             # register sensors
             sensors = self.serial.get_sensors()
             for s in sensors:
-                sensor = Sensor(periphery_controller, s['name'], s['unit'], s['samplingTime'])
+                param_type = db_session.query(ParameterType).filter_by(unit=s['unit']).first()
+                sensor = Sensor(periphery_controller, s['name'], param_type, 0.1, s['samplingTime'], 0, 100)
                 db_session.add(sensor)
         else:
             # known controller
-            periphery_controller = db_session.query(PeripheryController).filter(
-                PeripheryController.id == self.controller_id).first()
+            periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
             periphery_controller.active = True
         db_session.commit()
         db_session.close()
@@ -80,8 +81,7 @@ class PeripheryControllerWorker(object):
 
     def close(self):
         db_session = self.db_sessionmaker()
-        periphery_controller = db_session.query(PeripheryController).filter(
-            PeripheryController.id == self.controller_id).first()
+        periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
         periphery_controller.active = False
         db_session.commit()
         db_session.close()

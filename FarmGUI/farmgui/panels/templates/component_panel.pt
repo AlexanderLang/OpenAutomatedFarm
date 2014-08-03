@@ -10,7 +10,7 @@
         <div tal:repeat="p component.parameters">
             <div class="col-sm-1"></div>
             <div class="col-sm-11">
-                ${panel('parameter_panel', p._id)}
+                ${panel('parameter_panel', p.id)}
             </div>
         </div>
 
