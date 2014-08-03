@@ -30,6 +30,7 @@ def add_routes(config):
     config.add_route('components_list', '/configuration/components')
     config.add_route('parameter_save', '/configuration/parameters/add')
     config.add_route('parameter_delete', '/configuration/parameters/{_id}/delete')
+    config.add_route('parameter_update', '/configuration/parameters/{_id}/update')
     config.add_route('component_delete', '/configuration/component/{_id}/delete')
     config.add_route('component_save', '/configuration/component/{_id}/save')
     config.add_route('field_settings_list', '/configuration/field_settings')

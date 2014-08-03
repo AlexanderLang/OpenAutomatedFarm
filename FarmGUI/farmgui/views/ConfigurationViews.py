@@ -57,7 +57,6 @@ class ConfigurationViews(object):
         controls['name'] = fs.name
         controls['description'] = fs.description
         controls = controls.items()
-        print(self.request.POST)
         try:
             values = form.validate(controls)
         except ValidationFailure as e:
@@ -127,4 +126,33 @@ class ConfigurationViews(object):
     def parameter_delete(self):
         parameter = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['_id']).first()
         DBSession.delete(parameter)
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='parameter_update')
+    def parameter_update(self):
+        try:
+            p = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['_id']).first()
+            print(p)
+        except DBAPIError:
+            return Response('database error (query Parameters)', content_type='text/plain', status_int=500)
+        form = Form(ParameterSchema().bind(parameter=p))
+        print('form created...')
+        controls = self.request.POST
+        controls['name'] = p.name
+        controls['component'] = p.component_id
+        if controls['sensor'] == 'None':
+            controls['sensor'] = None
+        controls = controls.items()
+        print(self.request.POST)
+        try:
+            values = form.validate(controls)
+            print(values)
+        except ValidationFailure as e:
+            return Response(e.render())
+        p.parameter_type_id = values['parameter_type']
+        p.interval = values['interval']
+        if values['sensor'] is not None:
+            p.sensor_id = values['sensor']
+        p.description = values['description']
+        print('\nDescription: '+p.description)
         return HTTPFound(location=self.request.route_url('components_list'))

@@ -36,16 +36,37 @@ def deferred_type_default(node, kw):
 def deferred_interval_default(node, kw):
     if len(kw) > 0:
         return kw['parameter'].interval
-    return 15
+    return 60
 
 
 @colander.deferred
 def deferred_sensor_widget(node, kw):
     sensors = DBSession.query(Sensor).all()
     choises = []
+    choises.append((None, '--select--'))
     for s in sensors:
         choises.append((s.id, s.periphery_controller.name + '->' + s.name))
     return SelectWidget(values=choises)
+
+
+@colander.deferred
+def deferred_sensor_default(node, kw):
+    if len(kw) > 0:
+        sid = kw['parameter'].sensor_id
+        if sid is None:
+            return colander.null
+        return sid
+    return colander.null
+
+
+@colander.deferred
+def deferred_description_default(node, kw):
+    if len(kw) > 0:
+        desc = kw['parameter'].description
+        if desc is None:
+            return colander.null
+        return desc
+    return colander.null
 
 
 class ParameterSchema(MappingSchema):
@@ -61,11 +82,14 @@ class ParameterSchema(MappingSchema):
                                 widget=deferred_type_widget)
     interval = SchemaNode(typ=Float(),
                           title='Measurement interval [s]',
-                          validation=Range(0, 10),
-                          default=deferred_interval_default,
-                          widget=TextInputWidget())
+                          validation=Range(0, 86000),
+                          default=deferred_interval_default)
     sensor = SchemaNode(typ=Int(),
-                        title='Sensor',
+                        title='Associated Sensor',
+                        default=deferred_sensor_default,
                         widget=deferred_sensor_widget,
                         missing=None)
-    description = SchemaNode(String(), missing=None)
+    description = SchemaNode(typ=String(),
+                             title='Description',
+                             default=deferred_description_default,
+                             missing=None)

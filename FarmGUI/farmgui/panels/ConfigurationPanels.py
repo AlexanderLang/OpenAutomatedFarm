@@ -4,6 +4,8 @@ Created on Jul 20, 2014
 @author: alex
 """
 
+import colander
+
 from pyramid_layout.panel import panel_config
 from deform_bootstrap import Form
 
@@ -35,7 +37,13 @@ def component_panel(context, request, component_id):
 @panel_config(name='parameter_panel', renderer='farmgui:panels/templates/parameter_panel.pt')
 def parameter_panel(context, request, parameter_id):
     parameter = DBSession.query(Parameter).filter_by(_id=parameter_id).first()
+    schema = ParameterSchema().bind(parameter=parameter)
+    edit_form = Form(schema,
+                     action=request.route_url('parameter_update', _id=parameter_id),
+                     formid='edit_parameter_form_'+str(parameter_id),
+                     buttons=('Save',))
     return {'parameter': parameter,
+            'edit_form': edit_form,
             'delete_href': request.route_url('parameter_delete', _id=parameter.id)}
 
 
