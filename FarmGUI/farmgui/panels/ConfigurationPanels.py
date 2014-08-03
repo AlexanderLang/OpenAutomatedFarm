@@ -10,12 +10,14 @@ from pyramid_layout.panel import panel_config
 from deform_bootstrap import Form
 
 from ..models import DBSession
+from ..models import PeripheryController
 from ..models import FarmComponent
 from ..models import Parameter
 from ..models import FieldSetting
 
 from ..schemas import ParameterSchema
 from ..schemas import FieldSettingSchema
+from ..schemas import PeripheryControllerSchema
 
 @panel_config(name='component_panel', renderer='farmgui:panels/templates/component_panel.pt')
 def component_panel(context, request, component_id):
@@ -59,4 +61,16 @@ def field_setting_panel(context, request, field_setting_name):
             'edit_form': edit_form.render({'name': field_setting.name,
                                            'value': field_setting.value,
                                            'description': field_setting.description})}
+
+
+@panel_config(name='periphery_controller_panel', renderer='farmgui:panels/templates/periphery_controller_panel.pt')
+def periphery_controller_panel(context, request, periphery_controller_id):
+    periphery_controller = DBSession.query(PeripheryController).filter_by(_id=periphery_controller_id).first()
+    schema = PeripheryControllerSchema().bind(periphery_controller=periphery_controller)
+    edit_form = Form(schema,
+                     action=request.route_url('periphery_controller_update', _id=periphery_controller_id),
+                     formid='edit_periphery_controller_form_'+str(periphery_controller_id),
+                     buttons=('Save',))
+    return {'periphery_controller': periphery_controller,
+            'edit_form': edit_form}
 

@@ -1,0 +1,8 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2>${periphery_controller.name}</h2>
+    </div>
+    <div class="panel-body">
+    </div>
+
+</div><!-- /.container-fluid -->

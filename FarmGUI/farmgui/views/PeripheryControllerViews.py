@@ -15,17 +15,6 @@ class PeripheryControllerViews(object):
     def __init__(self, request):
         self.request = request
 
-    @view_config(route_name='periphery_controllers_list',
-                 renderer='farmgui:views/templates/periphery_controllers_list.pt', layout='default')
-    def periphery_controllers_list(self):
-        try:
-            periphery_controllers = DBSession.query(PeripheryController).all()
-        except DBAPIError:
-            return Response('database error (query PeripheryControllers)', content_type='text/plain', status_int=500)
-        return {'periphery_controllers': periphery_controllers}
-
-    @view_config(route_name='periphery_controller_view',
-                 renderer='farmgui:views/templates/periphery_controller_view.pt', layout='default')
     def periphery_controller_view(self):
         try:
             periphery_controller = DBSession.query(PeripheryController).filter(

@@ -15,6 +15,7 @@ from ..models import Parameter
 from ..models import ParameterType
 from ..models import Sensor
 from ..models import FieldSetting
+from ..models import PeripheryController
 
 from ..schemas import FarmComponentSchema
 from ..schemas import ParameterSchema
@@ -156,3 +157,35 @@ class ConfigurationViews(object):
         p.description = values['description']
         print('\nDescription: '+p.description)
         return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='periphery_controllers_list',
+                 renderer='farmgui:views/templates/periphery_controllers_list.pt', layout='default')
+    def periphery_controllers_list(self):
+        layout = self.request.layout_manager.layout
+        layout.add_javascript(self.request.static_url('farmgui:static/js/configuration_views.js'))
+        layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
+        layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
+        try:
+            periphery_controllers = DBSession.query(PeripheryController).all()
+            print(periphery_controllers)
+        except DBAPIError:
+            return Response('database error (query PeripheryControllers)', content_type='text/plain', status_int=500)
+        return {'periphery_controllers': periphery_controllers}
+
+    @view_config(route_name='periphery_controller_update')
+    def periphery_controller_update(self):
+        try:
+            fs = DBSession.query(FieldSetting).filter_by(name=self.request.matchdict['name']).first()
+        except DBAPIError:
+            return Response('database error (query FieldSettings)', content_type='text/plain', status_int=500)
+        form = Form(FieldSettingSchema())
+        controls = self.request.POST
+        controls['name'] = fs.name
+        controls['description'] = fs.description
+        controls = controls.items()
+        try:
+            values = form.validate(controls)
+        except ValidationFailure as e:
+            return Response(e.render())
+        fs.value = values['value']
+        return HTTPFound(location=self.request.route_url('field_settings_list'))

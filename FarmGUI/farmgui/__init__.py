@@ -35,6 +35,8 @@ def add_routes(config):
     config.add_route('component_save', '/configuration/component/{_id}/save')
     config.add_route('field_settings_list', '/configuration/field_settings')
     config.add_route('field_setting_update', '/configuration/field_settings/{name}/update')
+    config.add_route('periphery_controllers_list', '/configuration/periphery_controllers')
+    config.add_route('periphery_controller_update', '/configuration/periphery_controllers/{_id}/update')
 
     config.add_route('plant_settings_list', '/plant_settings')
     config.add_route('plant_settings_new', '/plant_settings/add')
@@ -50,8 +52,6 @@ def add_routes(config):
     config.add_route('measurement_view', '/config/measurements/{measurement_id}')
     config.add_route('measurements_list', '/config/measurements/')
 
-    config.add_route('periphery_controllers_list', '/field_controller/periphery_controllers')
-    config.add_route('periphery_controller_view', '/field_controller/periphery_controllers/{_id}')
     config.add_route('sensor_view', '/field_controller/sensors/{_id}')
 
     config.add_route('measurement_log_json', '/json/measurements/{measurement_id}/logs')

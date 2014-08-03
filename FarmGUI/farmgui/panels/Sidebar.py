@@ -24,5 +24,6 @@ def sidebar(context, request):
         # configuration sidebar
         sidebar_items.append(sidebar_item('Field Settings', request.route_url('field_settings_list')))
         sidebar_items.append(sidebar_item('Farm Components', request.route_url('components_list')))
+        sidebar_items.append(sidebar_item('Periphery Controllers', request.route_url('periphery_controllers_list')))
 
     return {'sidebar_items': sidebar_items}
