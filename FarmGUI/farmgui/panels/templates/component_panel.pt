@@ -1,13 +1,19 @@
-<div class="container-fluid">
-    <h3>${component.name}</h3>
+<div class="panel panel-default">
+    <div class="row">
+        <div class="col-sm-3">
+            <h2>Component:</h2>
+        </div>
+        <div class="col-sm-9">
+            <h2>${component.name}</h2>
+        </div>
+    </div>
 
-    <table class="table table-striped table-bordered table-hover">
-        <tbody>
-        <tr tal:repeat="p component.parameters">
-            <td>${panel('parameter_panel', p._id)}</td>
-        </tr>
-        </tbody>
-    </table>
+    <div tal:repeat="p component.parameters">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-11">
+            ${panel('parameter_panel', p._id)}
+        </div>
+    </div>
 
     <a data-toggle="modal" href="#add_parameter_modal_${component._id}" class="btn btn-primary">Add Parameter</a>
     <a href="${delete_href}" class="btn btn-primary">Delete Component</a>

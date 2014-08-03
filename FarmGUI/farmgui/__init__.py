@@ -31,7 +31,9 @@ def add_routes(config):
     config.add_route('parameter_save', '/configuration/parameters/add')
     config.add_route('parameter_delete', '/configuration/parameters/{_id}/delete')
     config.add_route('component_delete', '/configuration/component/{_id}/delete')
+    config.add_route('component_save', '/configuration/component/{_id}/save')
     config.add_route('field_settings_list', '/configuration/field_settings')
+    config.add_route('field_setting_update', '/configuration/field_settings/{name}/update')
 
     config.add_route('plant_settings_list', '/plant_settings')
     config.add_route('plant_settings_new', '/plant_settings/add')

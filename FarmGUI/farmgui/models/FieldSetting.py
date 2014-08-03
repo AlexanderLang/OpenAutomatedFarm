@@ -29,5 +29,5 @@ class FieldSetting(Base):
 
 
 def init_field_settings(db_session):
-    db_session.add(FieldSetting('cultivating plant', 'tomato', 'the plant being grown in the field right now'))
-    db_session.add(FieldSetting('cultivation start', '22.06.2014', 'start date'))
+    db_session.add(FieldSetting('cultivating_plant', 'tomato', 'the plant being grown in the field right now'))
+    db_session.add(FieldSetting('cultivation_start', '22.06.2014', 'start date'))

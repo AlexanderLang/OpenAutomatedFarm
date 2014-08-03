@@ -1,0 +1,27 @@
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-sm-4">
+            <h4>${field_setting.name}</h4>
+        </div>
+        <div class="col-sm-8">
+            <h4>
+                <a data-toggle="modal" href="#edit_setting_modal_${field_setting.name}">${field_setting.value}</a>
+            </h4>
+        </div>
+    </div><!-- /.panel-body -->
+
+    <div class="modal" id="edit_setting_modal_${field_setting.name}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Edit Field Setting</h4>
+                </div>
+                <div class="modal-body">
+                    <tal:form replace="structure edit_form"/>
+                </div>
+            </div><!-- /.modal_content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+</div><!-- /.panel -->

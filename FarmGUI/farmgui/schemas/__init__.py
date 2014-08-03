@@ -3,3 +3,4 @@ from .StageSchema import StageSchema
 from .ParameterSchema import ParameterSchema
 from .StageConfigurationSchema import StageConfigurationSchema
 from .FarmComponentSchema import FarmComponentSchema
+from .FieldSettingSchema import FieldSettingSchema

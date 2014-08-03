@@ -1,10 +1,21 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <a href="${delete_href}" class="close">delete</a>
-        <h4>${parameter.name} [ ${parameter.parameter_type.unit} ]</h4>
+        <h4>${parameter.name}</h4>
     </div>
     <div class="panel-body">
-
+        <table class="table table-striped table-bordered table-hover">
+            <tbody>
+            <tr>
+                <td>Type</td>
+                <td>${parameter.parameter_type.name + ' [' + parameter.parameter_type.unit + ']'}</td>
+            </tr>
+            <tr>
+                <td>Measurement Interval</td>
+                <td>${parameter.interval}</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
     <!-- /.panel-body -->
 </div><!-- /.panel -->

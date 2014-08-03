@@ -34,7 +34,7 @@ class Parameter(Base):
     component = relationship('FarmComponent', back_populates='parameters')
     name = Column(Unicode(250),
                   nullable=False,
-                  unique=True)
+                  unique=False)
     parameter_type_id = Column(SmallInteger,
                                ForeignKey('ParameterTypes._id'),
                                nullable=False)

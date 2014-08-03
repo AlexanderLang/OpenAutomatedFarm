@@ -1,5 +1,6 @@
 from .meta import Base
 from .meta import DBSession
+from .meta import serialize
 
 from .FarmComponent import FarmComponent
 from .FarmComponent import init_farm_components
