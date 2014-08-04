@@ -21,4 +21,4 @@ from .FieldSetting import init_field_settings
 from .PeripheryController import PeripheryController
 from .Sensor import Sensor
 from .Actuator import Actuator
-from .MeasurementLog import MeasurementLog
+from .ParameterLog import ParameterLog

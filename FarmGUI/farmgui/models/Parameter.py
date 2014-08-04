@@ -46,8 +46,8 @@ class Parameter(Base):
     sensor_id = Column(Integer,
                        ForeignKey('Sensors._id'),
                        nullable=True)
-    sensor = relationship("Sensor", backref="measurement")
-    logs = relationship("MeasurementLog", order_by="MeasurementLog.time")
+    sensor = relationship("Sensor")
+    logs = relationship("ParameterLog", order_by="ParameterLog.time")
 
     def __init__(self, component, name, parameter_type, interval, sensor, description):
         """

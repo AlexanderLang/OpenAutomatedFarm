@@ -14,11 +14,11 @@ from sqlalchemy import ForeignKey
 from .meta import Base
 
 
-class MeasurementLog(Base):
+class ParameterLog(Base):
     """
     classdocs
     """
-    __tablename__ = 'MeasurementLogs'
+    __tablename__ = 'ParameterLogs'
 
     _id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
     parameter_id = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
