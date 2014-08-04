@@ -18,6 +18,7 @@ from ..models import FieldSetting
 from ..models import PeripheryController
 
 from ..schemas import FarmComponentSchema
+from ..schemas import PeripheryControllerSchema
 from ..schemas import ParameterSchema
 from ..schemas import FieldSettingSchema
 
@@ -53,7 +54,7 @@ class ConfigurationViews(object):
             fs = DBSession.query(FieldSetting).filter_by(name=self.request.matchdict['name']).first()
         except DBAPIError:
             return Response('database error (query FieldSettings)', content_type='text/plain', status_int=500)
-        form = Form(FieldSettingSchema())
+        form = Form(FieldSettingSchema(), buttons=('Save',))
         controls = self.request.POST
         controls['name'] = fs.name
         controls['description'] = fs.description
@@ -136,7 +137,7 @@ class ConfigurationViews(object):
             print(p)
         except DBAPIError:
             return Response('database error (query Parameters)', content_type='text/plain', status_int=500)
-        form = Form(ParameterSchema().bind(parameter=p))
+        form = Form(ParameterSchema().bind(parameter=p), buttons=('Save',))
         print('form created...')
         controls = self.request.POST
         controls['name'] = p.name
@@ -174,17 +175,14 @@ class ConfigurationViews(object):
     @view_config(route_name='periphery_controller_update')
     def periphery_controller_update(self):
         try:
-            fs = DBSession.query(FieldSetting).filter_by(name=self.request.matchdict['name']).first()
+            pc = DBSession.query(PeripheryController).filter_by(_id=self.request.matchdict['_id']).first()
         except DBAPIError:
             return Response('database error (query FieldSettings)', content_type='text/plain', status_int=500)
-        form = Form(FieldSettingSchema())
-        controls = self.request.POST
-        controls['name'] = fs.name
-        controls['description'] = fs.description
-        controls = controls.items()
+        form = Form(PeripheryControllerSchema(), buttons=('Save',))
+        controls = self.request.POST.items()
         try:
             values = form.validate(controls)
         except ValidationFailure as e:
             return Response(e.render())
-        fs.value = values['value']
-        return HTTPFound(location=self.request.route_url('field_settings_list'))
+        pc.name = values['name']
+        return HTTPFound(location=self.request.route_url('periphery_controllers_list'))

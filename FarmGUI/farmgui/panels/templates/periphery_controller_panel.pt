@@ -3,11 +3,14 @@
           method="post">
         <div class="panel-heading">
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <h2>${structure:edit_form['name'].title}</h2>
                 </div>
                 <div class="col-sm-8">
                     <h2>${structure:edit_form['name'].serialize(periphery_controller=periphery_controller)}</h2>
+                </div>
+                <div class="col-sm-2">
+                    <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
                 </div>
             </div>
             <!-- /.row -->
