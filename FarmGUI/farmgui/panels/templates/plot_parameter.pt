@@ -1,0 +1,5 @@
+<div class="panel panel-default">
+    <div class="plot-container">
+        <div id="plot-placeholder" class="plot-placeholder"></div>
+    </div>
+</div><!-- /.panel -->

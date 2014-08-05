@@ -83,7 +83,7 @@ class ConfigurationViews(object):
         return {'components': components,
                 'add_component_form': add_form.render()}
 
-    @view_config(route_name='component_save', renderer='json')
+    @view_config(route_name='component_save')
     def component_save(self):
         if self.request.matchdict['_id'] == '0':
             # new component

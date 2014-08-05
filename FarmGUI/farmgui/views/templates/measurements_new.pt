@@ -1,6 +1,0 @@
-<metal:block use-macro="main_template">
-    <div metal:fill-slot="content">
-        <h1>Add new Measurement</h1>
-        <tal:form replace="structure addForm"/>
-    </div>
-</metal:block>

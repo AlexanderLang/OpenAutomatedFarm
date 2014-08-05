@@ -1,7 +1,7 @@
 $(document).ready(
-		function() {
-			var m_id = $("#measurement-title").attr("data-measurement-id");
-			var plot = $.plot("#placeholder", [], {
+		function () {
+			var p_id = 1;
+			var plot = $.plot("#plot-placeholder", [], {
 				series : {
 					shadowSize : 0
 				// Drawing is faster without shadows
@@ -24,18 +24,17 @@ $(document).ready(
 				plot.getOptions().xaxes[0].max = data.xmax;
 				plot.setupGrid();
 				plot.draw();
-				var interval = parseInt($("#interval").attr("data-interval"))*1000;
+				var interval = 2000;
 				setTimeout(function() {
-					get_measurement_log_data(m_id)
+					get_parameter_log_data(p_id)
 				}, interval);
-			}
+			};
 
-			function get_measurement_log_data(measurement_id) {
-				$.getJSON("/json/measurements/" + measurement_id
-						+ "/logs", function(data) {
+			function get_parameter_log_data(parameter_id) {
+				$.getJSON("/display/parameter/data", function(data) {
 					update_plot(data);
 				});
-			}
+			};
 
-			get_measurement_log_data(m_id);
+			get_parameter_log_data(p_id);
 		});
