@@ -122,6 +122,7 @@ class ConfigurationViews(object):
         except ValidationFailure as e:
             add_form = e
             return {'addForm': add_form.render()}
+        self.request.redis.publish('parameter_changes', 'new parameter')
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='parameter_delete')
@@ -156,6 +157,7 @@ class ConfigurationViews(object):
         if values['sensor'] is not None:
             p.sensor_id = values['sensor']
         p.description = values['description']
+        self.request.redis.publish('parameter_changes', 'parameter changed')
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='periphery_controllers_list',

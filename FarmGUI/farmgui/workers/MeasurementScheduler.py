@@ -37,7 +37,7 @@ class MeasurementScheduler(object):
         self.db_sessionmaker = db_sm
         # listen for changes in measurements (and controller connections)
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
-        self.pubsub.subscribe('parameter_changes', 'log_measurements')
+        self.pubsub.subscribe('periphery_controller_changes', 'parameter_changes', 'log_measurements')
         self.schedule = {}
         self.db_session = self.db_sessionmaker()
         self.recalculate_schedule()
@@ -50,6 +50,10 @@ class MeasurementScheduler(object):
             if message is not None:
                 if message['channel'] == b'parameter_changes':
                     # something changed
+                    self.db_session.close()
+                    self.db_session = self.db_sessionmaker()
+                    self.recalculate_schedule()
+                if message['channel'] == b'periphery_controller_changes':
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.recalculate_schedule()

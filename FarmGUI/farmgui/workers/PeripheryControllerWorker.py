@@ -64,7 +64,7 @@ class PeripheryControllerWorker(object):
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe(self.channel_name)
         # let scheduler know the available sensors changed
-        self.redis_conn.publish('measurement_changes', '')
+        self.redis_conn.publish('periphery_controller_changes', 'connected id: '+str(self.controller_id))
 
     def work(self):
         for item in self.pubsub.listen():
