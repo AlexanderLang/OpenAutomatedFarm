@@ -24,30 +24,30 @@ if [ $? -ne 0 ] ; then
 fi
 printf "***OAF*** done(activate virtualenv)\n"
 
-cd $ENV_DIR
+#cd $ENV_DIR
 # ubuntu does not install pip, so...
 # install easy_install and pip
-printf "***OAF*** install pip..."
-curl -O http://python-distribute.org/distribute_setup.py
-if [ $? -ne 0 ] ; then
-	printf "***OAF*** failed (download)\n"
-	exit 1
-fi
-python3.4 distribute_setup.py
-if [ $? -ne 0 ] ; then
-	printf "***OAF*** failed (distribute_setup.py)\n"
-	exit 1
-fi
-easy_install-3.4 pip
-if [ $? -ne 0 ] ; then
-	printf "***OAF*** failed (easy_install pip)\n"
-	exit 1
-fi
-printf "***OAF*** done (install pip)\n"
+#printf "***OAF*** install pip..."
+#curl -O http://python-distribute.org/distribute_setup.py
+#if [ $? -ne 0 ] ; then
+#	printf "***OAF*** failed (download)\n"
+#	exit 1
+#fi
+#python3.4 distribute_setup.py
+#if [ $? -ne 0 ] ; then
+#	printf "***OAF*** failed (distribute_setup.py)\n"
+#	exit 1
+#fi
+#easy_install-3.4 pip
+#if [ $? -ne 0 ] ; then
+#	printf "***OAF*** failed (easy_install pip)\n"
+#	exit 1
+#fi
+#printf "***OAF*** done (install pip)\n"
 
 # install farmGui (pyramid app)
 printf "  installing FarmGUI (pyramid app)..."
-cd ../FarmGUI
+cd FarmGUI
 python3.4 setup.py develop
 if [ $? -ne 0 ] ; then
 	printf "failed\n"
