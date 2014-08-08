@@ -21,7 +21,7 @@
                 <h4>Precision</h4>
             </div>
             <div class="row">
-                <h4>${sensor.precision}</h4>
+                <h4>+/- ${sensor.precision} ${sensor.parameter_type.unit}</h4>
             </div>
         </div>
         <div class="col-sm-2">

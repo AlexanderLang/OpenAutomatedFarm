@@ -8,6 +8,7 @@ typedef struct {
 	String name;
 	float value;
 	String unit;
+	float precision;
 	float samplingTime;
 	float min;
 	float max;
@@ -20,10 +21,10 @@ typedef struct {
 String fwName = "Dummy";
 String fwVersion = "0.1";
 int num_sensors = 6;
-OAF_Sensor::Sensor sensors[] = { { "T1", 10.0, "°C", 0.5, 10, 40 }, { "T2", 20.0,
-		"°C", 0.5, 10, 40 }, { "T3", 30.0, "°C", 0.5, 10, 40 }, { "H1", 20.0,
-		"%", 1.0, 20, 95 }, { "H2", 50.0, "%", 1.0, 20, 95 }, { "H3", 80.0, "%",
-		1.0, 20, 95 } };
+OAF_Sensor::Sensor sensors[] = { { "T1", 10.0, "°C", 0.2, 0.5, 0, 100 }, { "T2", 20.0,
+		"°C", 0.2, 0.5, 10, 40 }, { "T3", 30.0, "°C", 0.2, 0.5, 10, 40 }, { "H1", 20.0,
+		"%", 2.0, 1.0, 20, 95 }, { "H2", 50.0, "%", 2.0, 1.0, 20, 95 }, { "H3", 80.0, "%",
+		2.0, 1.0, 20, 95 } };
 int lc = 0;
 int lcc = 0;
 
@@ -89,7 +90,13 @@ void execute_cmd(char cmd) {
 			Serial.print(';');
 			Serial.print(sensors[i].unit);
 			Serial.print(';');
+			Serial.print(sensors[i].precision);
+			Serial.print(';');
 			Serial.print(sensors[i].samplingTime);
+			Serial.print(';');
+			Serial.print(sensors[i].min);
+			Serial.print(';');
+			Serial.print(sensors[i].max);
 			Serial.print('|');
 		}
 		Serial.println();

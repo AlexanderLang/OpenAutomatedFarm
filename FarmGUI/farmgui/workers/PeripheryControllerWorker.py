@@ -51,7 +51,8 @@ class PeripheryControllerWorker(object):
             sensors = self.serial.get_sensors()
             for s in sensors:
                 param_type = db_session.query(ParameterType).filter_by(unit=s['unit']).first()
-                sensor = Sensor(periphery_controller, s['name'], param_type, 0.1, s['samplingTime'], 0, 100)
+                sensor = Sensor(periphery_controller, s['name'], param_type, s['precision'],
+                                s['samplingTime'], s['min'], s['max'])
                 db_session.add(sensor)
         else:
             # known controller

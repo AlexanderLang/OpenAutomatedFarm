@@ -33,7 +33,10 @@ class SerialShell(object):
             values = sensorString.split(';')
             sensor_dict = {'name': values[0],
                            'unit': values[1],
-                           'samplingTime': float(values[2])}
+                           'precision': float(values[2]),
+                           'samplingTime': float(values[3]),
+                           'min': float(values[4]),
+                           'max': float(values[5])}
             sensors.append(sensor_dict)
         return sensors
 
