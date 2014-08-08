@@ -4,5 +4,6 @@
         <div>
             ${panel('plot_parameter')}
         </div>
+
     </div>
 </metal:block>

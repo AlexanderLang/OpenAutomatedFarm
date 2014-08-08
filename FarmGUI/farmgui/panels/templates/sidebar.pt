@@ -1,7 +1,11 @@
 <div class="col-sm-2">
     <ul id="sidebar" class="nav nav-stacked affix">
-        <li tal:repeat="item sidebar_items" tal:attributes="class 'active' if item.active else ''">
+        <li tal:repeat="item configuration_items" tal:attributes="class 'active' if item.active else ''">
             <a href="${item.url}">${item.name}</a>
+        </li>
+        <li tal:repeat="item parameter_items">
+            <input type="checkbox" name="${item.name}" id="${item.name+'_checkbox'}"/>
+            <label for="${item.name+'_checkbox'}">${item.name}</label>
         </li>
     </ul>
 </div>
