@@ -1,5 +1,7 @@
+import time
 from time import mktime
 from datetime import datetime
+from datetime import timezone
 from datetime import timedelta
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -30,27 +32,25 @@ class DisplayViews(object):
     def plot_parameter_data(self):
         period = 0
         p_ids = []
-        print('Post: '+str(self.request.POST))
         for i in self.request.POST.items():
             if i[0] == 'parameter_ids':
                 p_ids.append(i[1])
             if i[0] == 'plot_period':
                 period = int(i[1])
-        print('period: '+str(period))
-        print('p_ids:  '+str(p_ids))
-        start_time = datetime.now() - timedelta(seconds=period/1000)
-        xmin = 0
-        xmax = period
+        now = datetime.now()
+        start_time = now - timedelta(seconds=period/1000)
+        utc_offset = time.altzone * 1000
+        now_millis = int(mktime(now.timetuple())*1000) - utc_offset
+        start_time_millis = now_millis - period
         data = []
-        print('start_time: '+str(start_time))
         for pid in p_ids:
             logs = DBSession.query(ParameterLog).filter_by(parameter_id=pid).filter(ParameterLog.time >= start_time).order_by(asc(ParameterLog.time)).all()
             series = []
             for log in logs:
-                millis = int((mktime(log.time.timetuple()) - mktime(start_time.timetuple())) * 1000)
+                millis = int(mktime(log.time.timetuple()) * 1000) - utc_offset
                 series.append([millis, log.value])
             data.append(series)
-        return {'xmin': xmin,
-                'xmax': xmax,
+        return {'xmin': start_time_millis,
+                'xmax': now_millis,
                 'data': data
                 }
