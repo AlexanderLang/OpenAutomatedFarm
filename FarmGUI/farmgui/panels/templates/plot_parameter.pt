@@ -2,4 +2,22 @@
     <div class="plot-container">
         <div id="plot-placeholder" class="plot-placeholder"></div>
     </div>
+    <form>
+    <label class="radio" for="1Day_button">
+        <input type="radio" id="1Day_button" name="plot_period" value="86400000">
+        1 Day
+    </label>
+    <label class="radio" for="1Hour_button">
+        <input type="radio" id="1Hour_button" name="plot_period" value="3600000">
+        1 Hour
+    </label>
+    <label class="radio" for="30Min_button">
+        <input type="radio" id="30Min_button" name="plot_period" value="1800000">
+        30 Minutes
+    </label>
+    <label class="radio" for="15Min_button">
+        <input type="radio" id="15Min_button" name="plot_period" value="900000" checked>
+        15 Minutes
+    </label>
+    </form>
 </div><!-- /.panel -->

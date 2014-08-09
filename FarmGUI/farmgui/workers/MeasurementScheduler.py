@@ -16,6 +16,7 @@ from redis import Redis
 redis_conn = Redis('localhost', 6379)
 
 from sqlalchemy import create_engine
+from sqlalchemy import desc
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
 from ..models import PeripheryController
@@ -59,11 +60,7 @@ class MeasurementScheduler(object):
                     self.recalculate_schedule()
                 if message['channel'] == b'log_measurements':
                     data = eval(message['data'])
-                    param = self.db_session.query(Parameter).filter_by(_id=data['caller_id']).first()
-                    log = ParameterLog(param, data['time'], data['value'])
-                    self.db_session.add(log)
-                    self.db_session.commit()
-                    print('oaf_ms: saved ' + str(log))
+                    self.save_data(data)
             # get time
             now = datetime.now()
             # print(str(now)+':')
@@ -93,11 +90,9 @@ class MeasurementScheduler(object):
         controllers = self.db_session.query(PeripheryController).filter_by(active=True).all()
         # get ids of present sensors
         sensor_ids = []
-        print('controllers: '+str(controllers))
         for controller in controllers:
             for sensor in controller.sensors:
                 sensor_ids.append(sensor.id)
-        print(sensor_ids)
         if len(sensor_ids) > 0:
             # get measurements with present sensors
             parameters = self.db_session.query(Parameter).filter(Parameter.sensor_id.in_(sensor_ids))
@@ -109,6 +104,24 @@ class MeasurementScheduler(object):
         else:
             logging.info('no measurements to schedule')
         self.schedule = new_schedule
+
+    def save_data(self, data):
+        param = self.db_session.query(Parameter).filter_by(_id=data['caller_id']).first()
+        last_logs = self.db_session.query(ParameterLog).filter_by(parameter_id=param.id).order_by(
+            desc(ParameterLog.time))[:2]
+        if len(last_logs) > 1:
+            t1 = last_logs[1].time
+            t2 = last_logs[0].time
+            t3 = datetime.strptime(data['time'], '%Y-%m-%d %H:%M:%S.%f')
+            y1 = last_logs[1].value
+            y2 = last_logs[0].value
+            y3 = float(data['value'])
+            y3_inter = y1 + (y2-y1)/(t2-t1).total_seconds() * (t3-t1).total_seconds()
+            print('data: {0:.4f}  inter: {1:.4f}'.format(y3, y3_inter))
+        log = ParameterLog(param, data['time'], data['value'])
+        self.db_session.add(log)
+        self.db_session.commit()
+        print('oaf_ms: saved ' + str(log))
 
 
 def usage(argv):

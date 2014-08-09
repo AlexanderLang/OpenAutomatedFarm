@@ -4,7 +4,7 @@
             <a href="${item.url}">${item.name}</a>
         </li>
         <li tal:repeat="item parameter_items">
-            <input type="checkbox" name="${item.name}" id="${item.name+'_checkbox'}"/>
+            <input type="checkbox" name="${item.name}" id="${item.name+'_checkbox'}" data="${item.id}"/>
             <label for="${item.name+'_checkbox'}">${item.name}</label>
         </li>
     </ul>
