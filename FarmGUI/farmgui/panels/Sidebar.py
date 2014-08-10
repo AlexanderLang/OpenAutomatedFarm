@@ -22,6 +22,7 @@ def sidebar(context, request):
         return item
 
     config_items = []
+    components = []
 
     if request.current_route_url().startswith(request.route_url('configuration_views_home')):
         # configuration sidebar
