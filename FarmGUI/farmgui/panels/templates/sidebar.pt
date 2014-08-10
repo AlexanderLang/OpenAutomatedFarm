@@ -1,11 +1,18 @@
 <div class="col-sm-2">
-    <ul id="sidebar" class="nav nav-stacked affix">
+    <ul id="config-sidebar" class="nav nav-stacked affix">
         <li tal:repeat="item configuration_items" tal:attributes="class 'active' if item.active else ''">
             <a href="${item.url}">${item.name}</a>
         </li>
-        <li tal:repeat="item parameter_items">
-            <input type="checkbox" name="${item.name}" id="${item.name+'_checkbox'}" data="${item.id}"/>
-            <label for="${item.name+'_checkbox'}">${item.name}</label>
+    </ul>
+    <ul id="plot-sidebar" class="nav menu">
+        <li class="deeper parent" tal:repeat="comp components">
+            <span class="lbl">${comp.name}</span>
+            <ul class="children nav-item">
+                <li class="deeper" tal:repeat="param comp.parameters">
+                    <input type="checkbox" name="${param.name}" id="${param.name+'_checkbox'}" data="${param.id}"/>
+                    <label for="${param.name+'_checkbox'}">${param.name}</label>
+                </li>
+            </ul>
         </li>
     </ul>
 </div>

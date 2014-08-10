@@ -20,7 +20,7 @@ $(document).ready(
 
 			function get_selected_parameter_ids(){
 			    var ids = [];
-			    var checkboxes = $("#sidebar").find('input:checked');
+			    var checkboxes = $("#plot-sidebar").find('input:checked');
 			    for(var i = 0; i < checkboxes.length; i++){
 			        ids.push(checkboxes[i].getAttribute("data"));
 			    }
