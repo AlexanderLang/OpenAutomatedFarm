@@ -5,3 +5,4 @@ from .StageConfigurationSchema import StageConfigurationSchema
 from .FarmComponentSchema import FarmComponentSchema
 from .FieldSettingSchema import FieldSettingSchema
 from .PeripheryControllerSchema import PeripheryControllerSchema
+from .DeviceSchema import DeviceSchema

@@ -15,8 +15,10 @@ from ..models import FarmComponent
 from ..models import Parameter
 from ..models import FieldSetting
 from ..models import Sensor
+from ..models import Device
 
 from ..schemas import ParameterSchema
+from ..schemas import DeviceSchema
 from ..schemas import FieldSettingSchema
 from ..schemas import PeripheryControllerSchema
 
@@ -32,8 +34,12 @@ def component_panel(context, request, component_id):
                               action=request.route_url('parameter_save'),
                               formid='addParameterForm_' + str(component_id),
                               buttons=('Save',))
+    add_device_form = Form(DeviceSchema(component=component).bind(),
+                           action=request.route_url('device_save'),
+                           buttons=('Save',))
     return {'component': component,
             'add_parameter_form': add_parameter_form.render({'component': component.id}),
+            'add_device_form': add_device_form.render({'component': component.id}),
             'delete_href': request.route_url('component_delete', _id=component.id)}
 
 
@@ -48,6 +54,19 @@ def parameter_panel(context, request, parameter_id):
     return {'parameter': parameter,
             'edit_form': edit_form,
             'delete_href': request.route_url('parameter_delete', _id=parameter.id)}
+
+
+@panel_config(name='device_panel', renderer='farmgui:panels/templates/device_panel.pt')
+def device_panel(context, request, device_id):
+    device = DBSession.query(Device).filter_by(_id=device_id).first()
+    schema = DeviceSchema().bind(device=device)
+    edit_form = Form(schema,
+                     action=request.route_url('device_update', _id=device_id),
+                     formid='edit_parameter_form_'+str(device_id),
+                     buttons=('Save',))
+    return {'device': device,
+            'edit_form': edit_form,
+            'delete_href': request.route_url('device_delete', _id=device.id)}
 
 
 @panel_config(name='field_setting_panel', renderer='farmgui:panels/templates/field_setting_panel.pt')

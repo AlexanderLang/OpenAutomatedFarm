@@ -34,3 +34,7 @@ class Actuator(Base):
         self.name = name
         self.device_type = device_type
         self.device_type_id = device_type.id
+
+    @property
+    def id(self):
+        return self._id

@@ -16,11 +16,15 @@ from ..models import ParameterType
 from ..models import Sensor
 from ..models import FieldSetting
 from ..models import PeripheryController
+from ..models import Device
+from ..models import DeviceType
+from ..models import Actuator
 
 from ..schemas import FarmComponentSchema
 from ..schemas import PeripheryControllerSchema
 from ..schemas import ParameterSchema
 from ..schemas import FieldSettingSchema
+from ..schemas import DeviceSchema
 
 
 class ConfigurationViews(object):
@@ -134,29 +138,72 @@ class ConfigurationViews(object):
     def parameter_update(self):
         try:
             p = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['_id']).first()
-            print(p)
         except DBAPIError:
             return Response('database error (query Parameters)', content_type='text/plain', status_int=500)
         form = Form(ParameterSchema().bind(parameter=p), buttons=('Save',))
-        print('form created...')
         controls = self.request.POST
-        controls['name'] = p.name
         controls['component'] = p.component_id
         if controls['sensor'] == 'None':
             controls['sensor'] = None
         controls = controls.items()
-        print(self.request.POST)
         try:
             values = form.validate(controls)
-            print(values)
         except ValidationFailure as e:
             return Response(e.render())
+        p.name = values['name']
         p.parameter_type_id = values['parameter_type']
         p.interval = values['interval']
         if values['sensor'] is not None:
             p.sensor_id = values['sensor']
         p.description = values['description']
         self.request.redis.publish('parameter_changes', 'parameter changed')
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='device_save', renderer='farmgui:views/templates/device_save.pt', layout='default')
+    def device_save(self):
+        controls = self.request.POST
+        add_form = Form(DeviceSchema().bind(), buttons=('Save',))
+        try:
+            d = add_form.validate(controls.items())
+            comp = DBSession.query(FarmComponent).filter_by(_id=d['component']).first()
+            device_type = DBSession.query(DeviceType).filter_by(_id=d['device_type']).first()
+            actuator = DBSession.query(Actuator).filter_by(_id=d['actuator']).first()
+            new_dev = Device(comp, d['name'], device_type, actuator, d['description'])
+            DBSession.add(new_dev)
+        except ValidationFailure as e:
+            add_form = e
+            return {'addForm': add_form.render()}
+        self.request.redis.publish('device_changes', 'new device')
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='device_delete')
+    def device_delete(self):
+        device = DBSession.query(Device).filter_by(_id=self.request.matchdict['_id']).first()
+        DBSession.delete(device)
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='device_update')
+    def device_update(self):
+        try:
+            d = DBSession.query(Device).filter_by(_id=self.request.matchdict['_id']).first()
+        except DBAPIError:
+            return Response('database error (query Devices)', content_type='text/plain', status_int=500)
+        form = Form(DeviceSchema().bind(device=d), buttons=('Save',))
+        controls = self.request.POST
+        controls['component'] = d.component_id
+        if controls['actuator'] == 'None':
+            controls['actuator'] = None
+        controls = controls.items()
+        try:
+            values = form.validate(controls)
+        except ValidationFailure as e:
+            return Response(e.render())
+        d.name = values['name']
+        d.device_type_id = values['device_type']
+        if values['actuator'] is not None:
+            d.actuator_id = values['actuator']
+        d.description = values['description']
+        self.request.redis.publish('device_changes', 'device changed')
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='periphery_controllers_list',

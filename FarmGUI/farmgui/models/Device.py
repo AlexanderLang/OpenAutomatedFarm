@@ -47,7 +47,7 @@ class Device(Base):
     actuator = relationship("Actuator")
     logs = relationship("DeviceLog", order_by="DeviceLog.time")
 
-    def __init__(self, component, name, parameter_type, interval, sensor, description):
+    def __init__(self, component, name, device_type, actuator, description):
         """
         Constructor
         :type sensor: Sensor
@@ -57,12 +57,11 @@ class Device(Base):
         self.component = component
         self.component_id = component.id
         self.name = name
-        self.parameter_type = parameter_type
-        self.parameter_type_id = parameter_type.id
-        self.interval = interval
-        self.sensor = sensor
-        if sensor is not None:
-            self.sensor_id = sensor.id
+        self.device_type = device_type
+        self.device_type_id = device_type.id
+        self.actuator = actuator
+        if actuator is not None:
+            self.actuator_id = actuator.id
         self.description = description
 
     @property
