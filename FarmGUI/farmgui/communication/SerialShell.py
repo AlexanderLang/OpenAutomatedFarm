@@ -26,7 +26,7 @@ class SerialShell(object):
         return self.execute_cmd('v')
 
     def get_sensors(self):
-        sensor_list_string = self.execute_cmd('l').split('|')
+        sensor_list_string = self.execute_cmd('S').split('|')
         sensor_list_string.pop()
         sensors = []
         for sensorString in sensor_list_string:
@@ -39,6 +39,20 @@ class SerialShell(object):
                            'max': float(values[5])}
             sensors.append(sensor_dict)
         return sensors
+
+    def get_actuators(self):
+        actuator_list_string = self.execute_cmd('A').split('|')
+        actuator_list_string.pop()
+        actuators = []
+        for actuator_string in actuator_list_string:
+            values = actuator_string.split(';')
+            actuator_dict = {'name': values[0],
+                             'unit': values[1]}
+            actuators.append(actuator_dict)
+        return actuators
+
+    def set_actuator_value(self, name, value):
+        return self.execute_cmd('a' + name + ' ' + str(value))
 
     def get_sensor_value(self, name):
         return float(self.execute_cmd('s' + name))

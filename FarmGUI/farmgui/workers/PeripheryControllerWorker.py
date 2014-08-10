@@ -15,6 +15,8 @@ from ..models import Base
 from ..models import ParameterType
 from ..models import PeripheryController
 from ..models import Sensor
+from ..models import Actuator
+from ..models import DeviceType
 
 db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
 db_sessionmaker = sessionmaker(bind=db_engine)
@@ -54,6 +56,12 @@ class PeripheryControllerWorker(object):
                 sensor = Sensor(periphery_controller, s['name'], param_type, s['precision'],
                                 s['samplingTime'], s['min'], s['max'])
                 db_session.add(sensor)
+            # register actuators
+            actuators = self.serial.get_actuators()
+            for a in actuators:
+                device_type = db_session.query(DeviceType).filter_by(unit=a['unit']).first()
+                actuator = Actuator(periphery_controller, a['name'], device_type)
+                db_session.add(actuator)
         else:
             # known controller
             periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()

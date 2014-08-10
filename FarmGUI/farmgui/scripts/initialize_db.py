@@ -12,6 +12,8 @@ from ..models import Base
 
 from ..models import init_parameters
 from ..models import init_parameter_types
+from ..models import init_devices
+from ..models import init_device_types
 from ..models import init_plant_settings
 from ..models import init_stages
 from ..models import init_stage_configurations
@@ -42,6 +44,8 @@ def main(argv=sys.argv):
         init_farm_components(DBSession)
         init_parameter_types(DBSession)
         init_parameters(DBSession)
+        init_device_types(DBSession)
+        init_devices(DBSession)
         init_plant_settings(DBSession)
         init_stages(DBSession)
         init_stage_configurations(DBSession)

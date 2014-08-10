@@ -15,16 +15,33 @@ typedef struct {
 } Sensor;
 }
 
+namespace OAF_Actuator {
+typedef struct {
+    String name;
+    float value;
+    String unit;
+} Actuator;
+}
+
 /**********************************************************************
  * Global variables
  */
 String fwName = "Dummy";
 String fwVersion = "0.1";
 int num_sensors = 6;
-OAF_Sensor::Sensor sensors[] = { { "T1", 10.0, "°C", 0.2, 0.5, 0, 100 }, { "T2", 20.0,
-		"°C", 0.2, 0.5, 10, 40 }, { "T3", 30.0, "°C", 0.2, 0.5, 10, 40 }, { "H1", 20.0,
-		"%", 2.0, 1.0, 20, 95 }, { "H2", 50.0, "%", 2.0, 1.0, 20, 95 }, { "H3", 80.0, "%",
-		2.0, 1.0, 20, 95 } };
+OAF_Sensor::Sensor sensors[] = {
+    { "T1", 10.0, "°C", 0.2, 0.5, 0, 100 },
+    { "T2", 20.0, "°C", 0.2, 0.5, 10, 40 },
+    { "T3", 30.0, "°C", 0.2, 0.5, 10, 40 },
+    { "H1", 20.0, "%", 2.0, 1.0, 20, 95 },
+    { "H2", 50.0, "%", 2.0, 1.0, 20, 95 },
+    { "H3", 80.0, "%", 2.0, 1.0, 20, 95 }
+};
+int num_actuators = 2;
+OAF_Actuator::Actuator actuators[] = {
+    {"L1", 0.0, "%"},
+    {"B1", 0.0, "1/0"}
+};
 int lc = 0;
 int lcc = 0;
 
@@ -58,7 +75,8 @@ void loop() {
 
 int com_state = 0;
 char com_cmd = 0;
-String com_arg = "";
+String com_arg1 = "";
+String com_arg2 = "";
 
 void execute_cmd(char cmd) {
 	byte found = 0;
@@ -78,15 +96,13 @@ void execute_cmd(char cmd) {
 		break;
 	case 'I':
 		// set ID
-		EEPROM.write(ADDRESS_ID, (char) com_arg.toInt());
+		EEPROM.write(ADDRESS_ID, (char) com_arg1.toInt());
 		Serial.println(EEPROM.read(ADDRESS_ID));
 		break;
-	case 'l':
+	case 'S':
 		// get sensor list
 		for (int i = 0; i < num_sensors; i++) {
 			Serial.print(sensors[i].name);
-			//Serial.print('\t');
-			//Serial.print(sensors[i].value);
 			Serial.print(';');
 			Serial.print(sensors[i].unit);
 			Serial.print(';');
@@ -104,18 +120,50 @@ void execute_cmd(char cmd) {
 	case 's':
 		// read sensor named arg
 		for (int i = 0; i < num_sensors; i++) {
-			if (sensors[i].name == com_arg) {
+			if (sensors[i].name == com_arg1) {
 				Serial.println(sensors[i].value);
 				found = 1;
 				break;
 			}
 		}
-		if (found == 1) {
-			break;
-		}
+	    if (found == 0) {
+	        Serial.println("Sensor Name Error");
+	    }
+	    break;
+	case 'A':
+	    // get actuator list
+	    for (int i = 0; i < num_actuators; i++) {
+	        Serial.print(actuators[i].name);
+	        Serial.print(';');
+	        Serial.print(actuators[i].unit);
+	        Serial.print('|');
+	    }
+	    Serial.println();
+	    break;
+	case 'a':
+	    // set actuator named arg1 to value arg2
+	    for (int i = 0; i < num_actuators; i++) {
+	        if (actuators[i].name == com_arg1) {
+	            char carray[com_arg2.length() + 1];
+	            actuators[i].value = atof(carray);
+	            Serial.println(actuators[i].value);
+	            found = 1;
+	            break;
+	        }
+	    }
+	    if (found == 0) {
+	        Serial.println("Actuator Name Error");
+	    }
+	    break;
+
 	default:
 		Serial.println("Error");
 	}
+	// reset com_state
+	com_state = 0;
+	// reset com_args
+	com_arg1 = "";
+	com_arg2 = "";
 }
 
 void serialEvent() {
@@ -131,13 +179,22 @@ void serialEvent() {
 		if (c == '\n') {
 			// input finished, execute
 			execute_cmd(com_cmd);
-			// reset com_state
-			com_state = 0;
-			// reset com_arg
-			com_arg = "";
+		} else if (c == ' ') {
+		    // next argument starts
+		    com_state++;
 		} else {
 			// read argument
-			com_arg += c;
+			com_arg1 += c;
 		}
+		break;
+	case 2:
+	    // read second argument
+	    if (c == '\n') {
+	        // input finished, execute
+	        execute_cmd(com_cmd);
+	    } else {
+	        // read argument
+	        com_arg2 += c;
+	    }
 	}
 }
