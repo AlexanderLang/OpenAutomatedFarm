@@ -6,10 +6,11 @@ import sys
 from datetime import datetime
 
 from redis import Redis
+from pyramid.paster import get_appsettings
 
 redis_conn = Redis('localhost', 6379)
 
-from sqlalchemy import create_engine
+from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
 from ..models import ParameterType
@@ -18,9 +19,8 @@ from ..models import Sensor
 from ..models import Actuator
 from ..models import DeviceType
 
-db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
-db_sessionmaker = sessionmaker(bind=db_engine)
-Base.metadata.bind = db_engine
+db_engine = None
+db_sessionmaker = None
 
 from ..communication import SerialShell
 
@@ -101,15 +101,22 @@ class PeripheryControllerWorker(object):
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <dev_name>\n'
-          '(example: "%s /dev/ttyACM0")' % (cmd, cmd))
+    print('usage: %s <config_uri> <dev_name>\n'
+          '(example: "%s development.ini /dev/ttyACM0")' % (cmd, cmd))
     sys.exit(1)
 
 
 def main(argv=sys.argv):
-    if len(argv) < 2:
+    if len(argv) < 3:
         usage(argv)
-    dev_name = argv[1]
+    config_uri = argv[1]
+    dev_name = argv[2]
+
+    settings = get_appsettings(config_uri)
+    db_engine = engine_from_config(settings, 'sqlalchemy.')
+    db_sessionmaker = sessionmaker(bind=db_engine)
+    Base.metadata.bind = db_engine
+
     worker = PeripheryControllerWorker(dev_name, redis_conn, db_sessionmaker)
     try:
         worker.work()

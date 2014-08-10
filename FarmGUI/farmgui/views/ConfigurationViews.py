@@ -91,7 +91,6 @@ class ConfigurationViews(object):
                         formid='addForm',
                         action=self.request.route_url('component_save', _id=0),
                         buttons=('Save',))
-            add_component_error = False
             controls = self.request.POST.items()
             try:
                 values = add_form.validate(controls)
@@ -169,7 +168,6 @@ class ConfigurationViews(object):
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
         try:
             periphery_controllers = DBSession.query(PeripheryController).all()
-            print(periphery_controllers)
         except DBAPIError:
             return Response('database error (query PeripheryControllers)', content_type='text/plain', status_int=500)
         return {'periphery_controllers': periphery_controllers}

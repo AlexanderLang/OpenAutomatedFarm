@@ -12,20 +12,17 @@ import logging
 logging.basicConfig(format='%(levelname)s:%(asctime)s: %(message)s', datefmt='%Y.%m.%d %I:%M', level=logging.INFO)
 
 from redis import Redis
+from pyramid.paster import get_appsettings
 
 redis_conn = Redis('localhost', 6379)
 
-from sqlalchemy import create_engine
 from sqlalchemy import desc
+from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
 from ..models import PeripheryController
 from ..models import Parameter
 from ..models import ParameterLog
-
-db_engine = create_engine('mysql+mysqlconnector://oaf:oaf_password@localhost/OpenAutomatedFarm')
-db_sessionmaker = sessionmaker(bind=db_engine)
-Base.metadata.bind = db_engine
 
 
 class MeasurementScheduler(object):
@@ -117,11 +114,11 @@ class MeasurementScheduler(object):
             y2 = last_logs[0].value
             y3 = float(data['value'])
             y3_inter = y1 + (y2-y1)/(t2-t1).total_seconds() * (t3-t1).total_seconds()
-            print('data: {0:.4f}  inter: {1:.4f}'.format(y3, y3_inter))
+            #print('data: {0:.4f}  inter: {1:.4f}'.format(y3, y3_inter))
         log = ParameterLog(param, data['time'], data['value'])
         self.db_session.add(log)
         self.db_session.commit()
-        print('oaf_ms: saved ' + str(log))
+        #print('oaf_ms: saved ' + str(log))
 
 
 def usage(argv):
@@ -132,7 +129,12 @@ def usage(argv):
 
 
 def main(argv=sys.argv):
-    if len(argv) > 1:
+    if len(argv) < 2:
         usage(argv)
+    config_uri = argv[1]
+    settings = get_appsettings(config_uri)
+    db_engine = engine_from_config(settings, 'sqlalchemy.')
+    db_sessionmaker = sessionmaker(bind=db_engine)
+    Base.metadata.bind = db_engine
     worker = MeasurementScheduler(db_sessionmaker, redis_conn)
     worker.work()
