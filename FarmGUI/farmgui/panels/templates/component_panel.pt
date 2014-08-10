@@ -5,16 +5,13 @@
         <h2>${component.name}</h2>
     </div>
     <div class="panel-body">
-        <h3>Parameters:</h3>
-
-        <div tal:repeat="p component.parameters">
-            <div class="col-sm-1"></div>
-            <div class="col-sm-11">
-                ${panel('parameter_panel', p.id)}
-            </div>
-        </div>
 
         <a data-toggle="modal" href="#add_parameter_modal_${component._id}" class="btn btn-primary">Add Parameter</a>
+        <a data-toggle="modal" href="#add_device_modal_${component._id}" class="btn btn-primary">Add Device</a>
+
+        <div tal:repeat="p component.parameters">
+            ${panel('parameter_panel', p.id)}
+        </div>
 
         <div class="modal" id="add_parameter_modal_${component._id}">
             <div class="modal-dialog">

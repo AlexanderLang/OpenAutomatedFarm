@@ -60,6 +60,16 @@ def deferred_sensor_default(node, kw):
 
 
 @colander.deferred
+def deferred_name_default(node, kw):
+    if len(kw) > 0:
+        name = kw['parameter'].name
+        if name is None:
+            return colander.null
+        return name
+    return colander.null
+
+
+@colander.deferred
 def deferred_description_default(node, kw):
     if len(kw) > 0:
         desc = kw['parameter'].description
@@ -74,7 +84,9 @@ class ParameterSchema(MappingSchema):
                            title='Farm Component',
                            description='component the parameter belongs to',
                            widget=HiddenWidget(readonly=True))
-    name = SchemaNode(String())
+    name = SchemaNode(typ=String(),
+                      title='Parameter Name',
+                      default=deferred_name_default)
     parameter_type = SchemaNode(typ=Int(),
                                 title='Parameter Type',
                                 descripition='the type of physical quantity that is being measured',

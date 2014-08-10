@@ -2,47 +2,49 @@
     <form role="form" action="${request.route_url('parameter_update', _id=parameter.id)}" method="post">
         <div class="panel-heading">
             <a href="${delete_href}" class="close">delete</a>
-            <h4>${parameter.name}</h4>
+            <div class="row">
+                <div class="col-sm-2">
+                    <h4>${structure:edit_form['name'].title}</h4>
+                </div>
+                <div class="col-sm-6">
+                    ${structure:edit_form['name'].serialize(parameter=parameter)}
+                </div>
+            </div>
         </div>
         <div class="panel-body">
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <h5>${structure:edit_form['parameter_type'].title}</h5>
                 </div>
-                <div class="col-sm-8">
+                <div class="col-sm-3">
                     ${structure:edit_form['parameter_type'].serialize(parameter=parameter)}
                 </div>
-            </div>
-            <!-- /.row -->
-            <div class="row">
-                <div class="col-sm-4">
-                    <h5>${structure:edit_form['interval'].title}</h5>
-                </div>
-                <div class="col-sm-8">
-                    ${structure:edit_form['interval'].serialize(parameter=parameter)}
-                </div>
-            </div>
-            <!-- /.row -->
-            <div class="row">
-                <div class="col-sm-4">
-                    <h5>${structure:edit_form['sensor'].title}</h5>
-                </div>
-                <div class="col-sm-8">
-                    ${structure:edit_form['sensor'].serialize(parameter=parameter)}
-                </div>
-            </div>
-            <!-- /.row -->
-            <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <h5>${structure:edit_form['description'].title}</h5>
                 </div>
-                <div class="col-sm-8">
+                <div class="col-sm-5">
                     ${structure:edit_form['description'].serialize(parameter=parameter)}
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-sm-2">
+                    <h5>${structure:edit_form['sensor'].title}</h5>
+                </div>
+                <div class="col-sm-5">
+                    ${structure:edit_form['sensor'].serialize(parameter=parameter)}
+                </div>
+                <div class="col-sm-3">
+                    <h5>${structure:edit_form['interval'].title}</h5>
+                </div>
+                <div class="col-sm-2">
+                    ${structure:edit_form['interval'].serialize(parameter=parameter)}
                 </div>
             </div>
             <!-- /.row -->
         </div>
         <!-- /.panel-body -->
         <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
+        <a href="#" class="btn btn-primary btn-lg">Calendar</a>
     </form>
 </div><!-- /.panel -->
