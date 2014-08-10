@@ -23,6 +23,8 @@ class FarmComponent(Base):
     description = Column(Unicode(250), nullable=True)
     parameters = relationship("Parameter", order_by="Parameter.name", back_populates='component',
                               cascade='all, delete, delete-orphan')
+    devices = relationship("Device", order_by="Device.name", back_populates='component',
+                           cascade='all, delete, delete-orphan')
 
     def __init__(self, name, description=None):
         self.name = name

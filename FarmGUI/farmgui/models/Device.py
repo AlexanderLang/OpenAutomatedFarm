@@ -6,6 +6,7 @@ Created on Nov 17, 2013
 
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
+from sqlalchemy.types import Integer
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy.types import Float
@@ -15,12 +16,12 @@ from sqlalchemy.orm import relationship
 from .meta import Base
 
 
-class Parameter(Base):
+class Device(Base):
     """
     classdocs
     """
 
-    __tablename__ = 'Parameters'
+    __tablename__ = 'Devices'
 
     _id = Column(SmallInteger,
                  primary_key=True,
@@ -30,23 +31,21 @@ class Parameter(Base):
     component_id = Column(SmallInteger,
                           ForeignKey('FarmComponents._id'),
                           nullable=False)
-    component = relationship('FarmComponent', back_populates='parameters')
+    component = relationship('FarmComponent', back_populates='devices')
     name = Column(Unicode(250),
                   nullable=False,
                   unique=False)
-    parameter_type_id = Column(SmallInteger,
-                               ForeignKey('ParameterTypes._id'),
+    device_type_id = Column(SmallInteger,
+                               ForeignKey('DeviceTypes._id'),
                                nullable=False)
-    parameter_type = relationship('ParameterType')
+    device_type = relationship('DeviceType')
     description = Column(Text,
                          nullable=True)
-    interval = Column(Float(),
-                      nullable=False)
-    sensor_id = Column(SmallInteger,
-                       ForeignKey('Sensors._id'),
+    actuator_id = Column(SmallInteger,
+                       ForeignKey('Actuators._id'),
                        nullable=True)
-    sensor = relationship("Sensor")
-    logs = relationship("ParameterLog", order_by="ParameterLog.time")
+    actuator = relationship("Actuator")
+    logs = relationship("DeviceLog", order_by="DeviceLog.time")
 
     def __init__(self, component, name, parameter_type, interval, sensor, description):
         """
@@ -71,5 +70,5 @@ class Parameter(Base):
         return self._id
 
 
-def init_parameters(db_session):
+def init_devices(db_session):
     pass

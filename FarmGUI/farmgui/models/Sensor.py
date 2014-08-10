@@ -6,7 +6,6 @@ Created on Feb 15, 2014
 
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
-from sqlalchemy.types import Integer
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy.types import Float
@@ -21,7 +20,7 @@ class Sensor(Base):
     """
     __tablename__ = 'Sensors'
 
-    _id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
+    _id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
     periphery_controller_id = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
     periphery_controller = relationship('PeripheryController', back_populates='sensors')
     name = Column(Unicode(250), nullable=False)
