@@ -15,6 +15,7 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.add_static_view(name='static', path='farmgui:static', cache_max_age=0)
     config.add_static_view(name='deform_static', path='deform:static', cache_max_age=3600)
+    config.add_static_view(name='interpolation_plots', path='farmgui:plots/interpolations', cache_max_age=0)
     config.include(add_routes)
     config.scan()
     return config.make_wsgi_app()
@@ -43,3 +44,13 @@ def add_routes(config):
     # display views
     config.add_route('display_views_home', '/display')
     config.add_route('plot_parameter_data', '/display/parameter/data')
+    # calendar views
+    config.add_route('calendar_home', '/calendar/{parameter_id}')
+    config.add_route('calendar_entry_save', '/calendar/{parameter_id}/save')
+    config.add_route('calendar_entry_delete', '/calendar/{parameter_id}/delete/{entry_id}')
+    config.add_route('interpolation_save', '/calendar/{parameter_id}/interpolation/save')
+    config.add_route('interpolation_update', '/calendar/{parameter_id}/interpolation/{interpolation_id}/update')
+    config.add_route('interpolation_delete', '/calendar/{parameter_id}/interpolation/{interpolation_id}/delete')
+    config.add_route('interpolation_knot_save', '/calendar/{parameter_id}/interpolation/{interpolation_id}/knot/save')
+    config.add_route('interpolation_knot_update', '/calendar/{parameter_id}/interpolation/{interpolation_id}/{knot_id}/update')
+    config.add_route('interpolation_knot_delete', '/calendar/{parameter_id}/interpolation/{interpolation_id}/{knot_id}/delete')

@@ -47,6 +47,7 @@ class Parameter(Base):
                        nullable=True)
     sensor = relationship("Sensor")
     logs = relationship("ParameterLog", order_by="ParameterLog.time")
+    calendar = relationship('CalendarEntry', order_by='CalendarEntry.entry_number')
 
     def __init__(self, component, name, parameter_type, interval, sensor, description):
         """

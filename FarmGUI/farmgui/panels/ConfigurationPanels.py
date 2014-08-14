@@ -53,7 +53,8 @@ def parameter_panel(context, request, parameter_id):
                      buttons=('Save',))
     return {'parameter': parameter,
             'edit_form': edit_form,
-            'delete_href': request.route_url('parameter_delete', _id=parameter.id)}
+            'delete_href': request.route_url('parameter_delete', _id=parameter.id),
+            'calendar_href': request.route_url('calendar_home', parameter_id=parameter_id)}
 
 
 @panel_config(name='device_panel', renderer='farmgui:panels/templates/device_panel.pt')

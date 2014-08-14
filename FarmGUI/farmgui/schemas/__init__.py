@@ -6,3 +6,6 @@ from .FarmComponentSchema import FarmComponentSchema
 from .FieldSettingSchema import FieldSettingSchema
 from .PeripheryControllerSchema import PeripheryControllerSchema
 from .DeviceSchema import DeviceSchema
+from .CalendarEntrySchema import CalendarEntrySchema
+from .SetpointInterpolationSchema import SetpointInterpolationSchema
+from .InterpolationKnotSchema import InterpolationKnotSchema

@@ -1,0 +1,26 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <a href="${delete_href}" class="close">x</a>
+        <h5>Knot</h5>
+    </div>
+    <div class="panel-body">
+    <form action="${edit_form.action}" role="form" method="post">
+        <div class="row">
+            <div class="col-sm-2">
+                <h6>${structure:edit_form['time'].title}</h6>
+            </div>
+            <div class="col-sm-2">
+                ${structure:edit_form['time'].serialize(knot=knot)}
+            </div>
+            <div class="col-sm-2">
+                <h6>${structure:edit_form['value'].title}</h6>
+            </div>
+            <div class="col-sm-2">
+                ${structure:edit_form['value'].serialize(knot=knot)}
+            </div>
+        </div>
+        <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
+    </form>
+    </div><!-- /.panel-body -->
+
+</div><!-- /.panel -->

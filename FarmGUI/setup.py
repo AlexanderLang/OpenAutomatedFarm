@@ -24,6 +24,9 @@ requires = [
     'mysql-connector-python',
     'deform_bootstrap',
     'pyserial',
+    'numpy',
+    'scipy',
+    'matplotlib',
 ]
 
 setup(name='FarmGUI',

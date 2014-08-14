@@ -1,0 +1,77 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <a href="${delete_href}" class="close">delete</a>
+
+        <h3>${interpolation.name}</h3>
+    </div>
+
+    <div class="panel-body">
+    <form action="${edit_form.action}" role="form" method="post">
+        <div class="row">
+            <div class="col-sm-2">
+                <h5>${structure:edit_form['order'].title}</h5>
+            </div>
+            <div class="col-sm-3">
+                ${structure:edit_form['order'].serialize(interpolation=interpolation)}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <h5>${structure:edit_form['start_value'].title}</h5>
+            </div>
+            <div class="col-sm-5">
+                ${structure:edit_form['start_value'].serialize(interpolation=interpolation)}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <h5>${structure:edit_form['end_time'].title}</h5>
+            </div>
+            <div class="col-sm-5">
+                ${structure:edit_form['end_time'].serialize(interpolation=interpolation)}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <h5>${structure:edit_form['end_value'].title}</h5>
+            </div>
+            <div class="col-sm-5">
+                ${structure:edit_form['end_value'].serialize(interpolation=interpolation)}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <h5>${structure:edit_form['description'].title}</h5>
+            </div>
+            <div class="col-sm-5">
+                ${structure:edit_form['description'].serialize(interpolation=interpolation)}
+            </div>
+        </div>
+
+        <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
+
+        </form>
+
+        <img src="${request.static_url('farmgui:plots/interpolations/'+str(interpolation.id)+'.png')}" alt="plot" />
+
+        <div tal:repeat="knot interpolation.knots">
+            ${panel('interpolation_knot', knot=knot)}
+        </div>
+
+        <a data-toggle="modal" href="#add_interpolation_knot_modal_${interpolation.id}" class="btn btn-primary">Add Knot</a>
+
+        <div class="modal" id="add_interpolation_knot_modal_${interpolation.id}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Add Interpolation Knot</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_knot_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- /.panel -->

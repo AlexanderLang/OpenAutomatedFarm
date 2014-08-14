@@ -1,0 +1,165 @@
+from deform import ValidationFailure
+from deform_bootstrap import Form
+from pyramid.response import Response
+from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPFound
+from sqlalchemy import desc
+
+from ..models import DBSession
+from ..models import InterpolationKnot
+from ..models import Parameter
+from ..models import CalendarEntry
+from ..models import SetpointInterpolation
+
+from ..schemas import CalendarEntrySchema
+from ..schemas import SetpointInterpolationSchema
+from ..schemas import InterpolationKnotSchema
+from sqlalchemy.exc import DBAPIError
+
+
+class CalendarViews(object):
+    """
+    general views
+    """
+
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(route_name='calendar_home', renderer='templates/calendar_home.pt', layout='default')
+    def calendar_home(self):
+        layout = self.request.layout_manager.layout
+        layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
+        layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.time.js'))
+        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
+        interpolations = DBSession.query(SetpointInterpolation).all()
+        calendar_schema = CalendarEntrySchema().bind()
+        add_calendar_form = Form(calendar_schema,
+                                 action=self.request.route_url('calendar_entry_save', parameter_id=param.id),
+                                 formid='add_calendar_entry_form',
+                                 buttons=('Save',))
+        interpolation_schema = SetpointInterpolationSchema().bind()
+        add_interpolation_form = Form(interpolation_schema,
+                                      action=self.request.route_url('interpolation_save', parameter_id=param.id),
+                                      formid='add_interpolation_form',
+                                      buttons=('Save',))
+        return {"page_title": param.name + " Calendar",
+                'calendar': param.calendar,
+                'interpolations': interpolations,
+                'add_calendar_entry_form': add_calendar_form.render(),
+                'add_interpolation_form': add_interpolation_form.render()}
+
+    @view_config(route_name='calendar_entry_save', renderer='templates/error_form.pt', layout='default')
+    def calendar_entry_save(self):
+        controls = self.request.POST
+        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
+        controls['parameter'] = param.id
+        last_entry = DBSession.query(CalendarEntry).filter_by(parameter_id=param.id).order_by(desc(CalendarEntry.entry_number)).first()
+        if last_entry is not None:
+            controls['entry_number'] = last_entry.entry_number + 1
+        else:
+            controls['entry_number'] = 1
+        add_form = Form(CalendarEntrySchema().bind())
+        try:
+            p = add_form.validate(controls.items())
+            inter = DBSession.query(SetpointInterpolation).filter_by(_id=p['interpolation']).first()
+            new_par = CalendarEntry(param, p['entry_number'], inter)
+            DBSession.add(new_par)
+        except ValidationFailure as e:
+            return {'error_form': e.render()}
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
+
+    @view_config(route_name='calendar_entry_delete')
+    def calendar_entry_delete(self):
+        entry = DBSession.query(CalendarEntry).filter_by(_id=self.request.matchdict['entry_id']).first()
+        DBSession.delete(entry)
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+
+    @view_config(route_name='interpolation_save', renderer='templates/error_form.pt', layout='default')
+    def interpolation_save(self):
+        controls = self.request.POST
+        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
+        add_form = Form(SetpointInterpolationSchema().bind(), buttons=('Save',))
+        try:
+            p = add_form.validate(controls.items())
+            new_inter = SetpointInterpolation(p['name'], p['order'], p['start_value'], p['end_time'], p['end_value'], p['description'])
+            DBSession.add(new_inter)
+            filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(new_inter.id)+'.png'
+            new_inter.plot('', filename)
+        except ValidationFailure as e:
+            return {'error_form': e.render()}
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
+
+    @view_config(route_name='interpolation_update', renderer='templates/error_form.pt', layout='default')
+    def interpolation_update(self):
+        try:
+            spip = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+        except DBAPIError:
+            return Response('database error (query SetpointInterpolation)', content_type='text/plain', status_int=500)
+        form = Form(SetpointInterpolationSchema().bind(interpolation=spip), buttons=('Save',))
+        controls = self.request.POST
+        controls['name'] = spip.name
+        try:
+            values = form.validate(controls.items())
+        except ValidationFailure as e:
+            return {'error_form': e.render()}
+        spip.name = values['name']
+        spip.order = values['order']
+        spip.start_value = values['start_value']
+        spip.end_time = values['end_time']
+        spip.end_value = values['end_value']
+        spip.description = values['description']
+        filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(spip.id)+'.png'
+        spip.plot('', filename)
+        self.request.redis.publish('parameter_changes', 'interpolation changed')
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+
+    @view_config(route_name='interpolation_delete')
+    def interpolation_delete(self):
+        interpolation = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+        DBSession.delete(interpolation)
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+
+    @view_config(route_name='interpolation_knot_save', renderer='templates/error_form.pt', layout='default')
+    def interpolation_knot_save(self):
+        controls = self.request.POST
+        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
+        inter = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+        add_form = Form(InterpolationKnotSchema().bind())
+        try:
+            p = add_form.validate(controls.items())
+            new_inter = InterpolationKnot(inter, p['time'], p['value'])
+            DBSession.add(new_inter)
+        except ValidationFailure as e:
+            return {'error_form': e.render()}
+        filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(inter.id)+'.png'
+        inter.plot('', filename)
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
+
+    @view_config(route_name='interpolation_knot_update', renderer='templates/error_form.pt', layout='default')
+    def interpolation_knot_update(self):
+        try:
+            knot = DBSession.query(InterpolationKnot).filter_by(_id=self.request.matchdict['knot_id']).first()
+            inter = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+        except DBAPIError:
+            return Response('database error (query InterpolationKnot)', content_type='text/plain', status_int=500)
+        form = Form(InterpolationKnotSchema().bind(knot=knot), buttons=('Save',))
+        controls = self.request.POST
+        controls['interpolation_id'] = inter.id
+        try:
+            values = form.validate(controls.items())
+        except ValidationFailure as e:
+            return {'error_form': e.render()}
+        knot.time = values['time']
+        knot.value = values['value']
+        filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(inter.id)+'.png'
+        inter.plot('', filename)
+        self.request.redis.publish('parameter_changes', 'interpolation changed')
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+
+    @view_config(route_name='interpolation_knot_delete')
+    def interpolation_knot_delete(self):
+        interpolation_knot = DBSession.query(InterpolationKnot).filter_by(_id=self.request.matchdict['knot_id']).first()
+        DBSession.delete(interpolation_knot)
+        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))

@@ -1,0 +1,7 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <a href="${delete_href}" class="close">x</a>
+
+        <h3>${entry.interpolation.name}</h3>
+    </div>
+</div><!-- /.panel -->

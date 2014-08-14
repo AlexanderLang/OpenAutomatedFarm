@@ -14,13 +14,10 @@ from .DeviceType import init_device_types
 from .DeviceLog import DeviceLog
 from .Device import Device
 from .Device import init_devices
+from .InterpolationKnot import InterpolationKnot
+from .SetpointInterpolation import SetpointInterpolation
+from .CalendarEntry import CalendarEntry
 
-from .PlantSetting import PlantSetting
-from .PlantSetting import init_plant_settings
-from .Stage import Stage
-from .Stage import init_stages
-from .StageConfiguration import StageConfiguration
-from .StageConfiguration import init_stage_configurations
 from .FieldSetting import FieldSetting
 from .FieldSetting import init_field_settings
 

@@ -45,6 +45,6 @@
         </div>
         <!-- /.panel-body -->
         <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
-        <a href="#" class="btn btn-primary btn-lg">Calendar</a>
+        <a href="${calendar_href}" class="btn btn-primary btn-lg">Calendar</a>
     </form>
 </div><!-- /.panel -->

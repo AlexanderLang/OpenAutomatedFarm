@@ -9,7 +9,6 @@ from redis import Redis
 from pyramid.paster import get_appsettings
 
 redis_conn = Redis('localhost', 6379)
-
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
@@ -63,7 +62,7 @@ class PeripheryControllerWorker(object):
                 actuator = Actuator(periphery_controller, a['name'], device_type)
                 db_session.add(actuator)
         else:
-            # known controller
+            # known controller (set active)
             periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
             periphery_controller.active = True
         db_session.commit()
@@ -95,7 +94,7 @@ class PeripheryControllerWorker(object):
         db_session.commit()
         db_session.close()
         # let scheduler know the available sensors changed
-        self.redis_conn.publish('measurement_changes', '')
+        self.redis_conn.publish('periphery_controller_changes', 'disconnected id: '+str(self.controller_id))
         self.pubsub.close()
 
 
