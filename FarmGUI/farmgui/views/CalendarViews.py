@@ -68,12 +68,14 @@ class CalendarViews(object):
             DBSession.add(new_par)
         except ValidationFailure as e:
             return {'error_form': e.render()}
+        self.request.redis.publish('calendar_changes', 'entry saved')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
 
     @view_config(route_name='calendar_entry_delete')
     def calendar_entry_delete(self):
         entry = DBSession.query(CalendarEntry).filter_by(_id=self.request.matchdict['entry_id']).first()
         DBSession.delete(entry)
+        self.request.redis.publish('calendar_changes', 'entry deleted')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
 
     @view_config(route_name='interpolation_save', renderer='templates/error_form.pt', layout='default')
@@ -89,6 +91,7 @@ class CalendarViews(object):
             new_inter.plot('', filename)
         except ValidationFailure as e:
             return {'error_form': e.render()}
+        self.request.redis.publish('calendar_changes', 'interpolation saved')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
 
     @view_config(route_name='interpolation_update', renderer='templates/error_form.pt', layout='default')
@@ -112,13 +115,14 @@ class CalendarViews(object):
         spip.description = values['description']
         filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(spip.id)+'.png'
         spip.plot('', filename)
-        self.request.redis.publish('parameter_changes', 'interpolation changed')
+        self.request.redis.publish('calendar_changes', 'interpolation changed')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
 
     @view_config(route_name='interpolation_delete')
     def interpolation_delete(self):
         interpolation = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
         DBSession.delete(interpolation)
+        self.request.redis.publish('calendar_changes', 'interpolation deleted')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
 
     @view_config(route_name='interpolation_knot_save', renderer='templates/error_form.pt', layout='default')

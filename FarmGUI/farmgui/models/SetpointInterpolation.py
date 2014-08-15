@@ -4,7 +4,6 @@ Created on Feb 15, 2014
 @author: alex
 """
 
-from time import mktime
 from sqlalchemy import Column
 from sqlalchemy.types import Float
 from sqlalchemy.types import Integer
@@ -80,3 +79,26 @@ class SetpointInterpolation(Base):
         ax.set_ylim(y_inter.min()-1, y_inter.max()+1)
         ax.plot(x, y, 'o', x_inter, y_inter, '-')
         fig.savefig(filename)
+
+    def get_value_at(self, timedelta):
+        t = timedelta.total_seconds()
+        #print('t: '+str(t))
+        x = []
+        y = []
+        x.append(0)
+        y.append(self.start_value)
+        for knot in self.knots:
+            x.append(knot.time*self.end_time)
+            y.append(knot.value)
+        x.append(self.end_time)
+        y.append(self.end_value)
+        #print('x: '+str(x))
+        #print('y: '+str(y))
+        if self.order < 4:
+            f = interpolate.interp1d(x, y, kind=self.order)
+            y = str(f([t])[0])
+            print('value at '+str(t)+' ==> '+y)
+        else:
+            f = interpolate.splrep(x, y)
+            y = str(interpolate.splev(t, f)[0])
+        return y
