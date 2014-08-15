@@ -19,12 +19,15 @@ from ..models import PeripheryController
 from ..models import Device
 from ..models import DeviceType
 from ..models import Actuator
+from ..models import Regulator
+from ..models import RegulatorType
 
 from ..schemas import FarmComponentSchema
 from ..schemas import PeripheryControllerSchema
 from ..schemas import ParameterSchema
 from ..schemas import FieldSettingSchema
 from ..schemas import DeviceSchema
+from ..schemas import RegulatorSchema
 
 
 class ConfigurationViews(object):
@@ -204,6 +207,51 @@ class ConfigurationViews(object):
             d.actuator_id = values['actuator']
         d.description = values['description']
         self.request.redis.publish('device_changes', 'device changed')
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='regulator_save', renderer='farmgui:views/templates/error_form.pt', layout='default')
+    def regulator_save(self):
+        controls = self.request.POST
+        add_form = Form(RegulatorSchema().bind(), buttons=('Save',))
+        try:
+            d = add_form.validate(controls.items())
+            comp = DBSession.query(FarmComponent).filter_by(_id=d['component']).first()
+            regulator_type = DBSession.query(RegulatorType).filter_by(_id=d['regulator_type']).first()
+            parameter = DBSession.query(Parameter).filter_by(_id=d['parameter']).first()
+            device = DBSession.query(Device).filter_by(_id=d['device']).first()
+            new_reg = Regulator(comp, d['name'], regulator_type, parameter, device, d['description'])
+            DBSession.add(new_reg)
+        except ValidationFailure as e:
+            return {'addForm': e.render()}
+        self.request.redis.publish('regulator_changes', 'new regulator')
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='regulator_delete')
+    def regulator_delete(self):
+        regulator = DBSession.query(Regulator).filter_by(_id=self.request.matchdict['_id']).first()
+        DBSession.delete(regulator)
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='regulator_update')
+    def regulator_update(self):
+        try:
+            r = DBSession.query(Regulator).filter_by(_id=self.request.matchdict['_id']).first()
+        except DBAPIError:
+            return Response('database error (query Regulators)', content_type='text/plain', status_int=500)
+        form = Form(RegulatorSchema().bind(regulator=r), buttons=('Save',))
+        controls = self.request.POST
+        controls['component'] = r.component_id
+        controls = controls.items()
+        try:
+            values = form.validate(controls)
+        except ValidationFailure as e:
+            return Response(e.render())
+        r.name = values['name']
+        r.regulator_type_id = values['regulator_type']
+        r.parameter_id = values['parameter']
+        r.device_id = values['device']
+        r.description = values['description']
+        self.request.redis.publish('regulator_changes', 'regulator changed')
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='periphery_controllers_list',

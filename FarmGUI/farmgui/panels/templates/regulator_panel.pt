@@ -1,0 +1,52 @@
+<div class="panel panel-default">
+    <form role="form" action="${request.route_url('regulator_update', _id=regulator.id)}" method="post">
+        <div class="panel-heading">
+            <a href="${delete_href}" class="close">delete</a>
+            <div class="row">
+                <div class="col-sm-2">
+                    <h4>${structure:edit_form['name'].title}</h4>
+                </div>
+                <div class="col-sm-6">
+                    ${structure:edit_form['name'].serialize(regulator=regulator)}
+                </div>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-2">
+                    <h5>${structure:edit_form['regulator_type'].title}</h5>
+                </div>
+                <div class="col-sm-3">
+                    ${structure:edit_form['regulator_type'].serialize(regulator=regulator)}
+                </div>
+                <div class="col-sm-2">
+                    <h5>${structure:edit_form['description'].title}</h5>
+                </div>
+                <div class="col-sm-5">
+                    ${structure:edit_form['description'].serialize(regulator=regulator)}
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-sm-2">
+                    <h5>${structure:edit_form['parameter'].title}</h5>
+                </div>
+                <div class="col-sm-5">
+                    ${structure:edit_form['parameter'].serialize(regulator=regulator)}
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-sm-2">
+                    <h5>${structure:edit_form['device'].title}</h5>
+                </div>
+                <div class="col-sm-5">
+                    ${structure:edit_form['device'].serialize(regulator=regulator)}
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.panel-body -->
+        <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
+    </form>
+</div><!-- /.panel -->

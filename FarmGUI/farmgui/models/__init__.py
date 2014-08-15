@@ -17,6 +17,10 @@ from .Device import init_devices
 from .InterpolationKnot import InterpolationKnot
 from .SetpointInterpolation import SetpointInterpolation
 from .CalendarEntry import CalendarEntry
+from .Regulator import Regulator
+from .Regulator import init_regulators
+from .RegulatorType import RegulatorType
+from .RegulatorType import init_regulator_types
 
 from .FieldSetting import FieldSetting
 from .FieldSetting import init_field_settings

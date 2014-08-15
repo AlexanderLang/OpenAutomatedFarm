@@ -25,6 +25,7 @@ class FarmComponent(Base):
                               cascade='all, delete, delete-orphan')
     devices = relationship("Device", order_by="Device.name", back_populates='component',
                            cascade='all, delete, delete-orphan')
+    regulators = relationship("Regulator", back_populates='component')
 
     def __init__(self, name, description=None):
         self.name = name

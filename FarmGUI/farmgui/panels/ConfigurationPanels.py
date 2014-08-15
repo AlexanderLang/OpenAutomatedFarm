@@ -16,11 +16,13 @@ from ..models import Parameter
 from ..models import FieldSetting
 from ..models import Sensor
 from ..models import Device
+from ..models import Regulator
 
 from ..schemas import ParameterSchema
 from ..schemas import DeviceSchema
 from ..schemas import FieldSettingSchema
 from ..schemas import PeripheryControllerSchema
+from ..schemas import RegulatorSchema
 
 @panel_config(name='component_panel', renderer='farmgui:panels/templates/component_panel.pt')
 def component_panel(context, request, component_id):
@@ -29,17 +31,20 @@ def component_panel(context, request, component_id):
     :type component_id: int
     """
     component = DBSession.query(FarmComponent).filter_by(_id=component_id).first()
-    schema = ParameterSchema(component=component).bind()
-    add_parameter_form = Form(schema,
+    add_parameter_form = Form(ParameterSchema(component=component).bind(),
                               action=request.route_url('parameter_save'),
                               formid='addParameterForm_' + str(component_id),
                               buttons=('Save',))
     add_device_form = Form(DeviceSchema(component=component).bind(),
                            action=request.route_url('device_save'),
                            buttons=('Save',))
+    add_regulator_form = Form(RegulatorSchema(component=component).bind(),
+                              action=request.route_url('regulator_save'),
+                              buttons=('Save',))
     return {'component': component,
             'add_parameter_form': add_parameter_form.render({'component': component.id}),
             'add_device_form': add_device_form.render({'component': component.id}),
+            'add_regulator_form': add_regulator_form.render({'component': component.id}),
             'delete_href': request.route_url('component_delete', _id=component.id)}
 
 
@@ -68,6 +73,19 @@ def device_panel(context, request, device_id):
     return {'device': device,
             'edit_form': edit_form,
             'delete_href': request.route_url('device_delete', _id=device.id)}
+
+
+@panel_config(name='regulator_panel', renderer='farmgui:panels/templates/regulator_panel.pt')
+def regulator_panel(context, request, regulator_id):
+    regulator = DBSession.query(Regulator).filter_by(_id=regulator_id).first()
+    schema = RegulatorSchema().bind(regulator=regulator)
+    edit_form = Form(schema,
+                     action=request.route_url('regulator_update', _id=regulator_id),
+                     formid='edit_regulator_form_'+str(regulator_id),
+                     buttons=('Save',))
+    return {'regulator': regulator,
+            'edit_form': edit_form,
+            'delete_href': request.route_url('regulator_delete', _id=regulator.id)}
 
 
 @panel_config(name='field_setting_panel', renderer='farmgui:panels/templates/field_setting_panel.pt')

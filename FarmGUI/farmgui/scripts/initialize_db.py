@@ -16,6 +16,7 @@ from ..models import init_devices
 from ..models import init_device_types
 from ..models import init_farm_components
 from ..models import init_field_settings
+from ..models import init_regulator_types
 
 
 def usage(argv):
@@ -44,3 +45,4 @@ def main(argv=sys.argv):
         init_device_types(DBSession)
         init_devices(DBSession)
         init_field_settings(DBSession)
+        init_regulator_types(DBSession)
