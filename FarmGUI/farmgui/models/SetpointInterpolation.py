@@ -49,8 +49,8 @@ class SetpointInterpolation(Base):
         return self._id
 
     def plot(self, y_axis_name, filename):
-        fig = plt.figure(figsize=(8, 5))
-        ax = fig.add_axes([0.05, 0.05, 0.8, 0.9])
+        fig = plt.figure(figsize=(5, 3))
+        ax = fig.add_axes([0.15, 0.15, 0.8, 0.8])
         ax.set_xlabel('Time')
         ax.set_ylabel(y_axis_name, rotation='horizontal')
         ax.xaxis.grid(color='gray', linestyle='dashed')
@@ -64,10 +64,19 @@ class SetpointInterpolation(Base):
             y.append(knot.value)
         x.append(self.end_time)
         y.append(self.end_value)
+        while len(x) <= self.order:
+            # not enough knots
+            x.append(self.end_time * len(x)/5.0)
+            y.append(self.end_value)
+        x_inter = np.linspace(0, self.end_time, 100)
+        if self.order < 4:
+            f = interpolate.interp1d(x, y, kind=self.order)
+            y_inter = f(x_inter)
+        else:
+            f = interpolate.splrep(x, y)
+            y_inter = interpolate.splev(x_inter, f)
+
         ax.set_xlim(0, self.end_time)
-        f = interpolate.interp1d(x, y, kind=self.order)
-        x_inter = np.arange(0, self.end_time, self.end_time/200)
-        y_inter = f(x_inter)
-        ax.set_ylim(y_inter.min(), y_inter.max())
+        ax.set_ylim(y_inter.min()-1, y_inter.max()+1)
         ax.plot(x, y, 'o', x_inter, y_inter, '-')
         fig.savefig(filename)

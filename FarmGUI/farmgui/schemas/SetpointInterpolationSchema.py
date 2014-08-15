@@ -50,7 +50,7 @@ class SetpointInterpolationSchema(MappingSchema):
     order = SchemaNode(typ=Int(),
                        title='Type (order)',
                        default=deferred_order_default,
-                       widget=SelectWidget(values=[(0, 'Constant'), (1, 'Linear'), (2, 'Quadratic'), (3, 'Cubic')]))
+                       widget=SelectWidget(values=[(0, 'Constant'), (1, 'Linear'), (2, 'Quadratic'), (3, 'Cubic'), (4, 'Spline')]))
     start_value = SchemaNode(typ=Float(),
                              title='Start Value',
                              default=deferred_start_value_default)

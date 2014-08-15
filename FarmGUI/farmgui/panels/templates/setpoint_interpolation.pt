@@ -7,6 +7,7 @@
 
     <div class="panel-body">
     <form action="${edit_form.action}" role="form" method="post">
+    <div class="col-sm-6">
         <div class="row">
             <div class="col-sm-2">
                 <h5>${structure:edit_form['order'].title}</h5>
@@ -47,15 +48,20 @@
                 ${structure:edit_form['description'].serialize(interpolation=interpolation)}
             </div>
         </div>
+    </div>
+    <div class="col-sm-6">
+
+        <img src="${request.static_url('farmgui:plots/interpolations/'+str(interpolation.id)+'.png')}" alt="plot" />
+    </div>
 
         <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
 
         </form>
 
-        <img src="${request.static_url('farmgui:plots/interpolations/'+str(interpolation.id)+'.png')}" alt="plot" />
-
-        <div tal:repeat="knot interpolation.knots">
+        <div class="row">
+        <div tal:repeat="knot interpolation.knots" class="col-sm-4">
             ${panel('interpolation_knot', knot=knot)}
+        </div>
         </div>
 
         <a data-toggle="modal" href="#add_interpolation_knot_modal_${interpolation.id}" class="btn btn-primary">Add Knot</a>

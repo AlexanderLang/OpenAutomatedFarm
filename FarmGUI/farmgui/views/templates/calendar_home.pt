@@ -3,6 +3,9 @@
 
         <h1>${page_title}</h1>
 
+        <a data-toggle="modal" href="#add_calendar_entry_modal" class="btn btn-primary">Add Calendar Entry</a>
+        <a data-toggle="modal" href="#add_interpolation_modal" class="btn btn-primary">Define Interpolation</a>
+
         <div class="row">
             <div tal:repeat="entry calendar" class="col-sm-2">
                 ${panel('calendar_entry', entry=entry)}
@@ -11,9 +14,6 @@
         <div tal:repeat="inter interpolations">
             ${panel('setpoint_interpolation', interpolation=inter)}
         </div>
-
-        <a data-toggle="modal" href="#add_calendar_entry_modal" class="btn btn-primary">Add Calendar Entry</a>
-        <a data-toggle="modal" href="#add_interpolation_modal" class="btn btn-primary">Define Interpolation</a>
 
         <div class="modal" id="add_calendar_entry_modal">
             <div class="modal-dialog">

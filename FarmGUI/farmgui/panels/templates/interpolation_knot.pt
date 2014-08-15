@@ -6,16 +6,16 @@
     <div class="panel-body">
     <form action="${edit_form.action}" role="form" method="post">
         <div class="row">
-            <div class="col-sm-2">
+            <div class="col-sm-3">
                 <h6>${structure:edit_form['time'].title}</h6>
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-3">
                 ${structure:edit_form['time'].serialize(knot=knot)}
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-3">
                 <h6>${structure:edit_form['value'].title}</h6>
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-3">
                 ${structure:edit_form['value'].serialize(knot=knot)}
             </div>
         </div>
