@@ -144,7 +144,9 @@ void execute_cmd(char cmd) {
 	    // set actuator named arg1 to value arg2
 	    for (int i = 0; i < num_actuators; i++) {
 	        if (actuators[i].name == com_arg1) {
-	            char carray[com_arg2.length() + 1];
+	            int al = com_arg2.length() + 1;
+	            char carray[al];
+	            com_arg2.toCharArray(carray, al);
 	            actuators[i].value = atof(carray);
 	            Serial.println(actuators[i].value);
 	            found = 1;
