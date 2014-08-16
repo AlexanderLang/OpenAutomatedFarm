@@ -21,6 +21,8 @@ from .Regulator import Regulator
 from .Regulator import init_regulators
 from .RegulatorType import RegulatorType
 from .RegulatorType import init_regulator_types
+from .RegulatorConfig import RegulatorConfig
+from .RegulatorConfig import init_regulator_config
 
 from .FieldSetting import FieldSetting
 from .FieldSetting import init_field_settings

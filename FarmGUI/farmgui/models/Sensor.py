@@ -3,6 +3,7 @@ Created on Feb 15, 2014
 
 @author: alex
 """
+from datetime import datetime
 
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -31,7 +32,7 @@ class Sensor(Base):
     minimum = Column(Float(), nullable=False)
     maximum = Column(Float(), nullable=False)
 
-    def __init__(self, periphery_controller, name, parameter_type, precision, sampling_time, min, max):
+    def __init__(self, periphery_controller, name, parameter_type, precision, sampling_time, minimum, maximum):
         self.peripheryController = periphery_controller
         self.periphery_controller_id = periphery_controller.id
         self.name = name
@@ -39,8 +40,10 @@ class Sensor(Base):
         self.parameter_type_id = parameter_type.id
         self.precision = precision
         self.sampling_time = sampling_time
-        self.minimum = min
-        self.maximum = max
+        self.minimum = minimum
+        self.maximum = maximum
+        self.last_measured = datetime.now()
+
 
     @property
     def id(self):

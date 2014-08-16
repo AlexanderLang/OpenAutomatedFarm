@@ -57,5 +57,6 @@ setup(name='FarmGUI',
       oaf_pc_reset = farmgui.scripts:reset_main
       oaf_ms = farmgui.workers:measurement_scheduler_main
       oaf_sp = farmgui.workers:setpoint_provider_main
+      oaf_cl = farmgui.workers:control_loop_main
       """,
 )

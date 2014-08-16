@@ -63,22 +63,11 @@ class MeasurementScheduler(object):
             # print(str(now)+':')
             for sc in self.schedule:
                 if self.schedule[sc] < now:
-                    # execute
-                    self.execute_measurement(sc)
+                    # log sensor value
+                    val = self.redis_conn.get('s'+str(sc.sensor_id))
+                    self.save_data(sc, now, val)
                     self.schedule[sc] = now + timedelta(seconds=sc.interval)
             sleep(0.5)
-
-    def execute_measurement(self, param):
-        """
-
-        :param param:
-        """
-        channel_name = 'periphery_controller_' + str(param.sensor.periphery_controller_id)
-        data = {'cmd': 's' + param.sensor.name,
-                'result_channel': 'log_measurements',
-                'caller_id': param.id}
-        self.redis_conn.publish(channel_name, data)
-        # print('oaf_ms: measure ' + str(m))
 
     def recalculate_schedule(self):
         logging.info('recalculating schedule')
@@ -102,20 +91,8 @@ class MeasurementScheduler(object):
             logging.info('no measurements to schedule')
         self.schedule = new_schedule
 
-    def save_data(self, data):
-        param = self.db_session.query(Parameter).filter_by(_id=data['caller_id']).first()
-        last_logs = self.db_session.query(ParameterLog).filter_by(parameter_id=param.id).order_by(
-            desc(ParameterLog.time))[:2]
-        if len(last_logs) > 1:
-            t1 = last_logs[1].time
-            t2 = last_logs[0].time
-            t3 = datetime.strptime(data['time'], '%Y-%m-%d %H:%M:%S.%f')
-            y1 = last_logs[1].value
-            y2 = last_logs[0].value
-            y3 = float(data['value'])
-            y3_inter = y1 + (y2-y1)/(t2-t1).total_seconds() * (t3-t1).total_seconds()
-            #print('data: {0:.4f}  inter: {1:.4f}'.format(y3, y3_inter))
-        log = ParameterLog(param, data['time'], data['value'])
+    def save_data(self, param, time, value):
+        log = ParameterLog(param, time, value)
         self.db_session.add(log)
         self.db_session.commit()
         #print('oaf_ms: saved ' + str(log))

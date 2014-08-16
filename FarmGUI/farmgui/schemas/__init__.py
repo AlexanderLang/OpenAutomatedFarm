@@ -10,3 +10,4 @@ from .CalendarEntrySchema import CalendarEntrySchema
 from .SetpointInterpolationSchema import SetpointInterpolationSchema
 from .InterpolationKnotSchema import InterpolationKnotSchema
 from .RegulatorSchema import RegulatorSchema
+from .RegulatorConfigSchema import RegulatorConfigSchema

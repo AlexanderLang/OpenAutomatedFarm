@@ -21,6 +21,7 @@ from ..models import DeviceType
 from ..models import Actuator
 from ..models import Regulator
 from ..models import RegulatorType
+from ..models import RegulatorConfig
 
 from ..schemas import FarmComponentSchema
 from ..schemas import PeripheryControllerSchema
@@ -28,6 +29,7 @@ from ..schemas import ParameterSchema
 from ..schemas import FieldSettingSchema
 from ..schemas import DeviceSchema
 from ..schemas import RegulatorSchema
+from ..schemas import RegulatorConfigSchema
 
 
 class ConfigurationViews(object):
@@ -247,11 +249,31 @@ class ConfigurationViews(object):
         except ValidationFailure as e:
             return Response(e.render())
         r.name = values['name']
-        r.regulator_type_id = values['regulator_type']
+        rt = DBSession.query(RegulatorType).filter_by(_id=values['regulator_type']).first()
+        r.regulator_type = rt
+        r.regulator_type_id = rt.id
         r.parameter_id = values['parameter']
         r.device_id = values['device']
         r.description = values['description']
         self.request.redis.publish('regulator_changes', 'regulator changed')
+        return HTTPFound(location=self.request.route_url('components_list'))
+
+    @view_config(route_name='regulator_config_update')
+    def regulator_config_update(self):
+        try:
+            rc = DBSession.query(RegulatorConfig).filter_by(_id=self.request.matchdict['_id']).first()
+        except DBAPIError:
+            return Response('database error (query RegulatorConfig)', content_type='text/plain', status_int=500)
+        form = Form(RegulatorConfigSchema(), buttons=('Save',))
+        controls = self.request.POST
+        controls['name'] = rc.name
+        controls['description'] = rc.description
+        controls = controls.items()
+        try:
+            values = form.validate(controls)
+        except ValidationFailure as e:
+            return Response(e.render())
+        rc.value = values['value']
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='periphery_controllers_list',

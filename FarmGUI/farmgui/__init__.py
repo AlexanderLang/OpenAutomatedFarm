@@ -38,6 +38,7 @@ def add_routes(config):
     config.add_route('regulator_save', '/configuration/regulators/add')
     config.add_route('regulator_delete', '/configuration/regulators/{_id}/delete')
     config.add_route('regulator_update', '/configuration/regulators/{_id}/update')
+    config.add_route('regulator_config_update', '/configuration/regulators/{regulator_id}/config/{_id}/update')
     config.add_route('component_delete', '/configuration/component/{_id}/delete')
     config.add_route('component_save', '/configuration/component/{_id}/save')
     config.add_route('field_settings_list', '/configuration/field_settings')

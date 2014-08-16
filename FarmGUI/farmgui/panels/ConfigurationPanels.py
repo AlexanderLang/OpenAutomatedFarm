@@ -23,6 +23,7 @@ from ..schemas import DeviceSchema
 from ..schemas import FieldSettingSchema
 from ..schemas import PeripheryControllerSchema
 from ..schemas import RegulatorSchema
+from ..schemas import RegulatorConfigSchema
 
 @panel_config(name='component_panel', renderer='farmgui:panels/templates/component_panel.pt')
 def component_panel(context, request, component_id):
@@ -86,6 +87,19 @@ def regulator_panel(context, request, regulator_id):
     return {'regulator': regulator,
             'edit_form': edit_form,
             'delete_href': request.route_url('regulator_delete', _id=regulator.id)}
+
+
+@panel_config(name='regulator_config_panel', renderer='farmgui:panels/templates/regulator_config_panel.pt')
+def regulator_config_panel(context, request, regulator_config):
+    schema = RegulatorConfigSchema(config=regulator_config).bind()
+    edit_form = Form(schema,
+                     action=request.route_url('regulator_config_update', _id=regulator_config.id, regulator_id=regulator_config.regulator.id),
+                     formid='edit_regulator_config_form_'+str(regulator_config.id),
+                     buttons=('Save',))
+    return {'regulator_config': regulator_config,
+            'edit_form': edit_form.render({'name': regulator_config.name,
+                                           'value': regulator_config.value,
+                                           'description': regulator_config.description})}
 
 
 @panel_config(name='field_setting_panel', renderer='farmgui:panels/templates/field_setting_panel.pt')
