@@ -1,19 +1,19 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        <a href="${delete_href}" class="close"> x </a>
+        <a href="${delete_href}" class="close">x</a>
 
         <h2>
             <a id="component_name_${component.id}" data-toggle="modal" href="#edit_component_modal_${component.id}">${component.name}</a>
         </h2>
 
-        <h4>${component.description}</h4>
+        <h3>${component.description}</h3>
 
         <div class="modal" id="edit_component_modal_${component._id}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Define new Regulator for ${component.name}</h4>
+                        <h4 class="modal-title">Edit Component</h4>
                     </div>
                     <div class="modal-body">
                         <tal:form replace="structure edit_component_form"/>
@@ -25,23 +25,26 @@
 
     <div class="panel-body">
 
-        <a data-toggle="modal" href="#add_parameter_modal_${component._id}" class="btn btn-primary">Add Parameter</a>
-        <a data-toggle="modal" href="#add_device_modal_${component._id}" class="btn btn-primary">Add Device</a>
-        <a data-toggle="modal" href="#add_regulator_modal_${component._id}" class="btn btn-primary">Add Regulator</a>
+        <a data-toggle="modal" href="#add_parameter_modal_${component.id}" class="btn btn-primary">Add Parameter</a>
+        <a data-toggle="modal" href="#add_device_modal_${component.id}" class="btn btn-primary">Add Device</a>
+        <a data-toggle="modal" href="#add_regulator_modal_${component.id}" class="btn btn-primary">Add Regulator</a>
 
-        <div tal:repeat="p component.parameters">
-            ${panel('parameter_panel', p.id)}
+        <h3>Parameters</h3>
+        <div id="parameter_list_${component.id}">
+            <div class="col-sm-4 panel_container" tal:repeat="p component.parameters">
+                ${panel('parameter_panel', p)}
+            </div>
         </div>
 
         <div tal:repeat="d component.devices">
-            ${panel('device_panel', d.id)}
+            ${panel('device_panel', d)}
         </div>
 
         <div tal:repeat="r component.regulators">
-            ${panel('regulator_panel', r.id)}
+            ${panel('regulator_panel', r)}
         </div>
 
-        <div class="modal" id="add_parameter_modal_${component._id}">
+        <div class="modal" id="add_parameter_modal_${component.id}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

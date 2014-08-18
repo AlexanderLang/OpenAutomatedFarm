@@ -33,20 +33,21 @@ def component_panel(context, request, component):
     :type component_id: int
     """
     add_parameter_form = Form(ParameterSchema().bind(),
-                              action=request.route_url('parameter_save'),
+                              action=request.route_url('parameter_save', comp_id=component.id, param_id=0),
                               formid='add_parameter_form_' + str(component.id),
                               use_ajax=True,
-                              ajax_options='{"success": function (rText, sText, xhr, form) {alert(sText)}}',
+                              ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                           'add_parameter(rText, sText, xhr, form);}}',
                               buttons=('Save',))
     add_device_form = Form(DeviceSchema().bind(),
-                           action=request.route_url('device_save'),
+                           action=request.route_url('device_save', comp_id=component.id, dev_id=0),
                            use_ajax=True,
                            buttons=('Save',))
     add_regulator_form = Form(RegulatorSchema().bind(),
-                              action=request.route_url('regulator_save'),
+                              action=request.route_url('regulator_save', comp_id=component.id, reg_id=0),
                               buttons=('Save',))
     edit_component_form = Form(FarmComponentSchema().bind(component=component),
-                               action=request.route_url('component_save', _id=component.id),
+                               action=request.route_url('component_save', comp_id=component.id),
                                formid='edit_component_form_'+str(component.id),
                                use_ajax=True,
                                ajax_options='{"success": function (rText, sText, xhr, form) {'
@@ -57,30 +58,31 @@ def component_panel(context, request, component):
             'add_parameter_form': add_parameter_form.render(),
             'add_device_form': add_device_form.render(),
             'add_regulator_form': add_regulator_form.render(),
-            'delete_href': request.route_url('component_delete', _id=component.id)}
+            'delete_href': request.route_url('component_delete', comp_id=component.id)}
 
 
 @panel_config(name='parameter_panel', renderer='farmgui:panels/templates/parameter_panel.pt')
-def parameter_panel(context, request, parameter_id):
-    parameter = DBSession.query(Parameter).filter_by(_id=parameter_id).first()
+def parameter_panel(context, request, parameter):
     schema = ParameterSchema().bind(parameter=parameter)
-    edit_form = Form(schema,
-                     action=request.route_url('parameter_update', _id=parameter_id),
-                     formid='edit_parameter_form_'+str(parameter_id),
+    edit_parameter_form = Form(schema,
+                     action=request.route_url('parameter_save', comp_id=parameter.component_id, param_id=parameter.id),
+                     formid='edit_parameter_form_'+str(parameter.id),
+                     use_ajax=True,
+                     ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                  '  edit_parameter(rText, sText, xhr, form);}}',
                      buttons=('Save',))
     return {'parameter': parameter,
-            'edit_form': edit_form,
-            'delete_href': request.route_url('parameter_delete', _id=parameter.id),
-            'calendar_href': request.route_url('calendar_home', parameter_id=parameter_id)}
+            'edit_parameter_form': edit_parameter_form.render(),
+            'delete_href': request.route_url('parameter_delete', comp_id=parameter.component_id, param_id=parameter.id),
+            'calendar_href': request.route_url('calendar_home', parameter_id=parameter.id)}
 
 
 @panel_config(name='device_panel', renderer='farmgui:panels/templates/device_panel.pt')
-def device_panel(context, request, device_id):
-    device = DBSession.query(Device).filter_by(_id=device_id).first()
+def device_panel(context, request, device):
     schema = DeviceSchema().bind(device=device)
     edit_form = Form(schema,
-                     action=request.route_url('device_update', _id=device_id),
-                     formid='edit_parameter_form_'+str(device_id),
+                     action=request.route_url('device_update', _id=device.id),
+                     formid='edit_parameter_form_'+str(device.id),
                      buttons=('Save',))
     return {'device': device,
             'edit_form': edit_form,
@@ -88,12 +90,11 @@ def device_panel(context, request, device_id):
 
 
 @panel_config(name='regulator_panel', renderer='farmgui:panels/templates/regulator_panel.pt')
-def regulator_panel(context, request, regulator_id):
-    regulator = DBSession.query(Regulator).filter_by(_id=regulator_id).first()
+def regulator_panel(context, request, regulator):
     schema = RegulatorSchema().bind(regulator=regulator)
     edit_form = Form(schema,
-                     action=request.route_url('regulator_update', _id=regulator_id),
-                     formid='edit_regulator_form_'+str(regulator_id),
+                     action=request.route_url('regulator_update', _id=regulator.id),
+                     formid='edit_regulator_form_'+str(regulator.id),
                      buttons=('Save',))
     return {'regulator': regulator,
             'edit_form': edit_form,

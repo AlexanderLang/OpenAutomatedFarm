@@ -14,7 +14,6 @@ from ..models import DBSession
 from ..models import Sensor
 from ..models import ParameterType
 
-
 @colander.deferred
 def deferred_type_widget(node, kw):
     parameters = DBSession.query(ParameterType).all()
@@ -26,7 +25,7 @@ def deferred_type_widget(node, kw):
 
 @colander.deferred
 def deferred_type_default(node, kw):
-    if len(kw) > 0:
+    if 'parameter' in kw:
         return kw['parameter'].parameter_type_id
     parameter_type = DBSession.query(ParameterType).first()
     return parameter_type.id
@@ -34,7 +33,7 @@ def deferred_type_default(node, kw):
 
 @colander.deferred
 def deferred_interval_default(node, kw):
-    if len(kw) > 0:
+    if 'parameter' in kw:
         return kw['parameter'].interval
     return 60
 
@@ -51,7 +50,7 @@ def deferred_sensor_widget(node, kw):
 
 @colander.deferred
 def deferred_sensor_default(node, kw):
-    if len(kw) > 0:
+    if 'parameter' in kw:
         sid = kw['parameter'].sensor_id
         if sid is None:
             return colander.null
@@ -61,7 +60,7 @@ def deferred_sensor_default(node, kw):
 
 @colander.deferred
 def deferred_name_default(node, kw):
-    if len(kw) > 0:
+    if 'parameter' in kw:
         name = kw['parameter'].name
         if name is None:
             return colander.null
@@ -71,7 +70,7 @@ def deferred_name_default(node, kw):
 
 @colander.deferred
 def deferred_description_default(node, kw):
-    if len(kw) > 0:
+    if 'parameter' in kw:
         desc = kw['parameter'].description
         if desc is None:
             return colander.null
@@ -80,10 +79,6 @@ def deferred_description_default(node, kw):
 
 
 class ParameterSchema(MappingSchema):
-    component = SchemaNode(typ=Int(),
-                           title='Farm Component',
-                           description='component the parameter belongs to',
-                           widget=HiddenWidget(readonly=True))
     name = SchemaNode(typ=String(),
                       title='Parameter Name',
                       default=deferred_name_default)

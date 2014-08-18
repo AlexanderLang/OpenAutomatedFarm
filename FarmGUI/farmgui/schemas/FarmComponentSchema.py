@@ -8,13 +8,13 @@ from deform.widget import TextInputWidget
 
 @colander.deferred
 def deferred_name_default(node, kw):
-    if len(kw) > 0:
+    if 'component' in kw:
         return kw['component'].name
     return ''
 
 @colander.deferred
 def deferred_description_default(node, kw):
-    if len(kw) > 0:
+    if 'component' in kw:
         return kw['component'].description
     return ''
 
