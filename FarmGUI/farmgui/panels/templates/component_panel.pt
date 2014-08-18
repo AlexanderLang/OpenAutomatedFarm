@@ -1,9 +1,28 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        <a href="${delete_href}" class="close">delete</a>
+        <a href="${delete_href}" class="close"> x </a>
 
-        <h2>${component.name}</h2>
+        <h2>
+            <a id="component_name_${component.id}" data-toggle="modal" href="#edit_component_modal_${component.id}">${component.name}</a>
+        </h2>
+
+        <h4>${component.description}</h4>
+
+        <div class="modal" id="edit_component_modal_${component._id}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Define new Regulator for ${component.name}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure edit_component_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
     <div class="panel-body">
 
         <a data-toggle="modal" href="#add_parameter_modal_${component._id}" class="btn btn-primary">Add Parameter</a>

@@ -82,8 +82,11 @@ class ConfigurationViews(object):
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
         add_form = Form(FarmComponentSchema(),
-                        formid='addForm',
+                        formid='add_component_form',
                         action=self.request.route_url('component_save', _id=0),
+                        use_ajax=True,
+                        ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                     '  add_component(rText, sText, xhr, form);}}',
                         buttons=('Save',))
         try:
             components = DBSession.query(FarmComponent).all()
@@ -92,23 +95,55 @@ class ConfigurationViews(object):
         return {'components': components,
                 'add_component_form': add_form.render()}
 
-    @view_config(route_name='component_save')
+    @view_config(route_name='component_save', renderer='json')
     def component_save(self):
+        ret_dict = {}
+        controls = self.request.POST.items()
         if self.request.matchdict['_id'] == '0':
             # new component
             add_form = Form(FarmComponentSchema(),
-                        formid='addForm',
-                        action=self.request.route_url('component_save', _id=0),
-                        buttons=('Save',))
-            controls = self.request.POST.items()
+                            formid='add_form',
+                            action=self.request.route_url('component_save', _id=0),
+                            use_ajax=True,
+                            ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                         '  add_component(rText, sText, xhr, form);}}',
+                            buttons=('Save',))
             try:
                 values = add_form.validate(controls)
+                ret_dict['form'] = add_form.render()
+                ret_dict['error'] = False
             except ValidationFailure as e:
-                return Response(e.render())
-            new_component = FarmComponent(values['Name'], values['Description'])
+                ret_dict['error'] = True
+                ret_dict['form'] = e.render()
+                return ret_dict
+            new_component = FarmComponent(values['name'], values['description'])
             DBSession.add(new_component)
             DBSession.flush()
-        return HTTPFound(location=self.request.route_url('components_list'))
+            ret_dict['component'] = self.request.layout_manager.render_panel('component_panel', new_component)
+        else:
+            # existing component
+            comp = DBSession.query(FarmComponent).filter_by(_id=self.request.matchdict['_id']).first()
+            edit_form_id = 'edit_component_form_'+str(comp.id)
+            edit_form = Form(FarmComponentSchema(),
+                             formid=edit_form_id,
+                             action=self.request.route_url('component_save', _id=comp.id),
+                             use_ajax=True,
+                             ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                          '  edit_component(rText, sText, xhr, form);}}',
+                             buttons=('Save',))
+            try:
+                values = edit_form.validate(controls)
+                ret_dict['error'] = False
+                ret_dict['form'] = edit_form.render()
+            except ValidationFailure as e:
+                ret_dict['error'] = True
+                ret_dict['form'] = e.render()
+                return ret_dict
+            comp.name = values['name']
+            comp.description = values['description']
+            ret_dict['form'] = edit_form.render(component=comp)
+            ret_dict['component'] = serialize(comp)
+        return ret_dict
 
     @view_config(route_name='component_delete')
     def component_delete(self):

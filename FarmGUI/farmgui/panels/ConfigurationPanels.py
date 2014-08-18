@@ -18,6 +18,7 @@ from ..models import Sensor
 from ..models import Device
 from ..models import Regulator
 
+from ..schemas import FarmComponentSchema
 from ..schemas import ParameterSchema
 from ..schemas import DeviceSchema
 from ..schemas import FieldSettingSchema
@@ -26,26 +27,36 @@ from ..schemas import RegulatorSchema
 from ..schemas import RegulatorConfigSchema
 
 @panel_config(name='component_panel', renderer='farmgui:panels/templates/component_panel.pt')
-def component_panel(context, request, component_id):
+def component_panel(context, request, component):
     """
 
     :type component_id: int
     """
-    component = DBSession.query(FarmComponent).filter_by(_id=component_id).first()
-    add_parameter_form = Form(ParameterSchema(component=component).bind(),
+    add_parameter_form = Form(ParameterSchema().bind(),
                               action=request.route_url('parameter_save'),
-                              formid='addParameterForm_' + str(component_id),
+                              formid='add_parameter_form_' + str(component.id),
+                              use_ajax=True,
+                              ajax_options='{"success": function (rText, sText, xhr, form) {alert(sText)}}',
                               buttons=('Save',))
-    add_device_form = Form(DeviceSchema(component=component).bind(),
+    add_device_form = Form(DeviceSchema().bind(),
                            action=request.route_url('device_save'),
+                           use_ajax=True,
                            buttons=('Save',))
-    add_regulator_form = Form(RegulatorSchema(component=component).bind(),
+    add_regulator_form = Form(RegulatorSchema().bind(),
                               action=request.route_url('regulator_save'),
                               buttons=('Save',))
+    edit_component_form = Form(FarmComponentSchema().bind(component=component),
+                               action=request.route_url('component_save', _id=component.id),
+                               formid='edit_component_form_'+str(component.id),
+                               use_ajax=True,
+                               ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                            '  edit_component(rText, sText, xhr, form);}}',
+                               buttons=('Save',))
     return {'component': component,
-            'add_parameter_form': add_parameter_form.render({'component': component.id}),
-            'add_device_form': add_device_form.render({'component': component.id}),
-            'add_regulator_form': add_regulator_form.render({'component': component.id}),
+            'edit_component_form': edit_component_form.render(),
+            'add_parameter_form': add_parameter_form.render(),
+            'add_device_form': add_device_form.render(),
+            'add_regulator_form': add_regulator_form.render(),
             'delete_href': request.route_url('component_delete', _id=component.id)}
 
 
