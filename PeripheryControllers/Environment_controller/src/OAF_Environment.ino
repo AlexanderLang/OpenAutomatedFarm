@@ -95,7 +95,11 @@ void loop() {
   sensors[3].value = humO;
   
   analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
-  digitalWrite(cp, actuators[5].value); //Set CT-Pump
+  digitalWrite(fo, (int) actuators[1].value);  //Set Fog
+  analogWrite(rf, (int) actuators[2].value);  //Set Rootfan
+  analogWrite(ac, (int) actuators[3].value);  //Set Aircirculation
+  analogWrite(ex, (int) actuators[4].value);  //Set CT-Fan  
+  digitalWrite(cp, (int) actuators[5].value); //Set CT-Pump
   
   
 }
