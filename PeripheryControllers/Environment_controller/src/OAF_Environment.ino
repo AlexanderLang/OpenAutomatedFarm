@@ -40,7 +40,7 @@ OAF_Sensor::Sensor sensors[] = {
     { "HO", 50,	"%", 2.0, 2, 0, 100 }    //Outside Humidity
 };
 
-int num_actuators = 2;
+int num_actuators = 6;
 OAF_Actuator::Actuator actuators[] = {
     {"EX", 0.0, "%"},    //Exhaust
     {"FO", 0.0, "1/0"},  //Fog
@@ -93,6 +93,9 @@ void loop() {
   sensors[1].value = tempO;
   sensors[2].value = SHT2x.GetHumidity();
   sensors[3].value = humO;
+  
+  analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
+  digitalWrite(cp, actuators[5].value); //Set CT-Pump
   
   
 }
