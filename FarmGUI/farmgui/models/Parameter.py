@@ -46,8 +46,12 @@ class Parameter(Base):
                        ForeignKey('Sensors._id'),
                        nullable=True)
     sensor = relationship("Sensor")
-    logs = relationship("ParameterLog", order_by="ParameterLog.time")
-    calendar = relationship('CalendarEntry', order_by='CalendarEntry.entry_number')
+    logs = relationship("ParameterLog",
+                        order_by="ParameterLog.time",
+                        cascade='all, delete, delete-orphan')
+    calendar = relationship('CalendarEntry',
+                            order_by='CalendarEntry.entry_number',
+                            cascade='all, delete, delete-orphan')
 
     def __init__(self, component, name, parameter_type, interval, sensor, description):
         """

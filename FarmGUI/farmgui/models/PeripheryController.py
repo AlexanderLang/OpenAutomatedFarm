@@ -24,8 +24,14 @@ class PeripheryController(Base):
     firmwareVersion = Column(Unicode(20), nullable=False)
     name = Column(Unicode(250), nullable=True, unique=True)
     active = Column(Boolean, nullable=False, default=False, unique=False)
-    sensors = relationship("Sensor", order_by="Sensor._id", back_populates='periphery_controller')
-    actuators = relationship("Actuator", order_by="Actuator._id", back_populates='periphery_controller')
+    sensors = relationship("Sensor",
+                           order_by="Sensor._id",
+                           back_populates='periphery_controller',
+                           cascade='all, delete, delete-orphan')
+    actuators = relationship("Actuator",
+                             order_by="Actuator._id",
+                             back_populates='periphery_controller',
+                             cascade='all, delete, delete-orphan')
 
     def __init__(self, fw_name, fw_version, name, active=True):
         self.firmwareName = fw_name
