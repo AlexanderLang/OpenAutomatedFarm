@@ -2,6 +2,7 @@
     <form role="form" action="${request.route_url('periphery_controller_update', _id=periphery_controller.id)}"
           method="post">
         <div class="panel-heading">
+            <a href="${delete_href}" class="close">x</a>
             <div class="row">
                 <div class="col-sm-2">
                     <h2>${structure:edit_form['name'].title}</h2>

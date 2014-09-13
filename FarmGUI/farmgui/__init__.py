@@ -44,6 +44,7 @@ def add_routes(config):
     config.add_route('field_setting_update', '/configuration/field_settings/{name}/update')
     config.add_route('periphery_controllers_list', '/configuration/periphery_controllers')
     config.add_route('periphery_controller_update', '/configuration/periphery_controllers/{_id}/update')
+    config.add_route('periphery_controller_delete', '/configuration/periphery_controllers/{_id}/delete')
     # display views
     config.add_route('display_views_home', '/display')
     config.add_route('plot_parameter_data', '/display/parameter/data')

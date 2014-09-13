@@ -342,3 +342,9 @@ class ConfigurationViews(object):
             return Response(e.render())
         pc.name = values['name']
         return HTTPFound(location=self.request.route_url('periphery_controllers_list'))
+
+    @view_config(route_name='periphery_controller_delete')
+    def periphery_controller_delete(self):
+        pc = DBSession.query(PeripheryController).filter_by(_id=self.request.matchdict['_id']).first()
+        DBSession.delete(pc)
+        return HTTPFound(location=self.request.route_url('periphery_controller_list'))

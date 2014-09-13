@@ -137,6 +137,7 @@ def periphery_controller_panel(context, request, periphery_controller_id):
                      formid='edit_periphery_controller_form_'+str(periphery_controller_id),
                      buttons=('Save',))
     return {'periphery_controller': periphery_controller,
+            'delete_href': request.route_url('periphery_controller_delete', _id=periphery_controller.id),
             'edit_form': edit_form}
 
 
