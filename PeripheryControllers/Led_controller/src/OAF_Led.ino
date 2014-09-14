@@ -1,8 +1,5 @@
-#include <EEPROM.h>
 #include <Wire.h>
-#include <SHT2x.h>
-#include <JeeLib.h>
-#include <PortsSHT21.h>
+#include <EEPROM.h>
 
 #define OAF_SERIALSHELL_BAUD 57600
 #define ADDRESS_ID 0
@@ -30,82 +27,59 @@ typedef struct {
 /**********************************************************************
  * Global variables
  */
-String fwName = "Environment";
+String fwName = "LED";
 String fwVersion = "0.1";
-int num_sensors = 4;
+int num_sensors = 0;
 OAF_Sensor::Sensor sensors[] = { 
-    { "TI", 20.0, "°C", 0.2, 2, 5, 40 }, //Growarea Temperature
-    { "TO", 20.0, "°C", 0.2, 2, 5, 40 }, //Outside Temperature
-    { "HI", 50, "%", 2.0, 2, 0, 100 },   //Growarea Humidity
-    { "HO", 50,	"%", 2.0, 2, 0, 100 }    //Outside Humidity
+    
 };
 
-int num_actuators = 6;
+int num_actuators = 3;
 OAF_Actuator::Actuator actuators[] = {
-    {"EX", 0.0, "%"},    //Exhaust
-    {"FO", 0.0, "1/0"},  //Fog
-    {"RF", 0.0, "%"},    //Rootfan
-    {"AC", 0.0, "%"},    //Aircirculation
-    {"CF", 0.0, "%"},    //CT-Circulation
-    {"CP", 0.0, "1/0"}   //CT-Pump
+    {"WH", 0.0, "%"},    //White LED
+    {"BL", 0.0, "%"},  //Blue LED
+    {"RE", 0.0, "%"},    //Red LED
 };
 
 int lc = 0;
 int lcc = 0;
 
-//SHT softTWI
-SHT21 hsensor1 (1);
-float humO, tempO;
 
 //DO-Pins
-int ex = 8;
-int fo = 11;
-int rf = 10;
-int ac = 9;
-int cf = 6;
-int cp = 4;
+int white_pwm_pin = 9;
+int blue_pwm_pin = 6;
+int red1_pwm_pin = 5;
+int red2_pwm_pin = 10;
 
 
 void setup() {
   Wire.begin();	
-  Serial.begin(OAF_SERIALSHELL_BAUD);
-  pinMode(ex, OUTPUT);
-  analogWrite(ex, 0);
-  pinMode(fo, OUTPUT);
-  digitalWrite(fo, LOW);
-  pinMode(rf,OUTPUT);
-  analogWrite(rf, 0); 
-  pinMode(ac, OUTPUT);
-  analogWrite(ac, 0); 
-  pinMode(cf, OUTPUT);
-  analogWrite(cf, 0);
-  pinMode(cp, OUTPUT);   
-  digitalWrite(cp, LOW);
-  
-  // Timer settings
-  TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-  TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM10);
-  TCCR2B = TCCR2B & 0b11111000 | 0x01;
-  TCCR1B = TCCR1B & 0b11111000 | 0x01;
+  Serial.begin(OAF_SERIALSHELL_BAUD);  
+  // initialize white
+  pinMode(white_pwm_pin, OUTPUT);
+  analogWrite(white_pwm_pin, 0);
+  // initialize blue
+  pinMode(blue_pwm_pin, OUTPUT);
+  analogWrite(blue_pwm_pin, 0);
+  // initialize red
+  pinMode(red1_pwm_pin, OUTPUT);
+  analogWrite(red1_pwm_pin, 0);
+  pinMode(red2_pwm_pin, OUTPUT);
+  analogWrite(red2_pwm_pin, 0);
   
   Serial.println("ready!");
 }
 
-void loop() {
-  hsensor1.measure(SHT21::HUMI);
-  hsensor1.measure(SHT21::TEMP);
-  hsensor1.calculate(humO, tempO);
-  sensors[0].value = SHT2x.GetTemperature();
-  sensors[1].value = tempO;
-  sensors[2].value = SHT2x.GetHumidity();
-  sensors[3].value = humO;
+void loop() { 
+  if ((int) actuators[1].value > 180) {
+    actuators[1].value = 180;
+  };
   
-  analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
-  digitalWrite(fo, (int) actuators[1].value);  //Set Fog
-  analogWrite(rf, (int) actuators[2].value);  //Set Rootfan
-  analogWrite(ac, (int) actuators[3].value);  //Set Aircirculation
-  analogWrite(ex, (int) actuators[4].value);  //Set CT-Fan  
-  digitalWrite(cp, (int) actuators[5].value); //Set CT-Pump
+  analogWrite(white_pwm_pin, (int) actuators[0].value);  //Set white LED
+  analogWrite(blue_pwm_pin, (int) actuators[1].value);  //Set blue LED
+  analogWrite(red1_pwm_pin, (int) actuators[2].value);  //Set red 1 LED
+  analogWrite(red2_pwm_pin, (int) actuators[2].value);  //Set red 2 LED
+ 
   
   
 }
