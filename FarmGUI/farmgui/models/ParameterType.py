@@ -33,4 +33,6 @@ class ParameterType(Base):
 def init_parameter_types(db_session):
     db_session.add(ParameterType('Temperature', '°C'))
     db_session.add(ParameterType('Humidity', '%'))
-    db_session.add(ParameterType('Volume', 'L'))
+    db_session.add(ParameterType('Volume', 'Liter'))
+    db_session.add(ParameterType('pH', 'pH'))
+    db_session.add(ParameterType('Conductivity', 'mS'))

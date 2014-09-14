@@ -1,0 +1,7 @@
+[Unit]
+Description=Open Automated Farm Web Interface Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=pserve /root/OpenAutomatedFarm/FarmGUI/production.ini
