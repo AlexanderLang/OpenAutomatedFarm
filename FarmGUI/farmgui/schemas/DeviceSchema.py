@@ -73,10 +73,6 @@ def deferred_description_default(node, kw):
 
 
 class DeviceSchema(MappingSchema):
-    component = SchemaNode(typ=Int(),
-                           title='Farm Component',
-                           description='component the device belongs to',
-                           widget=HiddenWidget(readonly=True))
     name = SchemaNode(typ=String(),
                       title='Device Name',
                       default=deferred_name_default)

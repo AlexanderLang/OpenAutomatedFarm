@@ -29,20 +29,32 @@
         <a data-toggle="modal" href="#add_device_modal_${component.id}" class="btn btn-primary">Add Device</a>
         <a data-toggle="modal" href="#add_regulator_modal_${component.id}" class="btn btn-primary">Add Regulator</a>
 
-        <h3>Parameters</h3>
-        <div id="parameter_list_${component.id}">
-            <div class="col-sm-4 panel_container" tal:repeat="p component.parameters">
-                ${panel('parameter_panel', p)}
+        <div class="row">
+            <h3>Parameters</h3>
+            <div id="parameter_list_${component.id}">
+                <div class="col-sm-4 panel_container" tal:repeat="p component.parameters">
+                    ${panel('parameter_panel', p)}
+                </div>
             </div>
         </div>
 
-        <div tal:repeat="d component.devices">
-            ${panel('device_panel', d)}
+        <div class="row">
+            <h3>Devices</h3>
+            <div id="device_list_${component.id}">
+                <div class="col-sm-4 panel_container" tal:repeat="d component.devices">
+                    ${panel('device_panel', d)}
+                </div>
+            </div>
         </div>
 
-        <div tal:repeat="r component.regulators">
-            ${panel('regulator_panel', r)}
-        </div>
+        <div class="row">
+            <h3>Regulators</h3>
+            <div id="regulator_list_${component.id}">
+                <div class="col-sm-4 panel_container" tal:repeat="r component.regulators">
+                    ${panel('regulator_panel', r)}
+                </div>
+            </div>
+        <div>
 
         <div class="modal" id="add_parameter_modal_${component.id}">
             <div class="modal-dialog">

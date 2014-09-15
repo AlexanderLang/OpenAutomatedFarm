@@ -41,10 +41,17 @@ def component_panel(context, request, component):
                               buttons=('Save',))
     add_device_form = Form(DeviceSchema().bind(),
                            action=request.route_url('device_save', comp_id=component.id, dev_id=0),
+                           formid='add_device_form_' + str(component.id),
                            use_ajax=True,
+                           ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                        'add_device(rText, sText, xhr, form);}}',
                            buttons=('Save',))
     add_regulator_form = Form(RegulatorSchema().bind(),
                               action=request.route_url('regulator_save', comp_id=component.id, reg_id=0),
+                              formid='add_regulator_form_' + str(component.id),
+                              use_ajax=True,
+                              ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                           'add_regulator(rText, sText, xhr, form);}}',
                               buttons=('Save',))
     edit_component_form = Form(FarmComponentSchema().bind(component=component),
                                action=request.route_url('component_save', comp_id=component.id),
@@ -80,25 +87,25 @@ def parameter_panel(context, request, parameter):
 @panel_config(name='device_panel', renderer='farmgui:panels/templates/device_panel.pt')
 def device_panel(context, request, device):
     schema = DeviceSchema().bind(device=device)
-    edit_form = Form(schema,
-                     action=request.route_url('device_update', _id=device.id),
+    edit_device_form = Form(schema,
+                     action=request.route_url('device_save', comp_id=device.component_id, dev_id=device.id),
                      formid='edit_parameter_form_'+str(device.id),
                      buttons=('Save',))
     return {'device': device,
-            'edit_form': edit_form,
-            'delete_href': request.route_url('device_delete', _id=device.id)}
+            'edit_device_form': edit_device_form.render(),
+            'delete_href': request.route_url('device_delete', comp_id=device.component_id, dev_id=device.id)}
 
 
 @panel_config(name='regulator_panel', renderer='farmgui:panels/templates/regulator_panel.pt')
 def regulator_panel(context, request, regulator):
     schema = RegulatorSchema().bind(regulator=regulator)
-    edit_form = Form(schema,
-                     action=request.route_url('regulator_update', _id=regulator.id),
+    edit_regulator_form = Form(schema,
+                     action=request.route_url('regulator_save', comp_id=regulator.component_id, reg_id=regulator.id),
                      formid='edit_regulator_form_'+str(regulator.id),
                      buttons=('Save',))
     return {'regulator': regulator,
-            'edit_form': edit_form,
-            'delete_href': request.route_url('regulator_delete', _id=regulator.id)}
+            'edit_regulator_form': edit_regulator_form.render(),
+            'delete_href': request.route_url('regulator_delete', comp_id=regulator.component_id, reg_id=regulator.id)}
 
 
 @panel_config(name='regulator_config_panel', renderer='farmgui:panels/templates/regulator_config_panel.pt')

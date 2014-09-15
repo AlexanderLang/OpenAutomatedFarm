@@ -1,44 +1,47 @@
 <div class="panel panel-default">
-    <form role="form" action="${request.route_url('device_update', _id=device.id)}" method="post">
-        <div class="panel-heading">
-            <a href="${delete_href}" class="close">delete</a>
-            <div class="row">
-                <div class="col-sm-2">
-                    <h4>${structure:edit_form['name'].title}</h4>
-                </div>
-                <div class="col-sm-6">
-                    ${structure:edit_form['name'].serialize(device=device)}
+    <div class="panel-heading">
+        <a href="${delete_href}" class="close">x</a>
+
+        <h2>
+            <a id="device_name_${device.id}" data-toggle="modal" href="#edit_device_modal_${device.id}">${device.name}</a>
+        </h2>
+
+        <h4>${device.description}</h4>
+
+        <div class="modal" id="edit_device_modal_${device._id}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Edit Device</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure edit_device_form"/>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-sm-2">
-                    <h5>${structure:edit_form['device_type'].title}</h5>
-                </div>
-                <div class="col-sm-3">
-                    ${structure:edit_form['device_type'].serialize(device=device)}
-                </div>
-                <div class="col-sm-2">
-                    <h5>${structure:edit_form['description'].title}</h5>
-                </div>
-                <div class="col-sm-5">
-                    ${structure:edit_form['description'].serialize(device=device)}
-                </div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-4">
+                <h5>Type: </h5>
             </div>
-            <!-- /.row -->
-            <div class="row">
-                <div class="col-sm-2">
-                    <h5>${structure:edit_form['actuator'].title}</h5>
-                </div>
-                <div class="col-sm-5">
-                    ${structure:edit_form['actuator'].serialize(device=device)}
-                </div>
+            <div class="col-sm-8">
+                    ${device.device_type.name}
             </div>
-            <!-- /.row -->
         </div>
-        <!-- /.panel-body -->
-        <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>
-        <a href="#" class="btn btn-primary btn-lg">Calendar</a>
-    </form>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-sm-2">
+                <h5>Actuator: </h5>
+            </div>
+            <div class="col-sm-5">
+                ${device.actuator.periphery_controller.name + '-->' + device.actuator.name}
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.panel-body -->
+    <a href="#" class="btn btn-primary btn-lg">Calendar</a>
 </div><!-- /.panel -->

@@ -4,7 +4,7 @@ from pyramid.httpexceptions import HTTPFound
 from deform_bootstrap import Form
 from deform import ValidationFailure
 
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from json import dump
 
@@ -78,6 +78,7 @@ class ConfigurationViews(object):
     @view_config(route_name='components_list', renderer='farmgui:views/templates/components_list.pt', layout='default')
     def components_list(self):
         layout = self.request.layout_manager.layout
+        #layout.add_css(self.request.static_url('deform_bootstrap:static/deform_bootstrap.css'))
         layout.add_javascript(self.request.static_url('farmgui:static/js/configuration_views.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
@@ -107,7 +108,7 @@ class ConfigurationViews(object):
                        '  add_component(rText, sText, xhr, form);}}'
         else:
             # existing component
-            comp = DBSession.query(FarmComponent).filter_by(_id=self.request.matchdict['_id']).first()
+            comp = DBSession.query(FarmComponent).filter_by(_id=self.request.matchdict['comp_id']).first()
             form_id = 'edit_component_form_'+str(comp.id)
             form_opt = '{"success": function (rText, sText, xhr, form) {' \
                        '  edit_component(rText, sText, xhr, form);}}'
@@ -127,15 +128,25 @@ class ConfigurationViews(object):
             return ret_dict
 
         if comp_id == '0':
-            new_component = FarmComponent(values['name'], values['description'])
-            DBSession.add(new_component)
-            DBSession.flush()
-            ret_dict['component'] = self.request.layout_manager.render_panel('component_panel', new_component)
+            # new component
+            try:
+                new_component = FarmComponent(values['name'], values['description'])
+                DBSession.add(new_component)
+                DBSession.flush()
+                ret_dict['component'] = self.request.layout_manager.render_panel('component_panel', new_component)
+            except IntegrityError:
+                ret_dict['error'] = True
+                ret_dict['error_msg'] = 'Error: a component with this name already exists'
         else:
-            comp.name = values['name']
-            comp.description = values['description']
-            ret_dict['form'] = form.render(component=comp)
-            ret_dict['component'] = serialize(comp)
+            # existing component
+            try:
+                comp.name = values['name']
+                comp.description = values['description']
+                ret_dict['form'] = form.render(component=comp)
+                ret_dict['component'] = serialize(comp)
+            except IntegrityError:
+                ret_dict['error'] = True
+                ret_dict['error_msg'] = 'Error: a component with this name already exists'
 
         return ret_dict
 
@@ -155,7 +166,7 @@ class ConfigurationViews(object):
         if param_id != '0':
             # existing component
             param = DBSession.query(Parameter).filter_by(_id=param_id).first()
-            form_id = 'edit_component_form_' + comp_id
+            form_id = 'edit_parameter_form_' + comp_id
             form_opt = '{"success": function (rText, sText, xhr, form) {' \
                        '  edit_parameter(rText, sText, xhr, form);}}'
         else:
@@ -203,98 +214,118 @@ class ConfigurationViews(object):
         DBSession.delete(parameter)
         return HTTPFound(location=self.request.route_url('components_list'))
 
-    @view_config(route_name='device_save', renderer='farmgui:views/templates/device_save.pt', layout='default')
+    @view_config(route_name='device_save', renderer='json')
     def device_save(self):
-        controls = self.request.POST
-        add_form = Form(DeviceSchema().bind(), buttons=('Save',))
+        ret_dict = {}
+        controls = self.request.POST.items()
+        dev_id = self.request.matchdict['dev_id']
+        comp_id = self.request.matchdict['comp_id']
+        ret_dict['comp_id'] = comp_id
+        if dev_id != '0':
+            # existing device
+            dev = DBSession.query(Device).filter_by(_id=dev_id).first()
+            form_id = 'edit_device_form_' + dev_id
+            form_opt = '{"success": function (rText, sText, xhr, form) {' \
+                       '   edit_device(rText, sText, xhr, form);}}'
+        else:
+            # new device
+            form_id = 'add_device_form_' + comp_id
+            form_opt = '{"success": function (rText, sText, xhr, form) {' \
+                       '  add_device(rText, sText, xhr, form);}}'
+        form = Form(DeviceSchema().bind(),
+                    formid=form_id,
+                    action=self.request.route_url('device_save', comp_id=comp_id, dev_id=dev_id),
+                    use_ajax=True,
+                    ajax_options=form_opt,
+                    buttons=('Save',))
         try:
-            d = add_form.validate(controls.items())
-            comp = DBSession.query(FarmComponent).filter_by(_id=d['component']).first()
-            device_type = DBSession.query(DeviceType).filter_by(_id=d['device_type']).first()
-            actuator = DBSession.query(Actuator).filter_by(_id=d['actuator']).first()
-            new_dev = Device(comp, d['name'], device_type, actuator, d['description'])
-            DBSession.add(new_dev)
+            vals = form.validate(controls)
+            ret_dict['form'] = form.render()
+            ret_dict['error'] = False
         except ValidationFailure as e:
-            add_form = e
-            return {'addForm': add_form.render()}
-        self.request.redis.publish('device_changes', 'new device')
-        return HTTPFound(location=self.request.route_url('components_list'))
+            ret_dict['form'] = e.render()
+            ret_dict['error'] = True
+            return ret_dict
+
+        if dev_id == '0':
+            comp = DBSession.query(FarmComponent).filter_by(_id=comp_id).first()
+            device_type = DBSession.query(DeviceType).filter_by(_id=vals['device_type']).first()
+            actuator = DBSession.query(Actuator).filter_by(_id=vals['actuator']).first()
+            new_dev = Device(comp, vals['name'], device_type, actuator, vals['description'])
+            DBSession.add(new_dev)
+            DBSession.flush()
+            ret_dict['device_panel'] = self.request.layout_manager.render_panel('device_panel', new_dev)
+        else:
+            dev.name = vals['name']
+            dev.device_type_id = vals['device_type']
+            dev.actuator_id = vals['actuator']
+            dev.description = vals['description']
+        self.request.redis.publish('device_changes', 'device changed')
+        return ret_dict
 
     @view_config(route_name='device_delete')
     def device_delete(self):
-        device = DBSession.query(Device).filter_by(_id=self.request.matchdict['_id']).first()
+        device = DBSession.query(Device).filter_by(_id=self.request.matchdict['dev_id']).first()
         DBSession.delete(device)
         return HTTPFound(location=self.request.route_url('components_list'))
 
-    @view_config(route_name='device_update')
-    def device_update(self):
-        try:
-            d = DBSession.query(Device).filter_by(_id=self.request.matchdict['_id']).first()
-        except DBAPIError:
-            return Response('database error (query Devices)', content_type='text/plain', status_int=500)
-        form = Form(DeviceSchema().bind(device=d), buttons=('Save',))
-        controls = self.request.POST
-        controls['component'] = d.component_id
-        if controls['actuator'] == 'None':
-            controls['actuator'] = None
-        controls = controls.items()
-        try:
-            values = form.validate(controls)
-        except ValidationFailure as e:
-            return Response(e.render())
-        d.name = values['name']
-        d.device_type_id = values['device_type']
-        if values['actuator'] is not None:
-            d.actuator_id = values['actuator']
-        d.description = values['description']
-        self.request.redis.publish('device_changes', 'device changed')
-        return HTTPFound(location=self.request.route_url('components_list'))
-
-    @view_config(route_name='regulator_save', renderer='farmgui:views/templates/error_form.pt', layout='default')
+    @view_config(route_name='regulator_save', renderer='json')
     def regulator_save(self):
-        controls = self.request.POST
-        add_form = Form(RegulatorSchema().bind(), buttons=('Save',))
+        ret_dict = {}
+        controls = self.request.POST.items()
+        reg_id = self.request.matchdict['reg_id']
+        comp_id = self.request.matchdict['comp_id']
+        ret_dict['comp_id'] = comp_id
+        if reg_id != '0':
+            # existing regulator
+            reg = DBSession.query(Regulator).filter_by(_id=reg_id).first()
+            form_id = 'edit_regulator_form_' + reg_id
+            form_opt = '{"success": function (rText, sText, xhr, form) {' \
+                       '    edit_regulator(rText, sText, xhr, form);}}'
+        else:
+            # new regulator
+            form_id = 'add_regulator_form_' + comp_id
+            form_opt = '{"success": function (rText, sText, xhr, form) {' \
+                       '    add_regulator(rText, sText, xhr, form);}}'
+        form = Form(RegulatorSchema().bind(),
+                    formid=form_id,
+                    action=self.request.route_url('regulator_save', comp_id=comp_id, reg_id=reg_id),
+                    use_ajax=True,
+                    ajax_options=form_opt,
+                    buttons=('Save',))
         try:
-            d = add_form.validate(controls.items())
-            comp = DBSession.query(FarmComponent).filter_by(_id=d['component']).first()
-            regulator_type = DBSession.query(RegulatorType).filter_by(_id=d['regulator_type']).first()
-            parameter = DBSession.query(Parameter).filter_by(_id=d['parameter']).first()
-            device = DBSession.query(Device).filter_by(_id=d['device']).first()
-            new_reg = Regulator(comp, d['name'], regulator_type, parameter, device, d['description'])
-            DBSession.add(new_reg)
+            vals = form.validate(controls)
+            ret_dict['form'] = form.render()
+            ret_dict['error'] = False
         except ValidationFailure as e:
-            return {'addForm': e.render()}
+            ret_dict['form'] = e.render()
+            ret_dict['error'] = True
+            return ret_dict
+
+        if reg_id == '0':
+            # new regulator
+            comp = DBSession.query(FarmComponent).filter_by(_id=comp_id).first()
+            regulator_type = DBSession.query(RegulatorType).filter_by(_id=vals['regulator_type']).first()
+            parameter = DBSession.query(Parameter).filter_by(_id=vals['parameter']).first()
+            device = DBSession.query(Device).filter_by(_id=vals['device']).first()
+            new_reg = Regulator(comp, vals['name'], regulator_type, parameter, device, vals['description'])
+            DBSession.add(new_reg)
+            DBSession.flush()
+            ret_dict['regulator_panel'] = self.request.layout_manager.render_panel('regulator_panel', new_reg)
+        else:
+            reg.name = vals['name']
+            reg.regulator_type_id = vals['regulator_type']
+            reg.parameter_id = vals['parameter']
+            reg.device_id = vals['device']
+            reg.description = vals['description']
+
         self.request.redis.publish('regulator_changes', 'new regulator')
-        return HTTPFound(location=self.request.route_url('components_list'))
+        return ret_dict
 
     @view_config(route_name='regulator_delete')
     def regulator_delete(self):
-        regulator = DBSession.query(Regulator).filter_by(_id=self.request.matchdict['_id']).first()
+        regulator = DBSession.query(Regulator).filter_by(_id=self.request.matchdict['reg_id']).first()
         DBSession.delete(regulator)
-        return HTTPFound(location=self.request.route_url('components_list'))
-
-    @view_config(route_name='regulator_update')
-    def regulator_update(self):
-        try:
-            r = DBSession.query(Regulator).filter_by(_id=self.request.matchdict['_id']).first()
-        except DBAPIError:
-            return Response('database error (query Regulators)', content_type='text/plain', status_int=500)
-        form = Form(RegulatorSchema().bind(regulator=r), buttons=('Save',))
-        controls = self.request.POST
-        controls['component'] = r.component_id
-        controls = controls.items()
-        try:
-            values = form.validate(controls)
-        except ValidationFailure as e:
-            return Response(e.render())
-        r.name = values['name']
-        rt = DBSession.query(RegulatorType).filter_by(_id=values['regulator_type']).first()
-        r.regulator_type = rt
-        r.regulator_type_id = rt.id
-        r.parameter_id = values['parameter']
-        r.device_id = values['device']
-        r.description = values['description']
-        self.request.redis.publish('regulator_changes', 'regulator changed')
         return HTTPFound(location=self.request.route_url('components_list'))
 
     @view_config(route_name='regulator_config_update')
