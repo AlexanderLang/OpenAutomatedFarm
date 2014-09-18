@@ -1,0 +1,48 @@
+# nginx.conf
+
+worker_processes 1;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+
+    ##
+    # Basic Settings
+    ##
+
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+
+    include mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # Logging Settings
+    ##
+
+    access_log off;
+    error_log /var/log/nginx/error.log;
+
+    ##
+    # Gzip Settings
+    ##
+
+    gzip on;
+    gzip_disable "msie6";
+
+    ##
+    # Virtual Host Configs
+    ##
+
+    include farmgui.conf;
+
+    server {
+        server_name _;
+        return 444;
+    }
+}
