@@ -51,7 +51,7 @@
     </div>
     <div class="col-sm-6">
 
-        <img src="${request.static_url('farmgui:plots/interpolations/'+str(interpolation.id)+'.png')}" alt="plot" />
+        <img src="${plot_href}" alt="plot" />
     </div>
 
         <button name="save" type="submit" class="btn btn-primary btn-lg" value="save">Save</button>

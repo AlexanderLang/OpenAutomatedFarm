@@ -43,6 +43,7 @@ def setpoint_interpolation(context, request, interpolation):
             'delete_href': request.route_url('interpolation_delete',
                                              parameter_id= request.matchdict['parameter_id'],
                                              interpolation_id=interpolation.id),
+            'plot_href': request.static_url(request.registry.settings['plot_directory'] + '/interpolation_' + str(interpolation.id) + '.png'),
             'add_knot_form': add_knot_form.render(),
             'edit_form': edit_form}
 

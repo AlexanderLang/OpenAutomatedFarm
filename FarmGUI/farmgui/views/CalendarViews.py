@@ -87,7 +87,8 @@ class CalendarViews(object):
             p = add_form.validate(controls.items())
             new_inter = SetpointInterpolation(p['name'], p['order'], p['start_value'], p['end_time'], p['end_value'], p['description'])
             DBSession.add(new_inter)
-            filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(new_inter.id)+'.png'
+            DBSession.flush()
+            filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(new_inter.id) + '.png'
             new_inter.plot('', filename)
         except ValidationFailure as e:
             return {'error_form': e.render()}
@@ -113,7 +114,7 @@ class CalendarViews(object):
         spip.end_time = values['end_time']
         spip.end_value = values['end_value']
         spip.description = values['description']
-        filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(spip.id)+'.png'
+        filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(spip.id) + '.png'
         spip.plot('', filename)
         self.request.redis.publish('calendar_changes', 'interpolation changed')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
@@ -137,7 +138,7 @@ class CalendarViews(object):
             DBSession.add(new_inter)
         except ValidationFailure as e:
             return {'error_form': e.render()}
-        filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(inter.id)+'.png'
+        filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(inter.id) + '.png'
         inter.plot('', filename)
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
 
@@ -157,7 +158,7 @@ class CalendarViews(object):
             return {'error_form': e.render()}
         knot.time = values['time']
         knot.value = values['value']
-        filename = '/home/alex/pycharm-projects/OpenAutomatedFarm/FarmGUI/farmgui/plots/interpolations/'+str(inter.id)+'.png'
+        filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(inter.id) + '.png'
         inter.plot('', filename)
         self.request.redis.publish('parameter_changes', 'interpolation changed')
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
