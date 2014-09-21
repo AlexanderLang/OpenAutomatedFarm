@@ -46,13 +46,15 @@ class FarmManager(object):
                               'log_measurements')
         self.schedule = {}
         self.parameter_calendars = {}
-        # initialize parameter_calendars
+        self.recalculate_parameter_calendars()
         present = datetime.now()
+        self.parameter_setpoints = {}
+        self.recalculate_measurement_schedule()
+
+    def recalculate_parameter_calendars(self):
         for param in self.parameters:
             start_time = self.cultivation_start
             self.parameter_calendars[param.id] = self.current_calendar_entry(param, start_time, present)
-        self.parameter_setpoints = {}
-        self.recalculate_measurement_schedule()
 
     def current_calendar_entry(self, param, start_time, present):
         for entry in param.calendar:
@@ -136,10 +138,12 @@ class FarmManager(object):
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.parameters = self.db_session.query(Parameter).all()
+                    self.recalculate_parameter_calendars()
                 elif message['channel'] == b'field_setting_changes':
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.get_cultivation_start()
+                    self.recalculate_parameter_calendars()
                 if message['channel'] == b'regulator_changes':
                     # something changed
                     self.db_session.close()
