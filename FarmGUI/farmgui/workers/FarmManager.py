@@ -73,11 +73,12 @@ class FarmManager(object):
         for param in self.parameters:
             calendar = self.parameter_calendars[param.id]
             if calendar is not None:
-                if self.parameter_calendars[param.id]['end_time'] < present:
+                if calendar['end_time'] < present:
                     # update parameter_calendars
                     self.parameter_calendars[param.id] = self.current_calendar_entry(param, present)
-                entry = self.parameter_calendars[param.id]['entry']
-                start_time =self.parameter_calendars[param.id]['start_time']
+                    calendar = self.parameter_calendars[param.id]
+                entry = calendar['entry']
+                start_time =calendar['start_time']
                 self.parameter_setpoints[param.id] = entry.interpolation.get_value_at(present-start_time)
 
     def get_cultivation_start(self):
@@ -91,7 +92,11 @@ class FarmManager(object):
 
         """
         for r in self.regulators:
-            sp = self.parameter_setpoints[r.input_parameter.id]
+            try:
+                sp = self.parameter_setpoints[r.input_parameter.id]
+            except KeyError:
+                sp = None
+                logging.warn('no setpoint for ' + r.name + '->' + r.input_parameter.name)
             val = float(self.redis_conn.get('s'+str(r.input_parameter.sensor_id)))
             if sp is not None and val is not None:
                 y = r.calculate_output(sp, val, 0.5)
