@@ -100,9 +100,10 @@ class FarmManager(object):
                 sp = None
                 logging.warn('no setpoint for ' + r.name + '->' + r.input_parameter.name)
             val = float(self.redis_conn.get('s'+str(r.input_parameter.sensor_id)))
+            logging.debug(r.name+': sp='+str(sp)+' val='+str(val))
             if sp is not None and val is not None:
                 y = r.calculate_output(sp, val, 0.5)
-                logging.debug('sp: '+str(sp)+' val: '+str(val)+' y: '+str(y))
+                logging.debug(' y: '+str(y))
                 self.set_actuator(r.output_device, y)
 
     def set_actuator(self, device, value):
