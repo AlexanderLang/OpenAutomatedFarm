@@ -1,0 +1,22 @@
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-sm-1">
+            <div class="row">
+                <h4>Name</h4>
+            </div>
+            <div class="row">
+                <h4>${actuator.name}</h4>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <h4>Type</h4>
+            </div>
+            <div class="row">
+                <h4>${actuator.device_type.name + ' [' + actuator.device_type.unit + ']'}</h4>
+            </div>
+        </div>
+    </div>
+    <!-- /.panel-body -->
+
+</div><!-- /.panel -->

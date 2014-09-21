@@ -26,12 +26,20 @@
                 </div>
             </div>
             <!-- /.row -->
-            <h2>Sensors:</h2>
 
+            <h2>Sensors:</h2>
             <div tal:repeat="s periphery_controller.sensors">
                 <div class="col-sm-1"></div>
                 <div class="col-sm-11">
                     ${panel('sensor_panel', s.id)}
+                </div>
+            </div>
+
+            <h2>Actuators:</h2>
+            <div tal:repeat="a periphery_controller.actuators">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-11">
+                    ${panel('actuator_panel', a.id)}
                 </div>
             </div>
         </div>

@@ -15,6 +15,7 @@ from ..models import FarmComponent
 from ..models import Parameter
 from ..models import FieldSetting
 from ..models import Sensor
+from ..models import Actuator
 from ..models import Device
 from ..models import Regulator
 
@@ -152,4 +153,10 @@ def periphery_controller_panel(context, request, periphery_controller_id):
 def sensor_panel(context, request, sensor_id):
     sensor = DBSession.query(Sensor).filter_by(_id=sensor_id).first()
     return {'sensor': sensor}
+
+
+@panel_config(name='actuator_panel', renderer='farmgui:panels/templates/actuator_panel.pt')
+def actuator_panel(context, request, actuator_id):
+    actuator = DBSession.query(Actuator).filter_by(_id=actuator_id).first()
+    return {'actuator': actuator}
 

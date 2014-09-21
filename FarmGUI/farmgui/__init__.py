@@ -15,7 +15,6 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.add_static_view(name='static', path='farmgui:static', cache_max_age=0)
     config.add_static_view(name='deform_static', path='deform:static', cache_max_age=3600)
-    print('\n\n'+settings['plot_directory']+'\n\n')
     config.add_static_view(name='plots', path=settings['plot_directory'], cache_max_age=0)
     config.include(add_routes)
     config.scan()
