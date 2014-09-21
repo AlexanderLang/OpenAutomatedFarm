@@ -44,14 +44,14 @@ class FarmManager(object):
                               'field_setting_changes',
                               'regulator_changes',
                               'log_measurements')
+        present = datetime.now()
         self.schedule = {}
         self.parameter_calendars = {}
-        self.recalculate_parameter_calendars()
-        present = datetime.now()
+        self.recalculate_parameter_calendars(present)
         self.parameter_setpoints = {}
         self.recalculate_measurement_schedule()
 
-    def recalculate_parameter_calendars(self):
+    def recalculate_parameter_calendars(self, present):
         for param in self.parameters:
             start_time = self.cultivation_start
             self.parameter_calendars[param.id] = self.current_calendar_entry(param, start_time, present)
@@ -118,6 +118,8 @@ class FarmManager(object):
     def work(self):
         # main loop
         while True:
+            # get time
+            now = datetime.now()
             # listen for messages
             message = self.pubsub.get_message()
             if message is not None:
@@ -138,20 +140,18 @@ class FarmManager(object):
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.parameters = self.db_session.query(Parameter).all()
-                    self.recalculate_parameter_calendars()
+                    self.recalculate_parameter_calendars(now)
                 elif message['channel'] == b'field_setting_changes':
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.get_cultivation_start()
-                    self.recalculate_parameter_calendars()
+                    self.recalculate_parameter_calendars(now)
                 if message['channel'] == b'regulator_changes':
                     # something changed
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.regulators = self.db_session.query(Regulator).all()
 
-            # get time
-            now = datetime.now()
             self.calculate_parameter_setpoints(now)
             self.calculate_actuator_setpoints()
             for sc in self.schedule:
