@@ -102,6 +102,7 @@ class FarmManager(object):
             val = float(self.redis_conn.get('s'+str(r.input_parameter.sensor_id)))
             if sp is not None and val is not None:
                 y = r.calculate_output(sp, val, 0.5)
+                logging.debug('sp: '+str(sp)+' val: '+str(val)+' y: '+str(y))
                 self.set_actuator(r.output_device, y)
 
     def set_actuator(self, device, value):

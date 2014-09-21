@@ -4,4 +4,4 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=pserve /root/OpenAutomatedFarm/FarmGUI/production.ini
+ExecStart=pserve --daemon --pid-file=/OpenAutomatedFarm/pserve_5000.pid /OpenAutomatedFarm/FarmGUI/production.ini http_port=5000
