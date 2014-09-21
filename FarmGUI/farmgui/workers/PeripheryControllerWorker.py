@@ -133,7 +133,7 @@ def main(argv=sys.argv):
     db_engine = engine_from_config(settings, 'sqlalchemy.')
     db_sessionmaker = sessionmaker(bind=db_engine)
     Base.metadata.bind = db_engine
-    logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name + '.log',
+    logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name.split('/')[-1] + '.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
                         datefmt='%Y.%m.%d %I:%M',
                         level=logging.INFO)
