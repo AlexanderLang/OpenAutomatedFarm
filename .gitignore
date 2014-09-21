@@ -50,3 +50,7 @@ coverage.xml
 # kicad
 *.kicad_pcb-bak
 
+# logs
+*.log
+*.pid
+

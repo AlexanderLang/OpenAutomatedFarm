@@ -50,11 +50,11 @@ class FarmManager(object):
         present = datetime.now()
         for param in self.parameters:
             start_time = self.cultivation_start
-            self.parameter_calendars[param] = self.current_calendar_entry(param, present)
+            self.parameter_calendars[param.id] = self.current_calendar_entry(param, start_time, present)
         self.parameter_setpoints = {}
         self.recalculate_measurement_schedule()
 
-    def current_calendar_entry(self, param, present):
+    def current_calendar_entry(self, param, start_time, present):
         for entry in param.calendar:
             end_time = start_time + timedelta(seconds=entry.interpolation.end_time)
             if end_time > present:
@@ -71,14 +71,14 @@ class FarmManager(object):
         :param present:
         """
         for param in self.parameters:
-            calendar = self.parameter_calendars[param]
+            calendar = self.parameter_calendars[param.id]
             if calendar is not None:
-                if self.parameter_calendars[param]['end_time'] < present:
+                if self.parameter_calendars[param.id]['end_time'] < present:
                     # update parameter_calendars
-                    self.parameter_calendars[param] = self.current_calendar_entry(param, present)
-                entry = self.parameter_calendars[param]['entry']
-                start_time =self.parameter_calendars[param]['start_time']
-                self.parameter_setpoints[param] = entry.interpolation.get_value_at(present-start_time)
+                    self.parameter_calendars[param.id] = self.current_calendar_entry(param, present)
+                entry = self.parameter_calendars[param.id]['entry']
+                start_time =self.parameter_calendars[param.id]['start_time']
+                self.parameter_setpoints[param.id] = entry.interpolation.get_value_at(present-start_time)
 
     def get_cultivation_start(self):
         time_str = self.db_session.query(FieldSetting).filter_by(name='cultivation_start').first().value
@@ -91,11 +91,10 @@ class FarmManager(object):
 
         """
         for r in self.regulators:
-            sp = self.parameter_setpoints[r.input_parameter]
+            sp = self.parameter_setpoints[r.input_parameter.id]
             val = float(self.redis_conn.get('s'+str(r.input_parameter.sensor_id)))
             if sp is not None and val is not None:
                 y = r.calculate_output(sp, val, 0.5)
-                print('output: '+str(y))
                 self.set_actuator(r.output_device, y)
 
     def set_actuator(self, device, value):

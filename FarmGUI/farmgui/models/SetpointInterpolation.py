@@ -96,8 +96,8 @@ class SetpointInterpolation(Base):
         #print('y: '+str(y))
         if self.order < 4:
             f = interpolate.interp1d(x, y, kind=self.order)
-            y = str(f([t])[0])
+            y = f([t])[0]
         else:
             f = interpolate.splrep(x, y)
-            y = str(interpolate.splev([t], f)[0])
+            y = interpolate.splev([t], f)[0]
         return y

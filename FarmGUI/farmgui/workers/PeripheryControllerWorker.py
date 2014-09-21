@@ -7,6 +7,8 @@ from datetime import datetime
 from datetime import timedelta
 from time import sleep
 
+import logging
+
 from redis import Redis
 from pyramid.paster import get_appsettings
 
@@ -88,14 +90,13 @@ class PeripheryControllerWorker(object):
             message = self.pubsub.get_message()
             if message is not None:
                 data = eval(message['data'])
-                # print('got data: ' + str(data))
                 result = self.serial.execute_cmd(data['cmd'])
                 if data['result_channel'] is not None:
                     response = {'caller_id': data['caller_id'],
                                 'time': str(datetime.now()),
                                 'value': result}
                     self.redis_conn.publish(data['result_channel'], response)
-                    print('oaf_cw: ' + data['result_channel'] + '(' + data['cmd'] + ': ' + result + ')')
+                    logging.info(data['result_channel'] + '(' + data['cmd'] + ': ' + result + ')')
             now = datetime.now()
             for sensor in self.periphery_controller.sensors:
                 if now - sensor.last_measured > timedelta(seconds=sensor.sampling_time):
@@ -132,6 +133,10 @@ def main(argv=sys.argv):
     db_engine = engine_from_config(settings, 'sqlalchemy.')
     db_sessionmaker = sessionmaker(bind=db_engine)
     Base.metadata.bind = db_engine
+    logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name + '.log',
+                        format='%(levelname)s:%(asctime)s: %(message)s',
+                        datefmt='%Y.%m.%d %I:%M',
+                        level=logging.INFO)
 
     worker = PeripheryControllerWorker(dev_name, redis_conn, db_sessionmaker)
     try:
