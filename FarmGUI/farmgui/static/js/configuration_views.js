@@ -60,6 +60,10 @@ function edit_parameter (rText, sText, xhr, form) {
         $('#edit_parameter_modal_'+rText.parameter._id).modal('hide');
         // replace name
         $('#parameter_name_'+rText.parameter._id).text(rText.parameter.name);
+        $('#parameter_description_'+rText.parameter._id).text(rText.parameter.description);
+        $('#parameter_type_'+rText.parameter._id).text(rText.parameter.parameter_type.name + " [" + rText.parameter.parameter_type.unit + "]");
+        $('#parameter_sensor_'+rText.parameter._id).text(rText.parameter.sensor.periphery_controller.name + "-->" + rText.parameter.sensor.name);
+        $('#parameter_interval_'+rText.parameter._id).text(rText.parameter.interval);
     }
     // insert form again
     $('#edit_parameter_modal_'+rText.parameter._id).find('.modal-body').append(rText.form);
@@ -87,6 +91,9 @@ function edit_device (rText, sText, xhr, form) {
         $('#edit_device_modal_'+rText.device._id).modal('hide');
         // replace name
         $('#device_name_'+rText.device._id).text(rText.device.name);
+        $('#device_description_'+rText.device._id).text(rText.device.description);
+        $('#device_type_'+rText.device._id).text(rText.device.device_type);
+        $('#device_actuator_'+rText.device._id).text(rText.device.actuator.periphery_controller.name + "-->" + rText.device.actuator.name);
     }
     // insert form again
     $('#edit_device_modal_'+rText.device._id).find('.modal-body').append(rText.form);
@@ -114,6 +121,10 @@ function edit_regulator (rText, sText, xhr, form) {
         $('#edit_regulator_modal_'+rText.regulator._id).modal('hide');
         // replace name
         $('#regulator_name_'+rText.regulator._id).text(rText.regulator.name);
+        $('#regulator_description_'+rText.regulator._id).text(rText.regulator.description);
+        $('#regulator_type_'+rText.regulator._id).text(rText.regulator.regulator_type.name);
+        $('#regulator_input_parameter_'+rText.regulator._id).text(rText.regulator.input_parameter.name);
+        $('#regulator_output_device_'+rText.regulator._id).text(rText.regulator.output_device.name);
     }
     // insert form again
     $('#edit_regulator_modal_'+rText.regulator._id).find('.modal-body').append(rText.form);

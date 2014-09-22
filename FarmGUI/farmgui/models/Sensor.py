@@ -13,6 +13,7 @@ from sqlalchemy.types import Float
 from sqlalchemy.orm import relationship
 
 from .meta import Base
+from .meta import serialize
 
 
 class Sensor(Base):
@@ -48,3 +49,17 @@ class Sensor(Base):
     @property
     def id(self):
         return self._id
+
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {
+            '_id': self.id,
+            'periphery_controller': serialize(self.periphery_controller),
+            'name': self.name,
+            'parameter_type': serialize(self.parameter_type),
+            'precision': self.precision,
+            'sampling_time': self.sampling_time,
+            'minimum': self.minimum,
+            'maximum': self.maximum
+        }

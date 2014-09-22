@@ -1,4 +1,6 @@
 import serial
+import logging
+import time
 
 
 class SerialShell(object):
@@ -58,8 +60,11 @@ class SerialShell(object):
         return float(self.execute_cmd('s' + name))
 
     def execute_cmd(self, cmd):
+        start = time.time()
         self.serial.write(bytearray(cmd + '\n', 'ascii'))
-        return self.read_line()
+        line = self.read_line()
+        logging.debug('SerialShell: executed \"' + cmd + '\" in ' + str(time.time()-start) + ' [s]')
+        return line
 
     def read_line(self):
         line = ''

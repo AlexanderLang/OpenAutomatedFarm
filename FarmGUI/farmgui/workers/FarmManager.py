@@ -50,6 +50,7 @@ class FarmManager(object):
         self.recalculate_parameter_calendars(present)
         self.parameter_setpoints = {}
         self.recalculate_measurement_schedule()
+        logging.info('Farm Manager initialized')
 
     def recalculate_parameter_calendars(self, present):
         for param in self.parameters:
@@ -112,12 +113,13 @@ class FarmManager(object):
         :param param:
         """
         channel_name = 'periphery_controller_' + str(device.actuator.periphery_controller_id)
-        data = {'cmd': 'a' + device.actuator.name + ' ' + str(value),
+        data = {'cmd': 'a' + device.actuator.name + ' ' + str(int(value)),
                 'result_channel': 'log_devices',
                 'caller_id': device.id}
         self.redis_conn.publish(channel_name, data)
 
     def work(self):
+        logging.info('Farm Manager entered work loop')
         # main loop
         while True:
             # get time
@@ -130,10 +132,12 @@ class FarmManager(object):
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.recalculate_measurement_schedule()
+                    logging.info('recalculated measurement schedule due to parameter changes')
                 if message['channel'] == b'periphery_controller_changes':
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.recalculate_measurement_schedule()
+                    logging.info('recalculated measurement schedule due to periphery controller changes')
                 if message['channel'] == b'log_measurements':
                     data = eval(message['data'])
                     self.save_data(data)
@@ -143,11 +147,13 @@ class FarmManager(object):
                     self.db_session = self.db_sessionmaker()
                     self.parameters = self.db_session.query(Parameter).all()
                     self.recalculate_parameter_calendars(now)
+                    logging.info('recalculated parameter calendars due to calendar changes')
                 elif message['channel'] == b'field_setting_changes':
                     self.db_session.close()
                     self.db_session = self.db_sessionmaker()
                     self.get_cultivation_start()
                     self.recalculate_parameter_calendars(now)
+                    logging.info('recalculated prarameter calendars due to field setting changes')
                 if message['channel'] == b'regulator_changes':
                     # something changed
                     self.db_session.close()
@@ -209,7 +215,7 @@ def main(argv=sys.argv):
     Base.metadata.bind = db_engine
     logging.basicConfig(filename=settings['log_directory']+'/farm_manager.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
-                        datefmt='%Y.%m.%d %I:%M',
+                        datefmt='%Y.%m.%d %H:%M:%S',
                         level=logging.INFO)
     worker = FarmManager(db_sessionmaker, redis_conn)
     worker.work()

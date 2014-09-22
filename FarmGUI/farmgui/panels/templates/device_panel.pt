@@ -6,7 +6,7 @@
             <a id="device_name_${device.id}" data-toggle="modal" href="#edit_device_modal_${device.id}">${device.name}</a>
         </h2>
 
-        <h4>${device.description}</h4>
+        <h4 id="device_description_${device.id}">${device.description}</h4>
 
         <div class="modal" id="edit_device_modal_${device._id}">
             <div class="modal-dialog">
@@ -27,7 +27,7 @@
             <div class="col-sm-4">
                 <h5>Type: </h5>
             </div>
-            <div class="col-sm-8">
+            <div id="device_type_${device.id}" class="col-sm-8">
                     ${device.device_type.name}
             </div>
         </div>
@@ -36,7 +36,7 @@
             <div class="col-sm-2">
                 <h5>Actuator: </h5>
             </div>
-            <div class="col-sm-5">
+            <div id="device_actuator_${device.id}" class="col-sm-5">
                 ${device.actuator.periphery_controller.name + '-->' + device.actuator.name}
             </div>
         </div>

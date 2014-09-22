@@ -14,6 +14,7 @@ from sqlalchemy.types import Text
 from sqlalchemy.orm import relationship
 
 from .meta import Base
+from .meta import serialize
 
 
 class Device(Base):
@@ -67,6 +68,18 @@ class Device(Base):
     @property
     def id(self):
         return self._id
+
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {
+            '_id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'component': serialize(self.component),
+            'device_type': serialize(self.device_type),
+            'actuator': self.actuator.serialize
+        }
 
 
 def init_devices(db_session):

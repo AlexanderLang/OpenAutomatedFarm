@@ -204,7 +204,7 @@ class ConfigurationViews(object):
             param.sensor_id = vals['sensor']
             param.description = vals['description']
             ret_dict['form'] = form.render(parameter=param)
-            ret_dict['parameter'] = serialize(param)
+            ret_dict['parameter'] = param.serialize
         self.request.redis.publish('parameter_changes', 'parameter changed')
         return ret_dict
 
@@ -260,6 +260,8 @@ class ConfigurationViews(object):
             dev.device_type_id = vals['device_type']
             dev.actuator_id = vals['actuator']
             dev.description = vals['description']
+            ret_dict['form'] = form.render(device=dev)
+            ret_dict['device'] = dev.serialize
         self.request.redis.publish('device_changes', 'device changed')
         return ret_dict
 
@@ -315,9 +317,11 @@ class ConfigurationViews(object):
         else:
             reg.name = vals['name']
             reg.regulator_type_id = vals['regulator_type']
-            reg.parameter_id = vals['parameter']
-            reg.device_id = vals['device']
+            reg.input_parameter_id = vals['parameter']
+            reg.output_device_id = vals['device']
             reg.description = vals['description']
+            ret_dict['form'] = form.render(regulator=reg)
+            ret_dict['regulator'] = reg.serialize
 
         self.request.redis.publish('regulator_changes', 'new regulator')
         return ret_dict
@@ -328,7 +332,7 @@ class ConfigurationViews(object):
         DBSession.delete(regulator)
         return HTTPFound(location=self.request.route_url('components_list'))
 
-    @view_config(route_name='regulator_config_update')
+    @view_config(route_name='regulator_config_update', renderer='json')
     def regulator_config_update(self):
         try:
             rc = DBSession.query(RegulatorConfig).filter_by(_id=self.request.matchdict['_id']).first()

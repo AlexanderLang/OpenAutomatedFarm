@@ -12,6 +12,7 @@ from sqlalchemy.types import Text
 from sqlalchemy.orm import relationship
 
 from .meta import Base
+from .meta import serialize
 from .RegulatorConfig import RegulatorConfig
 
 
@@ -71,6 +72,19 @@ class Regulator(Base):
     @property
     def id(self):
         return self._id
+
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {
+            '_id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'component': serialize(self.component),
+            'regulator_type': serialize(self.regulator_type),
+            'input_parameter': self.input_parameter.serialize,
+            'output_device': self.output_device.serialize
+        }
 
     @property
     def regulator_type(self):

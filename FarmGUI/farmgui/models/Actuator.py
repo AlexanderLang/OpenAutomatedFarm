@@ -11,6 +11,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .meta import Base
+from .meta import serialize
 
 
 class Actuator(Base):
@@ -38,3 +39,13 @@ class Actuator(Base):
     @property
     def id(self):
         return self._id
+
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {
+            '_id': self.id,
+            'periphery_controller': serialize(self.periphery_controller),
+            'name': self.name,
+            'device_type': serialize(self.device_type)
+        }

@@ -96,7 +96,7 @@ class PeripheryControllerWorker(object):
                                 'time': str(datetime.now()),
                                 'value': result}
                     self.redis_conn.publish(data['result_channel'], response)
-                    logging.info(data['result_channel'] + '(' + data['cmd'] + ': ' + result + ')')
+                    logging.debug('executed \"' + data['cmd'] + '\": result=' + result + ', sending result to '+data['result_channel'])
             now = datetime.now()
             for sensor in self.periphery_controller.sensors:
                 if now - sensor.last_measured > timedelta(seconds=sensor.sampling_time):
@@ -135,7 +135,7 @@ def main(argv=sys.argv):
     Base.metadata.bind = db_engine
     logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name.split('/')[-1] + '.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
-                        datefmt='%Y.%m.%d %I:%M',
+                        datefmt='%Y.%m.%d %H:%M:%S',
                         level=logging.INFO)
 
     worker = PeripheryControllerWorker(dev_name, redis_conn, db_sessionmaker)

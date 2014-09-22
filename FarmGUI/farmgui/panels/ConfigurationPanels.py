@@ -90,7 +90,10 @@ def device_panel(context, request, device):
     schema = DeviceSchema().bind(device=device)
     edit_device_form = Form(schema,
                      action=request.route_url('device_save', comp_id=device.component_id, dev_id=device.id),
-                     formid='edit_parameter_form_'+str(device.id),
+                     formid='edit_device_form_'+str(device.id),
+                     use_ajax=True,
+                     ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                  '  edit_device(rText, sText, xhr, form);}}',
                      buttons=('Save',))
     return {'device': device,
             'edit_device_form': edit_device_form.render(),
@@ -103,6 +106,9 @@ def regulator_panel(context, request, regulator):
     edit_regulator_form = Form(schema,
                      action=request.route_url('regulator_save', comp_id=regulator.component_id, reg_id=regulator.id),
                      formid='edit_regulator_form_'+str(regulator.id),
+                     use_ajax=True,
+                     ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                  '  edit_regulator(rText, sText, xhr, form);}}',
                      buttons=('Save',))
     return {'regulator': regulator,
             'edit_regulator_form': edit_regulator_form.render(),
@@ -115,6 +121,9 @@ def regulator_config_panel(context, request, regulator_config):
     edit_form = Form(schema,
                      action=request.route_url('regulator_config_update', _id=regulator_config.id, regulator_id=regulator_config.regulator.id),
                      formid='edit_regulator_config_form_'+str(regulator_config.id),
+                     use_ajax=True,
+                     ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                  '  edit_regulator_config(rText, sText, xhr, form);}}',
                      buttons=('Save',))
     return {'regulator_config': regulator_config,
             'edit_form': edit_form.render({'name': regulator_config.name,

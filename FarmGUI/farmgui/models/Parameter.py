@@ -13,6 +13,7 @@ from sqlalchemy.types import Text
 from sqlalchemy.orm import relationship
 
 from .meta import Base
+from .meta import serialize
 
 
 class Parameter(Base):
@@ -74,6 +75,19 @@ class Parameter(Base):
     @property
     def id(self):
         return self._id
+
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {
+            '_id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'component': serialize(self.component),
+            'parameter_type': serialize(self.parameter_type),
+            'interval': self.interval,
+            'sensor': self.sensor.serialize
+        }
 
 
 def init_parameters(db_session):
