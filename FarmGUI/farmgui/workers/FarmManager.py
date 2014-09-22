@@ -168,7 +168,7 @@ class FarmManager(object):
                     val = self.redis_conn.get('s'+str(sc.sensor_id))
                     self.save_data(sc, now, val)
                     self.schedule[sc] = now + timedelta(seconds=sc.interval)
-            sleep(0.1)
+            sleep(3)
 
     def recalculate_measurement_schedule(self):
         logging.info('recalculating schedule')
