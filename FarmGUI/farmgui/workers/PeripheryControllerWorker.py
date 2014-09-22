@@ -136,7 +136,7 @@ def main(argv=sys.argv):
     logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name.split('/')[-1] + '.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
                         datefmt='%Y.%m.%d %H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
 
     worker = PeripheryControllerWorker(dev_name, redis_conn, db_sessionmaker)
     try:

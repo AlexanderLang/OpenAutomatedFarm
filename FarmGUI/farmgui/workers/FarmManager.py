@@ -216,6 +216,6 @@ def main(argv=sys.argv):
     logging.basicConfig(filename=settings['log_directory']+'/farm_manager.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
                         datefmt='%Y.%m.%d %H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
     worker = FarmManager(db_sessionmaker, redis_conn)
     worker.work()
