@@ -37,7 +37,7 @@ def add_routes(config):
     config.add_route('device_delete',               '/conf/comp/{comp_id}/dev/{dev_id}/delete')
     config.add_route('regulator_save',              '/conf/comp/{comp_id}/reg/{reg_id}/save')
     config.add_route('regulator_delete',            '/conf/comp/{comp_id}/reg/{reg_id}/delete')
-    config.add_route('regulator_config_update',     '/conf/reg/{regulator_id}/config/{_id}/update')
+    config.add_route('regulator_config_update',     '/conf/reg/{reg_id}/config/{_id}/update')
     config.add_route('field_settings_list',         '/conf/field_settings')
     config.add_route('field_setting_update',        '/conf/field_settings/{name}/update')
     config.add_route('periphery_controllers_list',  '/conf/periphery_controllers')

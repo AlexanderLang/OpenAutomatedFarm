@@ -334,21 +334,32 @@ class ConfigurationViews(object):
 
     @view_config(route_name='regulator_config_update', renderer='json')
     def regulator_config_update(self):
+        ret_dict = {}
+        reg_id = self.request.matchdict['reg_id']
+        ret_dict['regulator_id'] = reg_id
+        conf_id = self.request.matchdict['_id']
+        ret_dict['regulator_config_id'] = conf_id
+        controls = self.request.POST.items()
+        rc = DBSession.query(RegulatorConfig).filter_by(_id=conf_id).first()
+        form = Form(RegulatorConfigSchema().bind(),
+                    formid='edit_regulator_' + reg_id + '_config_form_' + conf_id,
+                    action=self.request.route_url('regulator_config_update', reg_id=reg_id, _id=conf_id),
+                    use_ajax=True,
+                    ajax_options='{"success": function (rText, sText, xhr, form) {' \
+                                 '    edit_regulator_config(rText, sText, xhr, form);}}',
+                    buttons=('Save',))
         try:
-            rc = DBSession.query(RegulatorConfig).filter_by(_id=self.request.matchdict['_id']).first()
-        except DBAPIError:
-            return Response('database error (query RegulatorConfig)', content_type='text/plain', status_int=500)
-        form = Form(RegulatorConfigSchema(), buttons=('Save',))
-        controls = self.request.POST
-        controls['name'] = rc.name
-        controls['description'] = rc.description
-        controls = controls.items()
-        try:
-            values = form.validate(controls)
+            vals = form.validate(controls)
+            ret_dict['form'] = form.render()
+            ret_dict['error'] = False
         except ValidationFailure as e:
-            return Response(e.render())
-        rc.value = values['value']
-        return HTTPFound(location=self.request.route_url('components_list'))
+            ret_dict['form'] = e.render()
+            ret_dict['error'] = True
+            return ret_dict
+        rc.value = vals['value']
+        ret_dict['regulator_config'] = serialize(rc)
+        self.request.redis.publish('regulator_changes', 'regulator config changed')
+        return ret_dict
 
     @view_config(route_name='periphery_controllers_list',
                  renderer='farmgui:views/templates/periphery_controllers_list.pt', layout='default')

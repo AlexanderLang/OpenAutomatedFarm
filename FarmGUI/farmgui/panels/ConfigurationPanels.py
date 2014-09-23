@@ -119,7 +119,7 @@ def regulator_panel(context, request, regulator):
 def regulator_config_panel(context, request, regulator_config):
     schema = RegulatorConfigSchema(config=regulator_config).bind()
     edit_form = Form(schema,
-                     action=request.route_url('regulator_config_update', _id=regulator_config.id, regulator_id=regulator_config.regulator.id),
+                     action=request.route_url('regulator_config_update', _id=regulator_config.id, reg_id=regulator_config.regulator.id),
                      formid='edit_regulator_config_form_'+str(regulator_config.id),
                      use_ajax=True,
                      ajax_options='{"success": function (rText, sText, xhr, form) {'

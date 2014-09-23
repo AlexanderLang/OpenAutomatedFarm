@@ -127,7 +127,20 @@ function edit_regulator (rText, sText, xhr, form) {
         $('#regulator_output_device_'+rText.regulator._id).text(rText.regulator.output_device.name);
     }
     // insert form again
-    $('#edit_regulator_modal_'+rText.regulator._id).find('.modal-body').append(rText.form);
+    $('#edit_regulator_modal_'+rText.regulator_config_id).find('.modal-body').append(rText.form);
+
+    deform.processCallbacks();
+}
+
+function edit_regulator_config (rText, sText, xhr, form) {
+    // dismiss modal dialog (if there was no error)
+    if (rText.error == false){
+        $('#edit_regulator_config_modal_'+rText.regulator_config_id).modal('hide');
+        // replace value
+        $('#regulator_config_value_'+rText.regulator_config_id).text(rText.regulator_config.value);
+    }
+    // insert form again
+    $('#edit_regulator_config_modal_'+rText.regulator_config._id).find('.modal-body').append(rText.form);
 
     deform.processCallbacks();
 }

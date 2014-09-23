@@ -5,7 +5,9 @@
         </div>
         <div class="col-sm-8">
             <h4>
-                <a data-toggle="modal" href="#edit_regulator_config_modal_${regulator_config.id}">${regulator_config.value}</a>
+                <a data-toggle="modal"
+                   href="#edit_regulator_config_modal_${regulator_config.id}"
+                   id="regulator_config_value_${regulator_config._id}">${regulator_config.value}</a>
             </h4>
         </div>
     </div><!-- /.panel-body -->
