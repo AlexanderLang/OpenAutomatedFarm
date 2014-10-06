@@ -7,7 +7,7 @@
         </a>
 
         <div id="component_list">
-            <div tal:repeat="c components">
+            <div tal:repeat="c components" id="component_${c.id}">
                 ${panel('component_panel', c)}
             </div>
         </div>

@@ -56,8 +56,12 @@ class SerialShell(object):
     def set_actuator_value(self, name, value):
         return self.execute_cmd('a' + name + ' ' + str(value))
 
-    def get_sensor_value(self, name):
-        return float(self.execute_cmd('s' + name))
+    def get_sensor_values(self):
+        response = self.execute_cmd('s')
+        values = []
+        for val_str in response.split(';'):
+            values.append(float(val_str))
+        return values
 
     def execute_cmd(self, cmd):
         start = time.time()

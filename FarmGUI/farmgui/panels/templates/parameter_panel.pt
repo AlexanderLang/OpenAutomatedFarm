@@ -42,15 +42,6 @@
             </div>
         </div>
         <!-- /.row -->
-        <div class="row">
-            <div class="col-sm-8">
-                <h5>Measurement Interval</h5>
-            </div>
-            <div class="col-sm-4" id="parameter_interval_${parameter.id}">
-                ${str(parameter.interval)}
-            </div>
-        </div>
-        <!-- /.row -->
         <a href="${calendar_href}" class="btn btn-primary btn-lg">Calendar</a>
     </div>
     <!-- /.panel-body -->

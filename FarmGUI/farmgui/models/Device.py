@@ -51,9 +51,7 @@ class Device(Base):
     def __init__(self, component, name, device_type, actuator, description):
         """
         Constructor
-        :type sensor: Sensor
         :type component: FarmComponent
-        :type parameter_type: ParameterType
         """
         self.component = component
         self.component_id = component.id

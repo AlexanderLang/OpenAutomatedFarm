@@ -18,8 +18,7 @@ from ..models import DeviceType
 @colander.deferred
 def deferred_interpolation_widget(node, kw):
     interpolations = DBSession.query(SetpointInterpolation).all()
-    choises = []
-    choises.append((None, '--select--'))
+    choises = [(None, '--select--')]
     for ip in interpolations:
         choises.append((ip.id, ip.name))
     return SelectWidget(values=choises)

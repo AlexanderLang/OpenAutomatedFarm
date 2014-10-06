@@ -35,8 +35,7 @@ def deferred_type_default(node, kw):
 @colander.deferred
 def deferred_actuator_widget(node, kw):
     actuators = DBSession.query(Actuator).all()
-    choises = []
-    choises.append((None, '--select--'))
+    choises = [(None, '--select--')]
     for a in actuators:
         choises.append((a.id, a.periphery_controller.name + '->' + a.name))
     return SelectWidget(values=choises)

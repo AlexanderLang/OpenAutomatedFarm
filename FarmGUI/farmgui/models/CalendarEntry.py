@@ -31,6 +31,7 @@ class CalendarEntry(Base):
         self.entry_number = entry_number
         self.interpolation = interpolation
         self.interpolation_id = interpolation.id
+        self.end_time = None
 
     @property
     def id(self):

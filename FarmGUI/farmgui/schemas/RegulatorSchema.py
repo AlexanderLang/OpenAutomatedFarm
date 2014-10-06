@@ -36,8 +36,7 @@ def deferred_type_default(node, kw):
 @colander.deferred
 def deferred_parameter_widget(node, kw):
     parameters = DBSession.query(Parameter).all()
-    choises = []
-    choises.append((None, '--select--'))
+    choises = [(None, '--select--')]
     for p in parameters:
         choises.append((p.id, p.name))
     return SelectWidget(values=choises)
@@ -56,8 +55,7 @@ def deferred_parameter_default(node, kw):
 @colander.deferred
 def deferred_device_widget(node, kw):
     devices = DBSession.query(Device).all()
-    choises = []
-    choises.append((None, '--select--'))
+    choises = [(None, '--select--')]
     for d in devices:
         choises.append((d.id, d.name))
     return SelectWidget(values=choises)

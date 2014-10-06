@@ -22,9 +22,6 @@ from ..models import Sensor
 from ..models import Actuator
 from ..models import DeviceType
 
-db_engine = None
-db_sessionmaker = None
-
 from ..communication import SerialShell
 
 
@@ -85,6 +82,7 @@ class PeripheryControllerWorker(object):
         self.redis_conn.publish('periphery_controller_changes', 'connected id: '+str(self.controller_id))
 
     def work(self):
+        loop_time = 0.1
         while True:
             # listen for messages
             message = self.pubsub.get_message()
@@ -97,13 +95,13 @@ class PeripheryControllerWorker(object):
                                 'value': result}
                     self.redis_conn.publish(data['result_channel'], response)
                     logging.debug('executed \"' + data['cmd'] + '\": result=' + result + ', sending result to '+data['result_channel'])
-            now = datetime.now()
+
+            values = self.serial.get_sensor_values()
+            i = 0
             for sensor in self.periphery_controller.sensors:
-                if now - sensor.last_measured > timedelta(seconds=sensor.sampling_time):
-                    s = 's'+str(sensor.id)
-                    self.redis_conn.set(s, self.serial.execute_cmd('s'+sensor.name))
-                    sensor.last_measured = now
-            sleep(0.05)
+                self.redis_conn.set('s'+str(sensor.id), values[i])
+                i += 1
+            sleep(loop_time)
 
     def close(self):
         db_session = self.db_sessionmaker()

@@ -31,7 +31,6 @@ from ..schemas import RegulatorConfigSchema
 def component_panel(context, request, component):
     """
 
-    :type component_id: int
     """
     add_parameter_form = Form(ParameterSchema().bind(),
                               action=request.route_url('parameter_save', comp_id=component.id, param_id=0),

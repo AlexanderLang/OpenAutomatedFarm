@@ -4,6 +4,7 @@ Created on Feb 15, 2014
 @author: alex
 """
 
+from datetime import datetime
 from sqlalchemy import Column
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
@@ -26,6 +27,11 @@ class FieldSetting(Base):
         self.name = name
         self.value = value
         self.description = description
+
+    @staticmethod
+    def get_cultivation_start(db_session):
+        time_str = db_session.query(FieldSetting).filter_by(name='cultivation_start').first().value
+        return datetime.strptime(time_str, "%d.%m.%Y")
 
 
 def init_field_settings(db_session):

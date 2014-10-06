@@ -32,17 +32,9 @@ def deferred_type_default(node, kw):
 
 
 @colander.deferred
-def deferred_interval_default(node, kw):
-    if 'parameter' in kw:
-        return kw['parameter'].interval
-    return 60
-
-
-@colander.deferred
 def deferred_sensor_widget(node, kw):
     sensors = DBSession.query(Sensor).all()
-    choises = []
-    choises.append((None, '--select--'))
+    choises = [(None, '--select--')]
     for s in sensors:
         choises.append((s.id, s.periphery_controller.name + '->' + s.name))
     return SelectWidget(values=choises)
@@ -87,10 +79,6 @@ class ParameterSchema(MappingSchema):
                                 descripition='the type of physical quantity that is being measured',
                                 default=deferred_type_default,
                                 widget=deferred_type_widget)
-    interval = SchemaNode(typ=Float(),
-                          title='Measurement interval [s]',
-                          validation=Range(0, 86000),
-                          default=deferred_interval_default)
     sensor = SchemaNode(typ=Int(),
                         title='Associated Sensor',
                         default=deferred_sensor_default,

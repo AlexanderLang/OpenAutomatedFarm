@@ -101,6 +101,7 @@ class ConfigurationViews(object):
         ret_dict = {}
         controls = self.request.POST.items()
         comp_id = self.request.matchdict['comp_id']
+        comp = None
         if comp_id == '0':
             # new component
             form_id = 'add_component_form'
@@ -163,6 +164,7 @@ class ConfigurationViews(object):
         param_id = self.request.matchdict['param_id']
         comp_id = self.request.matchdict['comp_id']
         ret_dict['comp_id'] = comp_id
+        param = None
         if param_id != '0':
             # existing component
             param = DBSession.query(Parameter).filter_by(_id=param_id).first()
@@ -193,14 +195,13 @@ class ConfigurationViews(object):
             comp = DBSession.query(FarmComponent).filter_by(_id=comp_id).first()
             parameter_type = DBSession.query(ParameterType).filter_by(_id=vals['parameter_type']).first()
             sensor = DBSession.query(Sensor).filter_by(_id=vals['sensor']).first()
-            new_parameter = Parameter(comp, vals['name'], parameter_type, vals['interval'], sensor, vals['description'])
+            new_parameter = Parameter(comp, vals['name'], parameter_type, sensor, vals['description'])
             DBSession.add(new_parameter)
             DBSession.flush()
             ret_dict['parameter_panel'] = self.request.layout_manager.render_panel('parameter_panel', new_parameter)
         else:
             param.name = vals['name']
             param.parameter_type_id = vals['parameter_type']
-            param.interval = vals['interval']
             param.sensor_id = vals['sensor']
             param.description = vals['description']
             ret_dict['form'] = form.render(parameter=param)
@@ -221,6 +222,7 @@ class ConfigurationViews(object):
         dev_id = self.request.matchdict['dev_id']
         comp_id = self.request.matchdict['comp_id']
         ret_dict['comp_id'] = comp_id
+        dev = None
         if dev_id != '0':
             # existing device
             dev = DBSession.query(Device).filter_by(_id=dev_id).first()
@@ -278,6 +280,7 @@ class ConfigurationViews(object):
         reg_id = self.request.matchdict['reg_id']
         comp_id = self.request.matchdict['comp_id']
         ret_dict['comp_id'] = comp_id
+        reg = None
         if reg_id != '0':
             # existing regulator
             reg = DBSession.query(Regulator).filter_by(_id=reg_id).first()

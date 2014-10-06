@@ -118,17 +118,12 @@ void execute_cmd(char cmd) {
 		Serial.println();
 		break;
 	case 's':
-		// read sensor named arg
+		// read sensors
 		for (int i = 0; i < num_sensors; i++) {
-			if (sensors[i].name == com_arg1) {
-				Serial.println(sensors[i].value);
-				found = 1;
-				break;
-			}
+			Serial.print(sensors[i].value);
+			Serial.print(';');
 		}
-	    if (found == 0) {
-	        Serial.println("Sensor Name Error");
-	    }
+		Serial.println();
 	    break;
 	case 'A':
 	    // get actuator list

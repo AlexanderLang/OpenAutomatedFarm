@@ -42,21 +42,18 @@ class Regulator(Base):
     description = Column(Text,
                          nullable=True)
     input_parameter_id = Column(SmallInteger,
-                       ForeignKey('Parameters._id'),
-                       nullable=False)
+                                ForeignKey('Parameters._id'),
+                                nullable=False)
     input_parameter = relationship("Parameter")
     output_device_id = Column(SmallInteger,
-                       ForeignKey('Devices._id'),
-                       nullable=False)
+                              ForeignKey('Devices._id'),
+                              nullable=False)
     output_device = relationship("Device")
     config = relationship('RegulatorConfig', backref='regulator', cascade="all, delete, delete-orphan")
 
     def __init__(self, component, name, regulator_type, input_parameter, output_device, description):
         """
         Constructor
-        :type sensor: Sensor
-        :type component: FarmComponent
-        :type parameter_type: ParameterType
         """
         self.component = component
         self.component_id = component.id
@@ -68,6 +65,7 @@ class Regulator(Base):
         self.output_device = output_device
         self.output_device_id = output_device.id
         self.description = description
+        self.esum = 0
 
     @property
     def id(self):
@@ -94,7 +92,7 @@ class Regulator(Base):
     def regulator_type(self, value):
         self._regulator_type = value
         if value.name == 'P':
-            while len(self.config)>1:
+            while len(self.config) > 1:
                 # delete unneeded config
                 del self.config[-1]
             if len(self.config) == 0:
@@ -118,8 +116,9 @@ class Regulator(Base):
                 self.config.append(new_conf)
 
     def calculate_output(self, setpoint, value, t_i):
+        output = 0
         if self.regulator_type.name == 'P':
-            output = (setpoint - value)*float(self.config[0].value)
+            output = (setpoint - value) * float(self.config[0].value)
         if self.regulator_type.name == 'PI':
             d = setpoint - value
             self.esum = self.esum + d
@@ -127,15 +126,14 @@ class Regulator(Base):
                 self.esum = 200
             elif self.esum < -200:
                 self.esum = -200
-            P = d * float(self.config[0].value)
-            I = self.esum * t_i * float(self.config[1].value)
-            output = P + I
+            proportional = d * float(self.config[0].value)
+            integral = self.esum * t_i * float(self.config[1].value)
+            output = proportional + integral
         if output > 100:
             output = 100
         if output < 0:
             output = 0
         return output
-
 
 
 def init_regulators(db_session):
