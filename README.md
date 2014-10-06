@@ -69,3 +69,7 @@ Getting Started
 
 5) start hacking :)
 
+6) building arduino firmware with ino (on arm)
+
+    ino build --cppflags="-fno-use-cxa-atexit -ffunction-sections -fdata-sections -g -Os -w"
+

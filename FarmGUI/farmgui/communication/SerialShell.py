@@ -59,7 +59,9 @@ class SerialShell(object):
     def get_sensor_values(self):
         response = self.execute_cmd('s')
         values = []
-        for val_str in response.split(';'):
+        strings = response.split(';')
+        strings.pop()
+        for val_str in strings:
             values.append(float(val_str))
         return values
 
