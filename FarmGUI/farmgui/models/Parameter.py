@@ -94,11 +94,17 @@ class Parameter(Base):
         return entry.get_value_at(setpoint_time)
 
     def log_measurement(self, time, value):
-        if self.logs[-2].value == value and self.logs[-1].value == value:
-            # value is constant, update time on last entry
-            self.logs[-1].time = time
-        else:
-            # add a new log entry
+        try:
+            old_1 = self.logs[-2].value
+            old_2 = self.logs[-1].value
+            if old_2 == value and old_1 == value:
+                # value is constant, update time on last entry
+                self.logs[-1].time = time
+            else:
+                # add a new log entry
+                new_log = ParameterLog(self, time, value)
+                self.logs.append(new_log)
+        except IndexError:
             new_log = ParameterLog(self, time, value)
             self.logs.append(new_log)
 
