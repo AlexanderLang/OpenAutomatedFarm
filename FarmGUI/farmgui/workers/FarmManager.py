@@ -63,6 +63,8 @@ class FarmManager(object):
                 self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
                 self.parameters = self.db_session.query(Parameter).all()
                 self.regulators = self.db_session.query(Regulator).all()
+                for regulator in self.regulators:
+                    regulator.input_parameter.configure_calendar(self.cultivation_start, now)
             # log parameters
             for param in self.parameters:
                 value = self.redis_conn.get('s' + str(param.sensor_id))
@@ -77,7 +79,7 @@ class FarmManager(object):
                     setpoint = regulator.input_parameter.get_setpoint(now)
                     if setpoint is None:
                         logging.warning('regulator '+regulator.name+' cannot find a setpoint')
-                output_value = regulator.calulate_output(setpoint, input_value, loop_time)
+                output_value = regulator.calculate_output(setpoint, input_value, loop_time)
                 self.redis_conn.set('a' + str(regulator.output_device_id), output_value)
             sleep(loop_time)
 
