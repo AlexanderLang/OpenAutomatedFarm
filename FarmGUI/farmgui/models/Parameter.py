@@ -98,15 +98,13 @@ class Parameter(Base):
             old_1 = self.logs[-2].value
             old_2 = self.logs[-1].value
             if old_2 == value and old_1 == value:
-                # value is constant, update time on last entry
-                self.logs[-1].time = time
-            else:
-                # add a new log entry
-                new_log = ParameterLog(self, time, value)
-                self.logs.append(new_log)
+                # value is constant, remove last entry
+                self.logs.pop()
         except IndexError:
-            new_log = ParameterLog(self, time, value)
-            self.logs.append(new_log)
+            pass
+        # add a new log entry
+        new_log = ParameterLog(self, time, value)
+        self.logs.append(new_log)
 
     @property
     def id(self):
