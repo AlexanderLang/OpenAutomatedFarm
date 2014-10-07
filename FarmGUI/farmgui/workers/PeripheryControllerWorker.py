@@ -10,6 +10,7 @@ from time import sleep
 import logging
 
 from redis import Redis
+from serial import SerialException
 from pyramid.paster import get_appsettings
 
 redis_conn = Redis('localhost', 6379)
@@ -40,67 +41,81 @@ class PeripheryControllerWorker(object):
         self.controller_id = self.serial.get_id()
         if self.controller_id == 0:
             # new controller
-            fw_name = self.serial.get_firmware_name()
-            fw_version = self.serial.get_firmware_version()
-            new_name = 'new ' + fw_name + ' (version ' + fw_version + ')'
-            self.periphery_controller = PeripheryController(fw_name, fw_version, new_name, True)
-            db_session.add(self.periphery_controller)
-            db_session.flush()
-            # save new id on controller
-            self.controller_id = self.periphery_controller.id
-            self.serial.set_id(self.controller_id)
-            # register sensors
-            sensors = self.serial.get_sensors()
-            for s in sensors:
-                param_type = db_session.query(ParameterType).filter_by(unit=s['unit']).first()
-                sensor = Sensor(self.periphery_controller, s['name'], param_type, s['precision'],
-                                s['samplingTime'], s['min'], s['max'])
-                db_session.add(sensor)
-            # register actuators
-            actuators = self.serial.get_actuators()
-            for a in actuators:
-                device_type = db_session.query(DeviceType).filter_by(unit=a['unit']).first()
-                actuator = Actuator(self.periphery_controller, a['name'], device_type)
-                db_session.add(actuator)
+            self.register_new_controller(db_session)
         else:
             # known controller (set active)
             self.periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
             self.periphery_controller.active = True
         db_session.commit()
         db_session.close()
-        # get periphery controller again
-        self.db_session = self.db_sessionmaker()
-        self.periphery_controller = self.db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
-        now = datetime.now()
-        for sensor in self.periphery_controller.sensors:
-            sensor.last_measured = now
-        # create command queue
-        self.channel_name = 'periphery_controller_' + str(self.controller_id)
-        self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
-        self.pubsub.subscribe(self.channel_name)
+        # get sensor ids
+        self.sensor_ids = []
+        db_session = self.db_sessionmaker()
+        sensors = db_session.query(Sensor).filter_by(periphery_controller_id=self.controller_id).all()
+        for sensor in sensors:
+            self.sensor_ids.append('s'+str(sensor.id))
+        # get actuator ids
+        self.actuator_ids = []
+        actuators = db_session.query(Actuator).filter_by(periphery_controller_id=self.controller_id).all()
+        for actuator in actuators:
+            self.actuator_ids.append('a'+str(actuator.id))
+        db_session.close()
         # let scheduler know the available sensors changed
         self.redis_conn.publish('periphery_controller_changes', 'connected id: '+str(self.controller_id))
 
-    def work(self):
-        loop_time = 0.1
-        while True:
-            # listen for messages
-            message = self.pubsub.get_message()
-            if message is not None:
-                data = eval(message['data'])
-                result = self.serial.execute_cmd(data['cmd'])
-                if data['result_channel'] is not None:
-                    response = {'caller_id': data['caller_id'],
-                                'time': str(datetime.now()),
-                                'value': result}
-                    self.redis_conn.publish(data['result_channel'], response)
-                    logging.debug('executed \"' + data['cmd'] + '\": result=' + result + ', sending result to '+data['result_channel'])
+    def register_new_controller(self, db_session):
+        fw_name = self.serial.get_firmware_name()
+        fw_version = self.serial.get_firmware_version()
+        new_name = 'new ' + fw_name + ' (version ' + fw_version + ')'
+        periphery_controller = PeripheryController(fw_name, fw_version, new_name, True)
+        db_session.add(periphery_controller)
+        db_session.flush()
+        # save new id on controller
+        self.controller_id = periphery_controller.id
+        self.serial.set_id(self.controller_id)
+        # register sensors
+        sensors = self.serial.get_sensors()
+        for i in range(len(sensors)):
+            s = sensors[i]
+            param_type = db_session.query(ParameterType).filter_by(unit=s['unit']).first()
+            sensor = Sensor(periphery_controller, i, s['name'], param_type, s['precision'],
+                            s['min'], s['max'])
+            db_session.add(sensor)
+        # register actuators
+        actuators = self.serial.get_actuators()
+        for i in range(len(actuators)):
+            a = actuators[i]
+            device_type = db_session.query(DeviceType).filter_by(unit=a['unit']).first()
+            actuator = Actuator(periphery_controller, i, a['name'], device_type, a['default'])
+            db_session.add(actuator)
 
+    def publish_sensor_values(self):
+        try:
             values = self.serial.get_sensor_values()
-            i = 0
-            for sensor in self.periphery_controller.sensors:
-                self.redis_conn.set('s'+str(sensor.id), values[i])
-                i += 1
+        except SerialException:
+            self.close()
+            exit()
+        for i in range(len(self.sensor_ids)):
+            self.redis_conn.set(self.sensor_ids[i], values[i])
+
+    def apply_actuator_values(self):
+        values = []
+        for i in range(len(self.actuator_ids)):
+            values.append(self.redis_conn.get(self.actuator_ids[i]))
+        try:
+            self.serial.set_actuator_values(values)
+        except SerialException:
+            self.close()
+            exit()
+
+
+
+
+    def work(self):
+        loop_time = 1
+        while True:
+            self.publish_sensor_values()
+            self.apply_actuator_values()
             sleep(loop_time)
 
     def close(self):
@@ -111,7 +126,6 @@ class PeripheryControllerWorker(object):
         db_session.close()
         # let scheduler know the available sensors changed
         self.redis_conn.publish('periphery_controller_changes', 'disconnected id: '+str(self.controller_id))
-        self.pubsub.close()
 
 
 def usage(argv):

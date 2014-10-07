@@ -5,6 +5,7 @@ Created on Feb 15, 2014
 """
 
 from sqlalchemy import Column
+from sqlalchemy.types import Float
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy import ForeignKey
@@ -23,18 +24,22 @@ class Actuator(Base):
     _id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
     periphery_controller_id = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
     periphery_controller = relationship('PeripheryController', back_populates='actuators')
+    index = Column(SmallInteger, nullable=False)
     name = Column(Unicode(250), nullable=False)
     device_type_id = Column(SmallInteger,
                                ForeignKey('DeviceTypes._id'),
                                nullable=False)
     device_type = relationship('DeviceType')
+    default_value = Column(Float, nullable=False)
 
-    def __init__(self, periphery_controller, name, device_type):
+    def __init__(self, periphery_controller, index, name, device_type, default_value):
         self.peripheryController = periphery_controller
         self.periphery_controller_id = periphery_controller.id
+        self.index = index
         self.name = name
         self.device_type = device_type
         self.device_type_id = device_type.id
+        self.default_value = default_value
 
     @property
     def id(self):

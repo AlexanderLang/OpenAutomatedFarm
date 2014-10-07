@@ -24,14 +24,6 @@
                 <h4>+/- ${sensor.precision} ${sensor.parameter_type.unit}</h4>
             </div>
         </div>
-        <div class="col-sm-2">
-            <div class="row">
-                <h4>Sampling Time</h4>
-            </div>
-            <div class="row">
-                <h4>${sensor.sampling_time}</h4>
-            </div>
-        </div>
         <div class="col-sm-1">
             <div class="row">
                 <h4>Min</h4>

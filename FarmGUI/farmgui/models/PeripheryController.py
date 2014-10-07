@@ -25,11 +25,11 @@ class PeripheryController(Base):
     name = Column(Unicode(250), nullable=True, unique=True)
     active = Column(Boolean, nullable=False, default=False, unique=False)
     sensors = relationship("Sensor",
-                           order_by="Sensor._id",
+                           order_by="Sensor.index",
                            back_populates='periphery_controller',
                            cascade='all, delete, delete-orphan')
     actuators = relationship("Actuator",
-                             order_by="Actuator._id",
+                             order_by="Actuator.index",
                              back_populates='periphery_controller',
                              cascade='all, delete, delete-orphan')
 
