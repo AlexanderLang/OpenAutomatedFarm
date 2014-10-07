@@ -92,8 +92,6 @@ class SetpointInterpolation(Base):
             y.append(knot.value)
         x.append(self.end_time)
         y.append(self.end_value)
-        #print('x: '+str(x))
-        #print('y: '+str(y))
         if self.order < 4:
             f = interpolate.interp1d(x, y, kind=self.order)
             y = f([t])[0]

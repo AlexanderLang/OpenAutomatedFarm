@@ -11,6 +11,7 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy.types import Text
 from sqlalchemy.orm import relationship
+import logging
 
 from .meta import Base
 from .meta import serialize
@@ -73,6 +74,7 @@ class Parameter(Base):
 
     def configure_calendar(self, cultivation_start, present):
         start_time = cultivation_start
+        self.current_calendar_entry = None
         for entry in self.calendar:
             end_time = start_time + timedelta(seconds=entry.interpolation.end_time)
             if end_time > present:
@@ -81,7 +83,8 @@ class Parameter(Base):
                 self.current_calendar_entry = entry
             else:
                 start_time = end_time
-        self.current_calendar_entry = None
+        if self.current_calendar_entry is None:
+            logging.warning(self.name + ': could not find calendar entry for ' + str(present))
 
     def get_setpoint(self, time):
         if self.current_calendar_entry is None:
@@ -89,9 +92,9 @@ class Parameter(Base):
         if self.current_calendar_entry.end_time < time:
             return None
         entry = self.current_calendar_entry
-        start_time = entry.end_time + timedelta(seconds=entry.interpolation.end_time)
+        start_time = entry.end_time - timedelta(seconds=entry.interpolation.end_time)
         setpoint_time = time - start_time
-        return entry.get_value_at(setpoint_time)
+        return entry.interpolation.get_value_at(setpoint_time)
 
     def log_measurement(self, time, value):
         try:
