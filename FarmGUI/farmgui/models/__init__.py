@@ -12,6 +12,7 @@ from .Parameter import init_parameters
 from .DeviceType import DeviceType
 from .DeviceType import init_device_types
 from .DeviceLog import DeviceLog
+from .DeviceCalendarEntry import DeviceCalendarEntry
 from .Device import Device
 from .Device import init_devices
 from .InterpolationKnot import InterpolationKnot

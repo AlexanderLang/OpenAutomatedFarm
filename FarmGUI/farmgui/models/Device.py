@@ -4,6 +4,8 @@ Created on Nov 17, 2013
 @author: alex
 """
 
+import logging
+from datetime import timedelta
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.types import Integer
@@ -47,6 +49,9 @@ class Device(Base):
                        nullable=True)
     actuator = relationship("Actuator")
     logs = relationship("DeviceLog", order_by="DeviceLog.time")
+    calendar = relationship('DeviceCalendarEntry',
+                            order_by='DeviceCalendarEntry.entry_number',
+                            cascade='all, delete, delete-orphan')
 
     def __init__(self, component, name, device_type, actuator, description):
         """
@@ -62,6 +67,29 @@ class Device(Base):
         if actuator is not None:
             self.actuator_id = actuator.id
         self.description = description
+        self.current_calendar_entry = None
+
+    def configure_calendar(self, cultivation_start, present):
+        start_time = cultivation_start
+        self.current_calendar_entry = None
+        for entry in self.calendar:
+            end_time = start_time + timedelta(seconds=entry.interpolation.end_time)
+            if end_time > present:
+                # found current calendar entry
+                entry.end_time = end_time
+                self.current_calendar_entry = entry
+            else:
+                start_time = end_time
+
+    def get_setpoint(self, time):
+        if self.current_calendar_entry is None:
+            return None
+        if self.current_calendar_entry.end_time < time:
+            return None
+        entry = self.current_calendar_entry
+        start_time = entry.end_time - timedelta(seconds=entry.interpolation.end_time)
+        setpoint_time = time - start_time
+        return entry.interpolation.get_value_at(setpoint_time)
 
     @property
     def id(self):

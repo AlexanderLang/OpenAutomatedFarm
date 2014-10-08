@@ -17,6 +17,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
 from ..models import Parameter
+from ..models import Device
 from ..models import FieldSetting
 from ..models import Regulator
 
@@ -32,10 +33,13 @@ class FarmManager(object):
         self.db_session = db_sm()
         self.parameters = self.db_session.query(Parameter).all()
         self.regulators = self.db_session.query(Regulator).all()
+        self.devices = self.db_session.query(Device).all()
         self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
         present = datetime.now()
         for regulator in self.regulators:
             regulator.input_parameter.configure_calendar(self.cultivation_start, present)
+        for device in self.devices:
+            device.configure_calendar(self.cultivation_start, present)
         # listen for database changes (broadcat on redis channels)
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('periphery_controller_changes',
@@ -62,14 +66,25 @@ class FarmManager(object):
                 self.db_session = self.db_sessionmaker()
                 self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
                 self.parameters = self.db_session.query(Parameter).all()
+                self.devices = self.db_session.query(Device).all()
                 self.regulators = self.db_session.query(Regulator).all()
                 for regulator in self.regulators:
                     regulator.input_parameter.configure_calendar(self.cultivation_start, now)
+                for device in self.devices:
+                    device.configure_calendar(self.cultivation_start, now)
             # log parameters
             for param in self.parameters:
                 value = self.redis_conn.get('s' + str(param.sensor_id))
                 param.log_measurement(now, value)
                 self.db_session.commit()
+            # set devices
+            for device in self.devices:
+                setpoint = device.get_setpoint(now)
+                if setpoint is None:
+                    device.configure_calendar(self.cultivation_start, now)
+                    setpoint = device.get_setpoint(now)
+                if setpoint is not None:
+                    self.redis_conn.set('a'+str(device.id), setpoint)
             # run regulators
             for regulator in self.regulators:
                 input_value = float(self.redis_conn.get('s' + str(regulator.input_parameter.sensor_id)))
