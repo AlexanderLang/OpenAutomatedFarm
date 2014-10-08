@@ -9,8 +9,7 @@ typedef struct {
 	String name;
 	float value;
 	String unit;
-	float samplingTime;
-        float precision;
+	float precision;
 	float min;
 	float max;
 } Sensor;
@@ -20,6 +19,7 @@ namespace OAF_Actuator {
 typedef struct {
     String name;
     float value;
+    float default_value;
     String unit;
 } Actuator;
 }
@@ -31,21 +31,21 @@ String fwName = "Hydro";
 String fwVersion = "0.1";
 int num_sensors = 4;
 OAF_Sensor::Sensor sensors[] = { 
-  { "PH", 7.0, "pH", 2, 0.1, 0, 14 }, 
-  { "EC", 0.0, "mS", 2, 0.1, 0, 5000 }, 
-  { "TL", 0.0, "Liter", 0.5, 0.1, 0, 30 }, 
-  { "T", 20.0, "°C", 1.0, 0.1, 5, 40 } 
+  { "PH", 7.0, "pH", 0.1, 0, 14 },
+  { "EC", 0.0, "mS", 0.1, 0, 5000 },
+  { "TL", 0.0, "Liter", 0.1, 0, 30 },
+  { "T", 20.0, "°C", 0.1, 5, 40 }
 };
 
 int num_actuators = 7;
 OAF_Actuator::Actuator actuators[] = {
-    {"P1", 0.0, "%"},    //Pump 1  
-    {"P2", 0.0, "1/0"},  //Pump 2
-    {"P3", 0.0, "%"},    //Pump 3
-    {"P4", 0.0, "%"},    //Pump 4
-    {"WC", 0.0, "%"},    //Water-Circulation
-    {"WI", 0.0, "1/0"},   //Water IN
-    {"WO", 0.0, "1/0"}   //Water OUT
+    {"P1", 0.0, 0.0, "%"},    //Pump 1
+    {"P2", 0.0, 0.0, "1/0"},  //Pump 2
+    {"P3", 0.0, 0.0, "%"},    //Pump 3
+    {"P4", 0.0, 0.0, "%"},    //Pump 4
+    {"WC", 0.0, 0.0, "%"},    //Water-Circulation
+    {"WI", 0.0, 0.0, "1/0"},   //Water IN
+    {"WO", 0.0, 0.0, "1/0"}   //Water OUT
 };
 
 int lc = 0;
@@ -194,6 +194,8 @@ String com_arg2 = "";
 
 void execute_cmd(char cmd) {
 	byte found = 0;
+	int index = 0;
+	int al = 0;
 	// look for commands
 	switch (cmd) {
 	case 'f':
@@ -222,8 +224,6 @@ void execute_cmd(char cmd) {
 			Serial.print(';');
 			Serial.print(sensors[i].precision);
 			Serial.print(';');
-			Serial.print(sensors[i].samplingTime);
-			Serial.print(';');
 			Serial.print(sensors[i].min);
 			Serial.print(';');
 			Serial.print(sensors[i].max);
@@ -232,17 +232,12 @@ void execute_cmd(char cmd) {
 		Serial.println();
 		break;
 	case 's':
-		// read sensor named arg
+		// read sensors
 		for (int i = 0; i < num_sensors; i++) {
-			if (sensors[i].name == com_arg1) {
-				Serial.println(sensors[i].value);
-				found = 1;
-				break;
-			}
+			Serial.print(sensors[i].value);
+			Serial.print(';');
 		}
-	    if (found == 0) {
-	        Serial.println("Sensor Name Error");
-	    }
+		Serial.println();
 	    break;
 	case 'A':
 	    // get actuator list
@@ -250,28 +245,33 @@ void execute_cmd(char cmd) {
 	        Serial.print(actuators[i].name);
 	        Serial.print(';');
 	        Serial.print(actuators[i].unit);
+	        Serial.print(';');
+	        Serial.print(actuators[i].default_value);
 	        Serial.print('|');
 	    }
 	    Serial.println();
 	    break;
 	case 'a':
-	    // set actuator named arg1 to value arg2
+	    // set actuators
+	    {
+	    al = com_arg1.length() + 1;
+	    char carray[al];
+	    char setpoint[al];
+	    com_arg1.toCharArray(carray, al);
 	    for (int i = 0; i < num_actuators; i++) {
-	        if (actuators[i].name == com_arg1) {
-	            int al = com_arg2.length() + 1;
-	            char carray[al];
-	            com_arg2.toCharArray(carray, al);
-	            actuators[i].value = atof(carray);
-	            Serial.println(actuators[i].value);
-	            found = 1;
-	            break;
+	        int j = 0;
+	        while(carray[index] != ';'){
+	            setpoint[j] = carray[index];
+	            index++;
+	            j++;
 	        }
+	        setpoint[j] = '\0';
+	        actuators[i].value = atof(setpoint);
+	        index++;
 	    }
-	    if (found == 0) {
-	        Serial.println("Actuator Name Error");
+	    Serial.println(0);
 	    }
 	    break;
-
 	default:
 		Serial.println("Error");
 	}

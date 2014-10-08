@@ -9,8 +9,7 @@ typedef struct {
 	String name;
 	float value;
 	String unit;
-	float samplingTime;
-        float precision;
+	float precision;
 	float min;
 	float max;
 } Sensor;
@@ -20,6 +19,7 @@ namespace OAF_Actuator {
 typedef struct {
     String name;
     float value;
+    float default_value;
     String unit;
 } Actuator;
 }
@@ -36,9 +36,9 @@ OAF_Sensor::Sensor sensors[] = {
 
 int num_actuators = 3;
 OAF_Actuator::Actuator actuators[] = {
-    {"WH", 0.0, "%"},    //White LED
-    {"BL", 0.0, "%"},  //Blue LED
-    {"RE", 0.0, "%"},    //Red LED
+    {"WH", 0.0, 0.0, "%"},    //White LED
+    {"BL", 0.0, 0.0, "%"},  //Blue LED
+    {"RE", 0.0, 0.0, "%"},    //Red LED
 };
 
 int lc = 0;
@@ -96,6 +96,8 @@ String com_arg2 = "";
 
 void execute_cmd(char cmd) {
 	byte found = 0;
+	int index = 0;
+	int al = 0;
 	// look for commands
 	switch (cmd) {
 	case 'f':
@@ -124,8 +126,6 @@ void execute_cmd(char cmd) {
 			Serial.print(';');
 			Serial.print(sensors[i].precision);
 			Serial.print(';');
-			Serial.print(sensors[i].samplingTime);
-			Serial.print(';');
 			Serial.print(sensors[i].min);
 			Serial.print(';');
 			Serial.print(sensors[i].max);
@@ -134,17 +134,12 @@ void execute_cmd(char cmd) {
 		Serial.println();
 		break;
 	case 's':
-		// read sensor named arg
+		// read sensors
 		for (int i = 0; i < num_sensors; i++) {
-			if (sensors[i].name == com_arg1) {
-				Serial.println(sensors[i].value);
-				found = 1;
-				break;
-			}
+			Serial.print(sensors[i].value);
+			Serial.print(';');
 		}
-	    if (found == 0) {
-	        Serial.println("Sensor Name Error");
-	    }
+		Serial.println();
 	    break;
 	case 'A':
 	    // get actuator list
@@ -152,28 +147,33 @@ void execute_cmd(char cmd) {
 	        Serial.print(actuators[i].name);
 	        Serial.print(';');
 	        Serial.print(actuators[i].unit);
+	        Serial.print(';');
+	        Serial.print(actuators[i].default_value);
 	        Serial.print('|');
 	    }
 	    Serial.println();
 	    break;
 	case 'a':
-	    // set actuator named arg1 to value arg2
+	    // set actuators
+	    {
+	    al = com_arg1.length() + 1;
+	    char carray[al];
+	    char setpoint[al];
+	    com_arg1.toCharArray(carray, al);
 	    for (int i = 0; i < num_actuators; i++) {
-	        if (actuators[i].name == com_arg1) {
-	            int al = com_arg2.length() + 1;
-	            char carray[al];
-	            com_arg2.toCharArray(carray, al);
-	            actuators[i].value = atof(carray);
-	            Serial.println(actuators[i].value);
-	            found = 1;
-	            break;
+	        int j = 0;
+	        while(carray[index] != ';'){
+	            setpoint[j] = carray[index];
+	            index++;
+	            j++;
 	        }
+	        setpoint[j] = '\0';
+	        actuators[i].value = atof(setpoint);
+	        index++;
 	    }
-	    if (found == 0) {
-	        Serial.println("Actuator Name Error");
+	    Serial.println(0);
 	    }
 	    break;
-
 	default:
 		Serial.println("Error");
 	}
