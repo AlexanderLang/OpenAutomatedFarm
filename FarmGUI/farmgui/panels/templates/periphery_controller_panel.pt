@@ -1,4 +1,4 @@
-<div class="panel panel-default">
+<div class="panel panel-default" id="periphery_controller_panel_${periphery_controller.id}" data="${periphery_controller.id}">
     <form role="form" action="${request.route_url('periphery_controller_update', _id=periphery_controller.id)}"
           method="post">
         <div class="panel-heading">

@@ -16,6 +16,22 @@
                 <h4>${actuator.device_type.name + ' [' + actuator.device_type.unit + ']'}</h4>
             </div>
         </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <h4>Default</h4>
+            </div>
+            <div class="row">
+                <h4>${actuator.default_value}</h4>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <h4>Value</h4>
+            </div>
+            <div class="row">
+                <h4 id="a${actuator.id}"></h4>
+            </div>
+        </div>
     </div>
     <!-- /.panel-body -->
 

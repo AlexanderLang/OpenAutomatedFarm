@@ -7,6 +7,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from ..models import DBSession
+from ..models import PeripheryController
 from ..models import ParameterLog
 from sqlalchemy import asc
 
@@ -54,3 +55,16 @@ class DisplayViews(object):
                 'xmax': now_millis,
                 'data': data
                 }
+
+    @view_config(route_name='periphery_controller_values', renderer='json')
+    def periphery_controller_values(self):
+        pc_id = self.request.matchdict['pc_id']
+        pc = DBSession.query(PeripheryController).filter_by(_id=pc_id).first()
+        values = {}
+        for sensor in pc.sensors:
+            sn = 's' + str(sensor.id)
+            values[sn] = self.request.redis.get(sn).decode('utf-8')
+        for actuator in pc.actuators:
+            an = 'a' + str(actuator.id)
+            values[an] = self.request.redis.get(an).decode('utf-8')
+        return values

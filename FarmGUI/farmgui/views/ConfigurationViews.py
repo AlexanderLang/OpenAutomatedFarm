@@ -369,6 +369,7 @@ class ConfigurationViews(object):
     def periphery_controllers_list(self):
         layout = self.request.layout_manager.layout
         layout.add_javascript(self.request.static_url('farmgui:static/js/configuration_views.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/display_periphery_controller_values.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
         try:

@@ -81,6 +81,9 @@ class PeripheryControllerWorker(object):
             sensor = Sensor(periphery_controller, i, s['name'], param_type, s['precision'],
                             s['min'], s['max'])
             db_session.add(sensor)
+            db_session.flush()
+            # create redis entry
+            self.redis_conn.set('s' + sensor.id, 0)
         # register actuators
         actuators = self.serial.get_actuators()
         for i in range(len(actuators)):
@@ -88,6 +91,9 @@ class PeripheryControllerWorker(object):
             device_type = db_session.query(DeviceType).filter_by(unit=a['unit']).first()
             actuator = Actuator(periphery_controller, i, a['name'], device_type, a['default'])
             db_session.add(actuator)
+            db_session.flush()
+            # create redis entry
+            self.redis_conn.set('a' + actuator.id, 0)
 
     def publish_sensor_values(self):
         try:

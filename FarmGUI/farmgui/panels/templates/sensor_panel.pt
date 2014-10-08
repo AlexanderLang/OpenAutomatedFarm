@@ -40,6 +40,14 @@
                 <h4>${sensor.maximum}</h4>
             </div>
         </div>
+        <div class="col-sm-1">
+            <div class="row">
+                <h4>Value</h4>
+            </div>
+            <div class="row">
+                <h4 id="s${sensor.id}"></h4>
+            </div>
+        </div>
     </div>
     <!-- /.panel-body -->
 

@@ -46,6 +46,7 @@ def add_routes(config):
     # display views
     config.add_route('display_views_home', '/display')
     config.add_route('plot_parameter_data', '/display/parameter/data')
+    config.add_route('periphery_controller_values', '/display/periphery_controller/{pc_id}/values')
     # calendar views
     config.add_route('calendar_home', '/calendar/{parameter_id}')
     config.add_route('calendar_entry_save', '/calendar/{parameter_id}/save')
