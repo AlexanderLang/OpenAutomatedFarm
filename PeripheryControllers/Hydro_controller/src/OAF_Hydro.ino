@@ -283,34 +283,36 @@ void execute_cmd(char cmd) {
 }
 
 void serialEvent() {
-	char c = (char) Serial.read();
-	switch (com_state) {
-	case 0:
-		// read command
-		com_cmd = c;
-		com_state++;
-		break;
-	case 1:
-		// read argument
-		if (c == '\n') {
-			// input finished, execute
-			execute_cmd(com_cmd);
-		} else if (c == ' ') {
-		    // next argument starts
-		    com_state++;
-		} else {
-			// read argument
-			com_arg1 += c;
-		}
-		break;
-	case 2:
-	    // read second argument
-	    if (c == '\n') {
-	        // input finished, execute
-	        execute_cmd(com_cmd);
-	    } else {
-	        // read argument
-	        com_arg2 += c;
+    while (Serial.available()) {
+    	char c = (char) Serial.read();
+	    switch (com_state) {
+    	case 0:
+	    	// read command
+		    com_cmd = c;
+    		com_state++;
+	    	break;
+    	case 1:
+	    	// read argument
+		    if (c == '\n') {
+			    // input finished, execute
+    			execute_cmd(com_cmd);
+	    	} else if (c == ' ') {
+		        // next argument starts
+		        com_state++;
+    		} else {
+	    		// read argument
+		    	com_arg1 += c;
+    		}
+	    	break;
+    	case 2:
+	        // read second argument
+	        if (c == '\n') {
+	            // input finished, execute
+    	        execute_cmd(com_cmd);
+	        } else {
+	            // read argument
+	            com_arg2 += c;
+    	    }
 	    }
 	}
 }

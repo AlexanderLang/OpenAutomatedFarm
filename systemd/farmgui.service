@@ -3,5 +3,10 @@ Description=Open Automated Farm Web Interface Service
 After=network.target
 
 [Service]
-Type=simple
-ExecStart=pserve --daemon --pid-file=/OpenAutomatedFarm/pserve_5000.pid /OpenAutomatedFarm/FarmGUI/production.ini http_port=5000
+Type=forking
+PIDFile=/OpenAutomatedFarm/farmgui.pid
+SyslogLevel=err
+ExecStart=pserve --daemon --pid-file=/OpenAutomatedFarm/farmgui.pid /OpenAutomatedFarm/FarmGUI/production.ini http_port=5000
+
+[Install]
+WantedBy=multi-user.target
