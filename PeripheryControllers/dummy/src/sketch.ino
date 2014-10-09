@@ -46,6 +46,7 @@ int lc = 0;
 int lcc = 0;
 
 void setup() {
+    pinMode(13, OUTPUT);
 	Serial.begin(OAF_SERIALSHELL_BAUD);
 	Serial.println("ready!");
 }
@@ -66,6 +67,11 @@ void loop() {
 			}
 		}
 	}
+	if(actuators[1].value > 0){
+    	digitalWrite(13, HIGH);
+    } else {
+        digitalWrite(13, LOW);
+    }
 }
 
 /**********************************************************************
