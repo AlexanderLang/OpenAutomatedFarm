@@ -69,73 +69,80 @@ int tanklevel_pin = 3;
 
 //PH
 int loopcounter_ph = 0;
-long int ph_value_raw = 0;
+long int ph_sum = 0;
+float ph_value = 0;
 
 //EC 
 int loopcounter_ec = 0;
-long int ec_value_raw = 0;
+long int ec_sum = 0;
+float ec_value = 0;
 
 //Tanksensor
-long int tanklevel_value_raw = 0;
+int loopcounter_tank = 0;
+long int tanklevel_sum = 0;
+float tanklevel_value = 0;
 
 //Water-Tempsensor
 int loopcounter_watertemperature = 0;
-long int watertemperature_value_raw = 0;
+long int watertemperature_sum = 0;
+float watertemperature_value = 0;
 
 //Water-In-Sensor
 int  count_water_in = 0;
 
 
 float measure_tanklevel() {
-  float tanklevel_offset = 2135;
-  float tanklevel_gain = -5;
-  tanklevel_value_raw = analogRead(tanklevel_pin);
-  return tanklevel_value_raw * tanklevel_gain + tanklevel_offset;
+  float offset = 24.2;
+  float gain = -0.1;
+  int meansteps = 10;
+  tanklevel_sum += analogRead(tanklevel_pin);
+  loopcounter_tank += 1;
+  if(loopcounter_tank > meansteps){
+    tanklevel_value = tanklevel_sum * gain / meansteps + offset;
+    loopcounter_tank = 0;
+    tanklevel_sum = 0;
+  }
+  return tanklevel_value;
 }
 
 float measure_ph() {
-  double ph_value = 7;
-  float ph_offset = 3.37;
-  float ph_gain = 3.0/148;
-  int ph_meanstep = 1000;
-  int loopcounter_ph = 0;
-  long int ph_value_raw = 0;
-  ph_value_raw += analogRead(ph_pin);
+  float offset = -3.37;
+  float gain = 3.0/148;
+  int meansteps = 200;
+  ph_sum += analogRead(ph_pin);
   loopcounter_ph+=1;
-  if (loopcounter_ph > ph_meanstep) {
-    ph_value = ph_value_raw*ph_gain/ph_meanstep-ph_offset;
+  if (loopcounter_ph > meansteps) {
+    ph_value = ph_sum * gain / meansteps + offset;
     loopcounter_ph = 0;
-    ph_value_raw = 0;
+    ph_sum = 0;
   }
   return ph_value;
 }
 
 float measure_ec() {
-  double ec_value = 0;
-  float ec_offset = 0.4169;
-  float ec_gain = 0.002513;
-  int ec_meanstep = 1000;
-  ec_value_raw += analogRead(ec_pin);
+  float offset = -0.4169;
+  float gain = 0.002513;
+  int meansteps = 200;
+  ec_sum += analogRead(ec_pin);
   loopcounter_ec+=1;
-  if (loopcounter_ec > ec_meanstep) {
-    ec_value = ec_value_raw*ec_gain/ec_meanstep-ec_offset;
+  if (loopcounter_ec > meansteps) {
+    ec_value = ec_sum * gain / meansteps + offset;
     loopcounter_ec = 0;
-    ec_value_raw = 0;
+    ec_sum = 0;
   }
   return ec_value;
 }
 
-float measure_temp() {
-  int watertemperature_value = 25;
-  float watertemperature_offset = 0;
-  float watertemperature_gain = 1;
-  int watertemperature_meanstep = 1000;
-  watertemperature_value_raw += analogRead(watertemperature_pin);
-  loopcounter_watertemperature+=1;
-  if (loopcounter_watertemperature > watertemperature_meanstep) {
-    watertemperature_value = watertemperature_value_raw*watertemperature_gain/watertemperature_meanstep+watertemperature_offset;
+float measure_watertemperature() {
+  float offset = 0;
+  float gain = 1;
+  int meansteps = 1000;
+  watertemperature_sum += analogRead(watertemperature_pin);
+  loopcounter_watertemperature += 1;
+  if (loopcounter_watertemperature > meansteps) {
+    watertemperature_value = watertemperature_sum * gain / meansteps + offset;
     loopcounter_watertemperature = 0;
-    watertemperature_value_raw = 0;
+    watertemperature_sum = 0;
   }
   return watertemperature_value;
 }
@@ -170,7 +177,7 @@ void loop() {
   sensors[0].value = measure_ph();
   sensors[1].value = measure_ec();
   sensors[2].value = measure_tanklevel();
-  sensors[3].value = measure_temp();
+  sensors[3].value = measure_watertemperature();
 
   digitalWrite(pump_1_pin, (int) actuators[0].value);  //Pump 1	
   digitalWrite(pump_2_pin, (int) actuators[1].value);  //Pump 2	
