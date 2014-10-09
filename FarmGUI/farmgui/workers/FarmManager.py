@@ -101,7 +101,6 @@ class FarmManager(object):
                 else:
                     output_value = regulator.calculate_output(setpoint, input_value, loop_time)
                     self.redis_conn.set('a' + str(regulator.output_device_id), output_value)
-            sleep(loop_time)
 
 
 def usage(argv):
