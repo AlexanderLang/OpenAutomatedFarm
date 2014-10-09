@@ -13,7 +13,6 @@ from redis import Redis
 from serial import SerialException
 from pyramid.paster import get_appsettings
 
-redis_conn = Redis('localhost', 6379)
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from ..models import Base
@@ -24,6 +23,7 @@ from ..models import Actuator
 from ..models import DeviceType
 
 from ..communication import SerialShell
+from ..communication import get_redis_conn
 
 
 class PeripheryControllerWorker(object):
@@ -107,22 +107,22 @@ class PeripheryControllerWorker(object):
     def apply_actuator_values(self):
         values = []
         for i in range(len(self.actuator_ids)):
-            values.append(self.redis_conn.get(self.actuator_ids[i]))
+            values.append(float(self.redis_conn.get(self.actuator_ids[i])))
         try:
             self.serial.set_actuator_values(values)
         except SerialException:
             self.close()
             exit()
 
-
-
-
     def work(self):
-        loop_time = 1
+        loop_time = timedelta(seconds=1)
+        last_run = datetime.now()
         while True:
+            while datetime.now() - last_run < loop_time:
+                sleep(0.05)
+            last_run = datetime.now()
             self.publish_sensor_values()
             self.apply_actuator_values()
-            sleep(loop_time)
 
     def close(self):
         db_session = self.db_sessionmaker()
@@ -151,6 +151,7 @@ def main(argv=sys.argv):
     db_engine = engine_from_config(settings, 'sqlalchemy.')
     db_sessionmaker = sessionmaker(bind=db_engine)
     Base.metadata.bind = db_engine
+    redis_conn = get_redis_conn(config_uri)
     logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name.split('/')[-1] + '.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
                         datefmt='%Y.%m.%d %H:%M:%S',

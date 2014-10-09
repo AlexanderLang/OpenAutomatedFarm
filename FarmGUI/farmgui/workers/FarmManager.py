@@ -4,14 +4,13 @@ from __future__ import (absolute_import, division, print_function,
 import os
 import sys
 from datetime import datetime
+from datetime import timedelta
 from time import sleep
 
 import logging
 
 from redis import Redis
 from pyramid.paster import get_appsettings
-
-redis_conn = Redis('localhost', 6379)
 
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
@@ -20,6 +19,8 @@ from ..models import Parameter
 from ..models import Device
 from ..models import FieldSetting
 from ..models import Regulator
+
+from ..communication import get_redis_conn
 
 
 class FarmManager(object):
@@ -52,9 +53,12 @@ class FarmManager(object):
 
     def work(self):
         logging.info('Farm Manager entered work loop')
-        loop_time = 0.5
-        # main loop
+        loop_time = timedelta(seconds=1)
+        last_run = datetime.now()
         while True:
+            while datetime.now() - last_run < loop_time:
+                sleep(0.05)
+            last_run = datetime.now()
             # get time
             now = datetime.now()
             # listen for messages
@@ -74,7 +78,7 @@ class FarmManager(object):
                     device.configure_calendar(self.cultivation_start, now)
             # log parameters
             for param in self.parameters:
-                value = self.redis_conn.get('s' + str(param.sensor_id))
+                value = float(self.redis_conn.get('s' + str(param.sensor_id)))
                 param.log_measurement(now, value)
                 self.db_session.commit()
             # set devices
@@ -115,6 +119,7 @@ def main(argv=sys.argv):
     db_engine = engine_from_config(settings, 'sqlalchemy.')
     db_sessionmaker = sessionmaker(bind=db_engine)
     Base.metadata.bind = db_engine
+    redis_conn = get_redis_conn(config_uri)
     logging.basicConfig(filename=settings['log_directory'] + '/farm_manager.log',
                         format='%(levelname)s:%(asctime)s: %(message)s',
                         datefmt='%Y.%m.%d %H:%M:%S',

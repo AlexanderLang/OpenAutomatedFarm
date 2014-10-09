@@ -102,7 +102,7 @@ class Parameter(Base):
             old_2 = self.logs[-1].value
             if old_2 == value and old_1 == value:
                 # value is constant, remove last entry
-                self.logs.pop()
+                self.logs.remove(self.logs[-1])
         except IndexError:
             pass
         # add a new log entry
