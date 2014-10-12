@@ -61,7 +61,11 @@ class DisplayViews(object):
         pc_id = self.request.matchdict['pc_id']
         values = {}
         for sensor_key in eval(self.request.redis.get('pc' + pc_id + '.s')):
-            values[sensor_key] = self.request.redis.get(sensor_key).decode('utf-8')
+            raw = self.request.redis.get(sensor_key)
+            if raw is None:
+                values[sensor_key] = 'error'
+            else:
+                values[sensor_key] = raw.decode('utf-8')
         for actuator_key in eval(self.request.redis.get('pc' + pc_id + '.a')):
             raw = self.request.redis.get(actuator_key)
             if raw is None:
