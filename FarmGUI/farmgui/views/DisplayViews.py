@@ -59,12 +59,12 @@ class DisplayViews(object):
     @view_config(route_name='periphery_controller_values', renderer='json')
     def periphery_controller_values(self):
         pc_id = self.request.matchdict['pc_id']
-        pc = DBSession.query(PeripheryController).filter_by(_id=pc_id).first()
         values = {}
-        for sensor in pc.sensors:
-            sn = 's' + str(sensor.id)
-            values[sn] = self.request.redis.get(sn).decode('utf-8')
-        for actuator in pc.actuators:
-            an = 'a' + str(actuator.id)
-            values[an] = self.request.redis.get(an).decode('utf-8')
+        for sensor_key in eval(self.request.redis.get('pc' + pc_id + '.s')):
+            values[sensor_key] = self.request.redis.get(sensor_key).decode('utf-8')
+        for actuator_key in eval(self.request.redis.get('pc' + pc_id + '.a')):
+            raw = self.request.redis.get(actuator_key)
+            if raw is None:
+                raw = self.request.redis.get(actuator_key + '.default')
+            values[actuator_key] = raw.decode('utf-8')
         return values

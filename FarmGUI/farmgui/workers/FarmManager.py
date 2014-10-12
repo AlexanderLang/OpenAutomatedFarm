@@ -32,6 +32,7 @@ class FarmManager(object):
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
         self.db_session = db_sm()
+        self.loop_time = timedelta(seconds=1)
         self.parameters = self.db_session.query(Parameter).all()
         self.regulators = self.db_session.query(Regulator).all()
         self.devices = self.db_session.query(Device).all()
@@ -53,10 +54,9 @@ class FarmManager(object):
 
     def work(self):
         logging.info('Farm Manager entered work loop')
-        loop_time = timedelta(seconds=1)
         last_run = datetime.now()
         while True:
-            while datetime.now() - last_run < loop_time:
+            while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
             last_run = datetime.now()
             # get time
@@ -88,7 +88,7 @@ class FarmManager(object):
                     device.configure_calendar(self.cultivation_start, now)
                     setpoint = device.get_setpoint(now)
                 if setpoint is not None:
-                    self.redis_conn.set('a'+str(device.actuator_id), setpoint)
+                    self.redis_conn.setex('a'+str(device.actuator_id), setpoint, 2*self.loop_time)
             # run regulators
             for regulator in self.regulators:
                 input_value = float(self.redis_conn.get('s' + str(regulator.input_parameter.sensor_id)))
@@ -99,8 +99,8 @@ class FarmManager(object):
                 if setpoint is None:
                     logging.warning('regulator '+regulator.name+' cannot find a setpoint')
                 else:
-                    output_value = regulator.calculate_output(setpoint, input_value, loop_time)
-                    self.redis_conn.set('a' + str(regulator.output_device.actuator_id), output_value)
+                    output_value = regulator.calculate_output(setpoint, input_value, self.loop_time)
+                    self.redis_conn.setex('a' + str(regulator.output_device.actuator_id), output_value, 2*self.loop_time)
 
 
 def usage(argv):

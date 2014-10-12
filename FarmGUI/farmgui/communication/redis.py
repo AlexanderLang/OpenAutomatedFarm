@@ -1,12 +1,22 @@
 
 from configparser import ConfigParser
-from redis import Redis
+from redis import from_url
 
 def get_redis_conn(config_uri):
+    """
+
+    :param config_uri:
+    :return:
+    """
     parser = ConfigParser()
     parser.read(config_uri)
-    redis_data = parser.get('app:main', 'redis.url').split(':')
-    redis_data.pop(0)
-    host = redis_data[0].replace('//', '')
-    port = int(redis_data[1])
-    return Redis(host, port)
+    redis_url = parser.get('app:main', 'redis.url')
+    return from_url(redis_url)
+
+def initialize_redis_sensor(connection, sensor):
+    """
+
+    :param connection:
+    :param sensor:
+    :return:
+    """

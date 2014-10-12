@@ -70,6 +70,7 @@ class ConfigurationViews(object):
         controls = controls.items()
         try:
             values = form.validate(controls)
+            self.request.redis.publish('field_setting_changes', 'parameter changed')
         except ValidationFailure as e:
             return Response(e.render())
         fs.value = values['value']
