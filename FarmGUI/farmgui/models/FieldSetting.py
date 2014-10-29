@@ -31,9 +31,9 @@ class FieldSetting(Base):
     @staticmethod
     def get_cultivation_start(db_session):
         time_str = db_session.query(FieldSetting).filter_by(name='cultivation_start').first().value
-        return datetime.strptime(time_str, "%d.%m.%Y")
+        return datetime.strptime(time_str, "%Y-%m-%d")
 
 
 def init_field_settings(db_session):
     db_session.add(FieldSetting('cultivating_plant', 'tomato', 'the plant being grown in the field right now'))
-    db_session.add(FieldSetting('cultivation_start', '22.06.2014', 'start date'))
+    db_session.add(FieldSetting('cultivation_start', str(datetime.today().date()), 'start date'))

@@ -7,43 +7,37 @@ Created on Feb 15, 2014
 from sqlalchemy import Column
 from sqlalchemy.types import Float
 from sqlalchemy.types import SmallInteger
-from sqlalchemy.types import Unicode
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from .meta import Base
-from .meta import serialize
+from farmgui.models import serialize
+from farmgui.models import Hardware
+from farmgui.models import DeviceType
 
 
-class Actuator(Base):
+class Actuator(Hardware):
     """
     classdocs
     """
     __tablename__ = 'Actuators'
 
-    _id = Column(SmallInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
-    periphery_controller_id = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
-    periphery_controller = relationship('PeripheryController', back_populates='actuators')
-    index = Column(SmallInteger, nullable=False)
-    name = Column(Unicode(250), nullable=False)
+    _id = Column(SmallInteger, ForeignKey('Hardware._id'), primary_key=True, autoincrement=True, nullable=False, unique=True)
     device_type_id = Column(SmallInteger,
                                ForeignKey('DeviceTypes._id'),
                                nullable=False)
     device_type = relationship('DeviceType')
     default_value = Column(Float, nullable=False)
 
+    __mapper_args__ = {'polymorphic_identity': 'actuator'}
+
     def __init__(self, periphery_controller, index, name, device_type, default_value):
-        self.peripheryController = periphery_controller
-        self.periphery_controller_id = periphery_controller.id
-        self.index = index
-        self.name = name
+        Hardware.__init__(self, periphery_controller, index, name, '')
         self.device_type = device_type
-        self.device_type_id = device_type.id
         self.default_value = default_value
 
     @property
-    def id(self):
-        return self._id
+    def redis_key(self):
+        return 'p'+str(self.periphery_controller_id)+'.a'+str(self.index)+'.value'
 
     @property
     def serialize(self):
@@ -54,3 +48,10 @@ class Actuator(Base):
             'name': self.name,
             'device_type': serialize(self.device_type)
         }
+
+
+def init_actuators(db_session, pc):
+    lin_type = db_session.query(DeviceType).filter_by(name='Linear').one()
+    on_off_type = db_session.query(DeviceType).filter_by(name='ON/OFF').one()
+    pc.actuators.append(Actuator(pc, 0, 'L1', lin_type, 0))
+    pc.actuators.append(Actuator(pc, 1, 'B1', on_off_type, 0))

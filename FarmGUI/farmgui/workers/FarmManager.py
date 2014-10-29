@@ -31,76 +31,77 @@ class FarmManager(object):
     def __init__(self, db_sm, redis):
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
-        self.db_session = db_sm()
         self.loop_time = timedelta(seconds=1)
-        self.parameters = self.db_session.query(Parameter).all()
-        self.regulators = self.db_session.query(Regulator).all()
-        self.devices = self.db_session.query(Device).all()
-        self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
-        present = datetime.now()
-        for regulator in self.regulators:
-            regulator.input_parameter.configure_calendar(self.cultivation_start, present)
-        for device in self.devices:
-            device.configure_calendar(self.cultivation_start, present)
+        self.db_session = None
+        self.parameters = None
+        self.regulators = None
+        self.devices = None
+        self.cultivation_start = None
+        self.max_regulation_order = 0
+        self.reload_database()
         # listen for database changes (broadcat on redis channels)
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('periphery_controller_changes',
                               'parameter_changes',
                               'calendar_changes',
                               'field_setting_changes',
-                              'regulator_changes',
-                              'log_measurements')
+                              'regulator_changes')
         logging.info('Farm Manager initialized')
+
+    def reload_database(self):
+        logging.info('reloading values form database')
+        if self.db_session is not None:
+            self.db_session.close()
+        self.db_session = self.db_sessionmaker(expire_on_commit=False, autoflush=False)
+        self.parameters = self.db_session.query(Parameter).all()
+        self.regulators = self.db_session.query(Regulator).all()
+        self.devices = self.db_session.query(Device).all()
+        self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
+        self.initialize_regulators()
+
+    def initialize_regulators(self):
+        self.max_regulation_order = -1
+        for regulator in self.regulators:
+            #regulator.initialize()
+            order = regulator.order
+            print(regulator.name + ': order='+str(order))
+            if order > self.max_regulation_order:
+                self.max_regulation_order = order
+        self.max_regulation_order += 1
 
     def work(self):
         logging.info('Farm Manager entered work loop')
         last_run = datetime.now()
+        loop_counter = 0
         while True:
+            loop_counter += 1
+            # sleep
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
             last_run = datetime.now()
-            # get time
-            now = datetime.now()
+            now = last_run
             # listen for messages
             message = self.pubsub.get_message()
             if message is not None:
                 # something in the database changed
-                logging.info('reloading values form database')
-                self.db_session.close()
-                self.db_session = self.db_sessionmaker()
-                self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
-                self.parameters = self.db_session.query(Parameter).all()
-                self.devices = self.db_session.query(Device).all()
-                self.regulators = self.db_session.query(Regulator).all()
-                for regulator in self.regulators:
-                    regulator.input_parameter.configure_calendar(self.cultivation_start, now)
-                for device in self.devices:
-                    device.configure_calendar(self.cultivation_start, now)
-            # log parameters
+                self.reload_database()
+            # calculate setpoints, log parameters
             for param in self.parameters:
-                value = float(self.redis_conn.get('s' + str(param.sensor_id)))
-                param.log_measurement(now, value)
-                self.db_session.commit()
-            # set devices
-            for device in self.devices:
-                setpoint = device.get_setpoint(now)
-                if setpoint is None:
-                    device.configure_calendar(self.cultivation_start, now)
-                    setpoint = device.get_setpoint(now)
-                if setpoint is not None:
-                    self.redis_conn.setex('a'+str(device.actuator_id), setpoint, 2*self.loop_time)
+                param.update_setpoint(self.cultivation_start, now, self.redis_conn)
+                param.update_value(self.redis_conn)
+                param.log_value(now, self.redis_conn)
+                param.log_setpoint(now, self.redis_conn)
+            for dev in self.devices:
+                dev.update_setpoint(self.cultivation_start, now, self.redis_conn)
             # run regulators
-            for regulator in self.regulators:
-                input_value = float(self.redis_conn.get('s' + str(regulator.input_parameter.sensor_id)))
-                setpoint = regulator.input_parameter.get_setpoint(now)
-                if setpoint is None:
-                    regulator.input_parameter.configure_calendar(self.cultivation_start, now)
-                    setpoint = regulator.input_parameter.get_setpoint(now)
-                if setpoint is None:
-                    logging.warning('regulator '+regulator.name+' cannot find a setpoint')
-                else:
-                    output_value = regulator.calculate_output(setpoint, input_value, self.loop_time)
-                    self.redis_conn.setex('a' + str(regulator.output_device.actuator_id), output_value, 2*self.loop_time)
+            for order in range(self.max_regulation_order):
+                for regulator in self.regulators:
+                    if regulator.order == order:
+                        regulator.execute(self.redis_conn)
+            for dev in self.devices:
+                dev.update_value(self.redis_conn)
+                dev.log_value(now, self.redis_conn)
+            self.db_session.commit()
 
 
 def usage(argv):

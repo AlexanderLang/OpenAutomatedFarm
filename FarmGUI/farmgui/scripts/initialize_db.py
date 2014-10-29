@@ -7,16 +7,16 @@ from sqlalchemy import engine_from_config
 from pyramid.paster import get_appsettings
 from pyramid.paster import setup_logging
 
-from ..models import DBSession
-from ..models import Base
-
-from ..models import init_parameters
-from ..models import init_parameter_types
-from ..models import init_devices
-from ..models import init_device_types
-from ..models import init_farm_components
-from ..models import init_field_settings
-from ..models import init_regulator_types
+from farmgui.models import DBSession
+from farmgui.models import Base
+from farmgui.models import init_setpoint_interpolations
+from farmgui.models import init_parameters
+from farmgui.models import init_parameter_types
+from farmgui.models import init_devices
+from farmgui.models import init_device_types
+from farmgui.models import init_field_settings
+from farmgui.models import init_regulators
+from farmgui.models import init_periphery_controllers
 
 
 def usage(argv):
@@ -39,10 +39,11 @@ def main(argv=sys.argv):
 
     # populate databases
     with transaction.manager:
-        init_farm_components(DBSession)
+        init_setpoint_interpolations(DBSession)
         init_parameter_types(DBSession)
-        init_parameters(DBSession)
         init_device_types(DBSession)
+        init_periphery_controllers(DBSession)
+        init_parameters(DBSession)
         init_devices(DBSession)
         init_field_settings(DBSession)
-        init_regulator_types(DBSession)
+        init_regulators(DBSession)

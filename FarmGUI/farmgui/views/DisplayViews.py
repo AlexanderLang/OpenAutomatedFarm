@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from ..models import DBSession
 from ..models import PeripheryController
-from ..models import ParameterLog
+from ..models import ParameterValueLog
 from sqlalchemy import asc
 
 
@@ -45,7 +45,7 @@ class DisplayViews(object):
         start_time_millis = now_millis - period
         data = []
         for pid in p_ids:
-            logs = DBSession.query(ParameterLog).filter_by(parameter_id=pid).filter(ParameterLog.time >= start_time).order_by(asc(ParameterLog.time)).all()
+            logs = DBSession.query(ParameterValueLog).filter_by(parameter_id=pid).filter(ParameterValueLog.time >= start_time).order_by(asc(ParameterValueLog.time)).all()
             series = []
             for log in logs:
                 millis = int(mktime(log.time.timetuple()) * 1000) - utc_offset

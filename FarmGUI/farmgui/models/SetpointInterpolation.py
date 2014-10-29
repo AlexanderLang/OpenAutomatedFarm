@@ -11,7 +11,8 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy.orm import relationship
 
-from .meta import Base
+from farmgui.models import Base
+from farmgui.models import InterpolationKnot
 
 import matplotlib
 matplotlib.use('Agg')
@@ -33,7 +34,9 @@ class SetpointInterpolation(Base):
     end_time = Column(Integer(), nullable=False)
     end_value = Column(Float(), nullable=True)
     description = Column(Unicode(250), nullable=True)
-    knots = relationship('InterpolationKnot')
+    knots = relationship('InterpolationKnot', backref='interpolation')
+
+    f = None
 
     def __init__(self, name, order, start_value, end_time, end_value, description):
         self.name = name
@@ -80,22 +83,49 @@ class SetpointInterpolation(Base):
         ax.plot(x, y, 'o', x_inter, y_inter, '-')
         fig.savefig(filename)
 
-    def get_value_at(self, timedelta):
-        t = timedelta.total_seconds()
-        #print('t: '+str(t))
+    def calculate_interpolation(self):
         x = []
         y = []
         x.append(0)
         y.append(self.start_value)
         for knot in self.knots:
-            x.append(knot.time*self.end_time)
+            x.append(knot.time)
             y.append(knot.value)
         x.append(self.end_time)
         y.append(self.end_value)
         if self.order < 4:
-            f = interpolate.interp1d(x, y, kind=self.order)
-            y = f([t])[0]
+            self.f = interpolate.interp1d(x, y, kind=self.order)
         else:
-            f = interpolate.splrep(x, y)
-            y = interpolate.splev([t], f)[0]
-        return y
+            self.f = interpolate.splrep(x, y)
+
+    def get_value_at(self, interpolation_time):
+        if self.f is None:
+            self.calculate_interpolation()
+        if self.order < 4:
+            y = self.f([interpolation_time])[0]
+        else:
+            y = interpolate.splev([interpolation_time], self.f)[0]
+        return round(y.item(), 2)
+
+
+def init_setpoint_interpolations(db_session):
+    h = 3600
+    m = 60
+    new_inter = SetpointInterpolation('Temperature Interpolation (long day)', 1, 20, 86400, 20, '...')
+    new_inter.knots.append(InterpolationKnot(new_inter, 6*h, 20))
+    new_inter.knots.append(InterpolationKnot(new_inter, 8*h, 25))
+    new_inter.knots.append(InterpolationKnot(new_inter, 22*h, 25))
+    db_session.add(new_inter)
+    new_inter = SetpointInterpolation('Red Light Interpolation (long day)', 1, 0, 86400, 0, '...')
+    new_inter.knots.append(InterpolationKnot(new_inter, 3*h, 0))
+    new_inter.knots.append(InterpolationKnot(new_inter, 3*h+30*m, 100))
+    new_inter.knots.append(InterpolationKnot(new_inter, 20*h+30*m, 100))
+    new_inter.knots.append(InterpolationKnot(new_inter, 21*h, 0))
+    db_session.add(new_inter)
+    new_inter = SetpointInterpolation('Test Interpolation', 1, 0, 86400, 0, '...')
+    new_inter.knots.append(InterpolationKnot(new_inter, 4*h, 100))
+    new_inter.knots.append(InterpolationKnot(new_inter, 8*h, 0))
+    new_inter.knots.append(InterpolationKnot(new_inter, 12*h, 100))
+    new_inter.knots.append(InterpolationKnot(new_inter, 16*h, 0))
+    new_inter.knots.append(InterpolationKnot(new_inter, 20*h, 100))
+    db_session.add(new_inter)

@@ -10,7 +10,9 @@ from sqlalchemy.types import Unicode
 from sqlalchemy.types import Boolean
 from sqlalchemy.orm import relationship
 
-from .meta import Base
+from farmgui.models import Base
+from farmgui.models import init_sensors
+from farmgui.models import init_actuators
 
 
 class PeripheryController(Base):
@@ -26,12 +28,12 @@ class PeripheryController(Base):
     active = Column(Boolean, nullable=False, default=False, unique=False)
     sensors = relationship("Sensor",
                            order_by="Sensor.index",
-                           back_populates='periphery_controller',
-                           cascade='all, delete, delete-orphan')
+                           backref='periphery_controller',
+                           cascade='all, delete-orphan')
     actuators = relationship("Actuator",
                              order_by="Actuator.index",
-                             back_populates='periphery_controller',
-                             cascade='all, delete, delete-orphan')
+                             backref='periphery_controller',
+                             cascade='all, delete-orphan')
 
     def __init__(self, fw_name, fw_version, name, active=True):
         self.firmwareName = fw_name
@@ -42,3 +44,10 @@ class PeripheryController(Base):
     @property
     def id(self):
         return self._id
+
+
+def init_periphery_controllers(db_session):
+    pc = PeripheryController('Dummy', '0.1', 'Dummy')
+    init_sensors(db_session, pc)
+    init_actuators(db_session, pc)
+    db_session.add(pc)

@@ -14,19 +14,18 @@ from sqlalchemy import ForeignKey
 from .meta import Base
 
 
-class DeviceLog(Base):
+class ParameterValueLog(Base):
     """
     classdocs
     """
-    __tablename__ = 'DeviceLogs'
+    __tablename__ = 'ParameterValueLogs'
 
     _id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
-    device_id = Column(SmallInteger, ForeignKey('Devices._id'), nullable=False)
+    parameter_id = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
     time = Column(DateTime, nullable=False)
-    value = Column(Float, nullable=False)
+    value = Column(Float, nullable=True)
 
-    def __init__(self, device, time, value):
-        self.device = device
-        self.device_id = device.id
+    def __init__(self, parameter, time, value):
+        self.parameter = parameter
         self.time = time
         self.value = value

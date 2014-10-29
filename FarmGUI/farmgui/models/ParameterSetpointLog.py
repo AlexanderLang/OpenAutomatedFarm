@@ -14,19 +14,18 @@ from sqlalchemy import ForeignKey
 from .meta import Base
 
 
-class ParameterLog(Base):
+class ParameterSetpointLog(Base):
     """
     classdocs
     """
-    __tablename__ = 'ParameterLogs'
+    __tablename__ = 'ParameterSetpointLogs'
 
     _id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
     parameter_id = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
     time = Column(DateTime, nullable=False)
-    value = Column(Float, nullable=False)
+    setpoint = Column(Float, nullable=True)
 
-    def __init__(self, parameter, time, value):
+    def __init__(self, parameter, time, setpoint):
         self.parameter = parameter
-        self.parameter_id = parameter.id
         self.time = time
-        self.value = value
+        self.setpoint = setpoint

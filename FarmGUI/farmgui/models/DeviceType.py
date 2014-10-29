@@ -8,7 +8,7 @@ from sqlalchemy import Column
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 
-from .meta import Base
+from farmgui.models import Base
 
 
 class DeviceType(Base):

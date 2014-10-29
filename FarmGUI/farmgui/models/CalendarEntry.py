@@ -36,3 +36,7 @@ class CalendarEntry(Base):
     @property
     def id(self):
         return self._id
+
+    def get_value_at(self, time):
+        interpolation_time = (time - self.end_time).total_seconds() + self.interpolation.end_time
+        return self.interpolation.get_value_at(interpolation_time)

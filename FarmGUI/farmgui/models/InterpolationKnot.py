@@ -10,7 +10,7 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Float
 from sqlalchemy import ForeignKey
 
-from .meta import Base
+from farmgui.models import Base
 
 
 class InterpolationKnot(Base):
@@ -25,7 +25,7 @@ class InterpolationKnot(Base):
     value = Column(Float, nullable=False)
 
     def __init__(self, interpolation, time, value):
-        self.interpolation_id = interpolation.id
+        self.interpolation = interpolation
         self.time = time
         self.value = value
 

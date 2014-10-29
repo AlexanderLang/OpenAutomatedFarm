@@ -8,15 +8,17 @@ from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
-from sqlalchemy.types import Text
-from sqlalchemy.orm import relationship
 
-from .meta import Base
-from .meta import serialize
-from .RegulatorConfig import RegulatorConfig
+from farmgui.models import Component
+from farmgui.models import ComponentInput
+from farmgui.models import ComponentOutput
+from farmgui.models import ComponentProperty
+from farmgui.models import Parameter
+from farmgui.models import Device
 
+from farmgui.regulators import regulator_factory
 
-class Regulator(Base):
+class Regulator(Component):
     """
     classdocs
     """
@@ -24,48 +26,27 @@ class Regulator(Base):
     __tablename__ = 'Regulators'
 
     _id = Column(SmallInteger,
+                 ForeignKey('Components._id'),
                  primary_key=True,
                  autoincrement=True,
                  nullable=False,
                  unique=True)
-    component_id = Column(SmallInteger,
-                          ForeignKey('FarmComponents._id'),
-                          nullable=False)
-    component = relationship('FarmComponent', back_populates='regulators')
-    name = Column(Unicode(250),
-                  nullable=False,
-                  unique=False)
-    regulator_type_id = Column(SmallInteger,
-                               ForeignKey('RegulatorTypes._id'),
-                               nullable=False)
-    _regulator_type = relationship('RegulatorType')
-    description = Column(Text,
-                         nullable=True)
-    input_parameter_id = Column(SmallInteger,
-                                ForeignKey('Parameters._id'),
-                                nullable=False)
-    input_parameter = relationship("Parameter")
-    output_device_id = Column(SmallInteger,
-                              ForeignKey('Devices._id'),
-                              nullable=False)
-    output_device = relationship("Device")
-    config = relationship('RegulatorConfig', backref='regulator', cascade="all, delete, delete-orphan")
+    _algorithm_name = Column(Unicode(100),
+                             nullable=False)
 
-    def __init__(self, component, name, regulator_type, input_parameter, output_device, description):
+    __mapper_args__ = {'polymorphic_identity': 'regulator'}
+
+    real_regulator = None
+
+    def __init__(self, name, algorithm_name, description):
         """
         Constructor
         """
-        self.component = component
-        self.component_id = component.id
-        self.name = name
-        self.regulator_type = regulator_type
-        self.regulator_type_id = regulator_type.id
-        self.input_parameter = input_parameter
-        self.input_parameter_id = input_parameter.id
-        self.output_device = output_device
-        self.output_device_id = output_device.id
-        self.description = description
-        self.esum = 0
+        Component.__init__(self, name, description)
+        self._algorithm_name = algorithm_name
+        self.real_regulator = regulator_factory(self._algorithm_name)
+        self.initialize_regulator_db()
+
 
     @property
     def id(self):
@@ -74,67 +55,66 @@ class Regulator(Base):
     @property
     def serialize(self):
         """Return data in serializeable format"""
-        return {
-            '_id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'component': serialize(self.component),
-            'regulator_type': serialize(self.regulator_type),
-            'input_parameter': self.input_parameter.serialize,
-            'output_device': self.output_device.serialize
-        }
+        ret_dict = Component.serialize(self)
+        ret_dict['algorithm_name'] = self._algorithm_name
+        return ret_dict
 
     @property
-    def regulator_type(self):
-        return self._regulator_type
+    def algorithm_name(self):
+        return self._algorithm_name
 
-    @regulator_type.setter
-    def regulator_type(self, value):
-        self._regulator_type = value
-        if value.name == 'P':
-            while len(self.config) > 1:
-                # delete unneeded config
-                del self.config[-1]
-            if len(self.config) == 0:
-                new_conf = RegulatorConfig(self, 'K_p', '20', 'proportional gain')
-                self.config.append(new_conf)
+    def execute(self, redis_con):
+        if self.real_regulator is None:
+            self.real_regulator = regulator_factory(self._algorithm_name)
+            # get constants
+            for const_key in self._properties:
+                self.real_regulator.constants[const_key].value = float(self._properties[const_key].value)
+        # get inputs
+        execute = True
+        for in_key in self._inputs:
+            conn_out = self._inputs[in_key].connected_output
+            if conn_out is not None:
+                value_str = redis_con.get(conn_out.redis_key)
+                value = None
+                if value_str is not None:
+                    value = float(value_str)
+                self.real_regulator.inputs[in_key].value = value
             else:
-                self.config[0].name = 'K_p'
-                self.config[0].value = 20
-        elif value.name == 'PI':
-            while len(self.config) > 2:
-                # delete unneeded config
-                del self.config[-1]
-            if len(self.config) == 0:
-                new_conf = RegulatorConfig(self, 'K_p', '20', 'proportional gain')
-                self.config.append(new_conf)
-            else:
-                self.config[0].name = 'K_p'
-                self.config[0].value = 20
-            if len(self.config) < 2:
-                new_conf = RegulatorConfig(self, 'K_i', '0.5', 'integral gain')
-                self.config.append(new_conf)
+                execute = False
+        # execute
+        if execute:
+            self.real_regulator.execute()
+            # set outputs
+            for out_key in self._outputs:
+                value = self.real_regulator.outputs[out_key].value
+                redis_con.set(self._outputs[out_key].redis_key, str(value))
 
-    def calculate_output(self, setpoint, value, t_i):
-        output = 0
-        if self.regulator_type.name == 'P':
-            output = (setpoint - value) * float(self.config[0].value)
-        if self.regulator_type.name == 'PI':
-            d = setpoint - value
-            self.esum = self.esum + d
-            if self.esum > 200:
-                self.esum = 200
-            elif self.esum < -200:
-                self.esum = -200
-            proportional = d * float(self.config[0].value)
-            integral = self.esum * t_i * float(self.config[1].value)
-            output = proportional + integral
-        if output > 100:
-            output = 100
-        if output < 0:
-            output = 0
-        return output
+
+    def initialize_regulator_db(self):
+        """
+
+        :param db_regulator:
+        """
+        for in_key in self.real_regulator.inputs:
+            self._inputs[in_key] = ComponentInput(self, in_key, None)
+        for out_key in self.real_regulator.outputs:
+            self._outputs[out_key] = ComponentOutput(self, out_key)
+        for const_key in self.real_regulator.constants:
+            self._properties[const_key] = ComponentProperty(self, const_key, str(self.real_regulator.constants[const_key].value))
 
 
 def init_regulators(db_session):
-    pass
+    air_temp_diff = Regulator('Air Temperature Difference', 'Difference', '')
+    air_temp_reg = Regulator('Air Temperature Regulator', 'PI', '')
+    test_reg = Regulator('Test Regulator', 'P', '')
+    # make connections
+    inside_temp = db_session.query(Parameter).filter_by(name='Inside Air Temperature').one()
+    exhaust_fan = db_session.query(Device).filter_by(name='Exhaust Fan').one()
+    air_temp_diff.connect_input('a', inside_temp.outputs['value'])
+    air_temp_diff.connect_input('b', inside_temp.outputs['setpoint'])
+    air_temp_reg.connect_input('diff', air_temp_diff.outputs['result'])
+    exhaust_fan.connect_input('value', air_temp_reg.outputs['result'])
+    db_session.add(air_temp_diff)
+    db_session.add(air_temp_reg)
+    db_session.add(test_reg)
+
