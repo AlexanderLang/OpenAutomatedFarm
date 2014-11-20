@@ -19,4 +19,6 @@ class P(Regulator):
         ret_dict = {}
         if self.is_executable(inputs):
             ret_dict['result'] = round(inputs['diff'] * self.constants['K_p'].value, 2)
+        else:
+            ret_dict['result'] = None
         return ret_dict

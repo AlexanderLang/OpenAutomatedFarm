@@ -45,7 +45,7 @@
                 <h4>Value</h4>
             </div>
             <div class="row">
-                <h4 id="s${sensor.id}"></h4>
+                <h4 id="s_${sensor.id}_redis_value" data-redis="${sensor.redis_key}"></h4>
             </div>
         </div>
     </div>

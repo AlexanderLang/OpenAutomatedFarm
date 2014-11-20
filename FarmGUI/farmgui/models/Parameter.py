@@ -109,7 +109,7 @@ class Parameter(Component):
         #print('id: '+str(self.id))
         #print('value: '+str(self._value))
         #print('outputs: '+str(self._outputs))
-        redis_conn.setex(self._outputs['value'].redis_key, self._value, 3)
+        redis_conn.setex(self._outputs['value'].redis_key, self._value, 10)
 
     def log_setpoint(self, time, redis_conn):
         value_str = redis_conn.get(self._outputs['setpoint'].redis_key)
@@ -135,13 +135,7 @@ class Parameter(Component):
         self.setpoint_logs.append(new_log)
 
     def log_value(self, time, redis_conn):
-        value_str = redis_conn.get(self._outputs['value'].redis_key)
-        value = None
-        if value_str is not None:
-            try:
-                value = float(value_str)
-            except ValueError:
-                value = None
+        value = get_redis_number(redis_conn, self._outputs['value'].redis_key)
         log_new = True
         try:
             old_1 = self.value_logs[-2].value

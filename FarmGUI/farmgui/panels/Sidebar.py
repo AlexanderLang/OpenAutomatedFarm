@@ -24,12 +24,12 @@ def sidebar(context, request):
     config_items = []
     components = []
 
-    if request.current_route_url().startswith(request.route_url('project_views_about')):
+    if request.current_route_url().startswith('nope'):
         # configuration sidebar
         config_items.append(config_item('Settings', request.route_url('setting_views_home')))
         config_items.append(config_item('Components', request.route_url('component_views_home')))
         config_items.append(config_item('Periphery Controllers', request.route_url('periphery_controllers_list')))
-    if request.current_route_url().startswith(request.route_url('project_views_about')):
+    if request.current_route_url().startswith('nope'):
         # display sidebar
         components = DBSession.query(Parameter).all()
 

@@ -31,16 +31,8 @@ def deferred_description_default(node, kw):
 
 
 class FieldSettingSchema(MappingSchema):
-    name = SchemaNode(typ=String(),
-                      title='Name',
-                      default=deferred_name_default,
-                      widget=TextInputWidget(readonly=True))
     value = SchemaNode(typ=String(),
-                       title='Value',
+                       title=deferred_name_default,
                        default=deferred_value_default,
+                       description=deferred_description_default,
                        widget=TextInputWidget())
-    description = SchemaNode(typ=String(),
-                             title='Description',
-                             default=deferred_description_default,
-                             widget=TextInputWidget(readonly=True),
-                             missing=None)

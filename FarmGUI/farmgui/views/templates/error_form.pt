@@ -1,5 +1,0 @@
-<metal:block use-macro="main_template">
-    <div metal:fill-slot="content">
-        <tal:form replace="structure error_form"/>
-    </div>
-</metal:block>

@@ -9,21 +9,22 @@ from time import sleep
 
 import logging
 
-from redis import Redis
 from serial import SerialException
 from pyramid.paster import get_appsettings
 
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
-from ..models import Base
-from ..models import ParameterType
-from ..models import PeripheryController
-from ..models import Sensor
-from ..models import Actuator
-from ..models import DeviceType
+from sqlalchemy.orm.exc import NoResultFound
 
-from ..communication import SerialShell
-from ..communication import get_redis_conn
+from farmgui.models import Base
+from farmgui.models import ParameterType
+from farmgui.models import PeripheryController
+from farmgui.models import Sensor
+from farmgui.models import Actuator
+from farmgui.models import DeviceType
+
+from farmgui.communication import SerialShell
+from farmgui.communication import get_redis_conn
 
 
 class PeripheryControllerWorker(object):
@@ -47,12 +48,20 @@ class PeripheryControllerWorker(object):
             self.register_new_controller(db_session)
         else:
             # known controller (set active)
-            self.periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
-            self.periphery_controller.active = True
+            try:
+                self.periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).one()
+                self.periphery_controller.active = True
+            except NoResultFound:
+                # controller was deleted, will not be used until reset
+                self.close()
+                exit()
             logging.info('Working with Controller id=' + str(self.controller_id))
         db_session.commit()
         # let scheduler know the available sensors changed
         self.redis_conn.publish('periphery_controller_changes', 'connected '+str(self.controller_id))
+        # listen for changes in the database
+        self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
+        self.pubsub.subscribe('periphery_controller_changes')
 
     def register_new_controller(self, db_session):
         logging.info('Register new controller:')
@@ -112,23 +121,38 @@ class PeripheryControllerWorker(object):
             self.close()
             exit()
 
+    def handle_messages(self):
+        message = self.pubsub.get_message()
+        if message is not None:
+            # something in the database changed
+            data = message['data'].decode('UTF-8')
+            print('message: ' + str(message))
+            change_type, pc_id_str = data.split(' ')
+            if change_type == 'deleted' and int(pc_id_str) == self.controller_id:
+                exit()
+
+
     def work(self):
         last_run = datetime.now()
         while True:
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
             last_run = datetime.now()
+            self.handle_messages()
             self.publish_sensor_values()
             self.apply_actuator_values()
 
     def close(self):
         db_session = self.db_sessionmaker()
-        periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).first()
-        periphery_controller.active = False
-        db_session.commit()
-        db_session.close()
-        # let scheduler know the available sensors changed
-        self.redis_conn.publish('periphery_controller_changes', 'disconnected '+str(self.controller_id))
+        try:
+            periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).one()
+            periphery_controller.active = False
+            db_session.commit()
+            db_session.close()
+            # let scheduler know the available sensors changed
+            self.redis_conn.publish('periphery_controller_changes', 'disconnected '+str(self.controller_id))
+        except NoResultFound:
+            pass
 
 
 def usage(argv):

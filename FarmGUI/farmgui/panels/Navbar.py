@@ -24,6 +24,7 @@ def navbar(context, request):
         nav_item('Hardware', request.route_url('hardware_views_home')),
         nav_item('Components', request.route_url('component_views_home')),
         nav_item('Settings', request.route_url('setting_views_home')),
+        nav_item('Display', request.route_url('display_views_home')),
         nav_item('About', request.route_url('project_views_about')),
     ]
     return {'nav_items': nav_items}

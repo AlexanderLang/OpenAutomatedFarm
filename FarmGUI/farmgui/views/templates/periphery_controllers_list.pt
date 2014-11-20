@@ -3,7 +3,7 @@
         <h1>Periphery Controllers</h1>
 
         <div tal:repeat="pc periphery_controllers">
-            ${panel('periphery_controller_panel', pc.id)}
+            ${panel('periphery_controller_panel', context=pc)}
         </div>
     </div>
 </metal:block>

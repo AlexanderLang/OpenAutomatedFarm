@@ -23,6 +23,8 @@ from farmgui.models import Actuator
 from farmgui.models import SetpointInterpolation
 from farmgui.models import DeviceCalendarEntry
 
+from farmgui.communication import get_redis_number
+
 
 class Device(Component):
     """
@@ -122,11 +124,8 @@ class Device(Component):
 
     def log_value(self, time, redis_conn):
         value = None
-        value_str = None
         if self._inputs['value'].connected_output is not None:
-            value_str = redis_conn.get(self._inputs['value'].connected_output.redis_key)
-        if value_str is not None:
-            value = float(value_str)
+            value = get_redis_number(redis_conn, self._inputs['value'].connected_output.redis_key)
         log_new = True
         try:
             old_1 = self.value_logs[-2].value

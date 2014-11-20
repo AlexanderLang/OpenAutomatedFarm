@@ -110,8 +110,11 @@ class ComponentViews(object):
 
     @view_config(route_name='component_delete', renderer='json')
     def component_delete(self):
-        component = DBSession.query(Component).filter_by(_id=self.request.matchdict['comp_id']).first()
+        comp_id = self.request.matchdict['comp_id']
+        component = DBSession.query(Component).filter_by(_id=comp_id).one()
+        channel = component.component_type + '_changes'
         DBSession.delete(component)
+        self.request.redis.publish(channel, 'deleted '+str(comp_id))
         return {'delete': True}
 
     @view_config(route_name='component_input_update', renderer='json')

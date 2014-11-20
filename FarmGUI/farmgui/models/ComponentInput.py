@@ -38,7 +38,7 @@ class ComponentInput(Base):
     def redis_key(self):
         if self.connected_output is not None:
             return self.connected_output.redis_key
-        return 'not_connected_' + str(self._id)
+        return 'nc_' + str(self._id)
 
     @property
     def serialize(self):

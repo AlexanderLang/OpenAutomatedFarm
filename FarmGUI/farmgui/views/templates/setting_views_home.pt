@@ -3,7 +3,7 @@
         <h1>Field Settings</h1>
 
         <div tal:repeat="s field_settings">
-            ${panel('field_setting_panel', s.name)}
+            ${panel('field_setting_panel', context=s)}
         </div>
     </div>
 </metal:block>

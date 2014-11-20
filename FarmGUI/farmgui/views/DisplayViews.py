@@ -55,20 +55,3 @@ class DisplayViews(object):
                 'xmax': now_millis,
                 'data': data
                 }
-
-    @view_config(route_name='periphery_controller_values', renderer='json')
-    def periphery_controller_values(self):
-        pc_id = self.request.matchdict['pc_id']
-        values = {}
-        for sensor_key in eval(self.request.redis.get('pc' + pc_id + '.s')):
-            raw = self.request.redis.get(sensor_key)
-            if raw is None:
-                values[sensor_key] = 'error'
-            else:
-                values[sensor_key] = raw.decode('utf-8')
-        for actuator_key in eval(self.request.redis.get('pc' + pc_id + '.a')):
-            raw = self.request.redis.get(actuator_key)
-            if raw is None:
-                raw = self.request.redis.get(actuator_key + '.default')
-            values[actuator_key] = raw.decode('utf-8')
-        return values

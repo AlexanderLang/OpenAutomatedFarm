@@ -5,12 +5,16 @@
         </div>
         <div class="col-sm-8">
             <h4>
-                <a data-toggle="modal" href="#edit_setting_modal_${field_setting.name}">${field_setting.value}</a>
+                <a id="field_setting_value_${field_setting.name}"
+                   data-toggle="modal"
+                   href="#edit_field_setting_modal_${field_setting.name}">
+                        ${field_setting.value}
+                </a>
             </h4>
         </div>
     </div><!-- /.panel-body -->
 
-    <div class="modal" id="edit_setting_modal_${field_setting.name}">
+    <div class="modal" id="edit_field_setting_modal_${field_setting.name}">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

@@ -29,7 +29,7 @@
                 <h4>Value</h4>
             </div>
             <div class="row">
-                <h4 id="a${actuator.id}"></h4>
+                <h4 id="a_${actuator.id}_redis_value" data-redis="${actuator.redis_key}"></h4>
             </div>
         </div>
     </div>

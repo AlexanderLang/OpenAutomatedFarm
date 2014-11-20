@@ -41,7 +41,7 @@ class Sensor(Hardware):
 
     @property
     def redis_key(self):
-        return 'p'+str(self.periphery_controller_id)+'.s'+str(self.index)+'.value'
+        return 'p'+str(self.periphery_controller_id)+'_s'+str(self.id)+'_value'
 
     @property
     def serialize(self):

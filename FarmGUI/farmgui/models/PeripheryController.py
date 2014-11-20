@@ -45,6 +45,26 @@ class PeripheryController(Base):
     def id(self):
         return self._id
 
+    @property
+    def serialize(self):
+        """Return data in serializeable (dictionary) format"""
+        ret_dict = {
+            'id': self.id,
+            'name': self.name,
+            'firmwareName': self.firmwareName,
+            'firmwareVersion': self.firmwareVersion,
+            'active': self.active
+        }
+        sensors = []
+        for s in self.sensors:
+            sensors.append(s.serialize)
+        ret_dict['sensors'] = sensors
+        actuators = []
+        for a in self.actuators:
+            actuators.append(a.serialize)
+        ret_dict['actuators'] = actuators
+        return ret_dict
+
 
 def init_periphery_controllers(db_session):
     pc = PeripheryController('Dummy', '0.1', 'Dummy')

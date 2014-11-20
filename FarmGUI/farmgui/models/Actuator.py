@@ -37,7 +37,7 @@ class Actuator(Hardware):
 
     @property
     def redis_key(self):
-        return 'p'+str(self.periphery_controller_id)+'.a'+str(self.index)+'.value'
+        return 'p'+str(self.periphery_controller_id)+'_a'+str(self.index)+'_value'
 
     @property
     def serialize(self):

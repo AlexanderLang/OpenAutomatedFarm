@@ -27,10 +27,11 @@ def add_routes(config):
     config.add_route('project_views_about', '/about')
     config.add_route('get_redis_values',     '/redis_values')
     # hardware views
-    config.add_route('hardware_views_home', '/hardware')
+    config.add_route('hardware_views_home',         '/hardware')
+    config.add_route('periphery_controller_update', '/hardware/pc/update/{pc_id}')
+    config.add_route('periphery_controller_delete', '/hardware/pc/delete/{pc_id}')
     # component views
     config.add_route('component_views_home', '/components')
-
     config.add_route('component_update',       '/components/update/{comp_id}')
     config.add_route('component_delete',       '/components/delete/{comp_id}')
     config.add_route('component_input_update', '/components/input/update/{comp_in_id}')
@@ -49,17 +50,12 @@ def add_routes(config):
     config.add_route('regulator_delete',       '/components/reg/delete/{reg_id}')
     # settings views
     config.add_route('setting_views_home',     '/settings')
-    config.add_route('setting_views_update',   '/settings/update/{name}')
-
-    # configuration views
-    config.add_route('regulator_config_update',     '/conf/reg/{reg_id}/config/{_id}/update')
-    config.add_route('periphery_controllers_list',  '/conf/periphery_controllers')
-    config.add_route('periphery_controller_update', '/conf/periphery_controllers/{_id}/update')
-    config.add_route('periphery_controller_delete', '/conf/periphery_controllers/{_id}/delete')
+    config.add_route('field_setting_update',   '/settings/update/{name}')
     # display views
     config.add_route('display_views_home', '/display')
+
+
     config.add_route('plot_parameter_data', '/display/parameter/data')
-    config.add_route('periphery_controller_values', '/display/periphery_controller/{pc_id}/values')
     # calendar views
     config.add_route('calendar_home', '/calendar/{parameter_id}')
     config.add_route('calendar_entry_save', '/calendar/{parameter_id}/save')

@@ -28,6 +28,17 @@ class FieldSetting(Base):
         self.value = value
         self.description = description
 
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {'id': self._id,
+                'name': self.name,
+                'value': self.value,
+                'description': self.description}
+
+    def __repr__(self):
+        return str(self.serialize)
+
     @staticmethod
     def get_cultivation_start(db_session):
         time_str = db_session.query(FieldSetting).filter_by(name='cultivation_start').first().value

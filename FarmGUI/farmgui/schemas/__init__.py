@@ -11,7 +11,6 @@ from .DeviceSchemas import NewDeviceSchema
 from .RegulatorSchemas import EditRegulatorSchema
 from .RegulatorSchemas import NewRegulatorSchema
 
-from .FarmComponentSchema import FarmComponentSchema
 from .FieldSettingSchema import FieldSettingSchema
 from .PeripheryControllerSchema import PeripheryControllerSchema
 from .CalendarEntrySchema import CalendarEntrySchema

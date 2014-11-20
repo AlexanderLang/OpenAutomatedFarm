@@ -48,8 +48,8 @@ class FarmManager(object):
         # query database
         self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
         self.reload_parameters()
-        self.handle_parameters(now)
         self.reload_devices()
+        self.handle_parameters(now)
         self.handle_device_setpoints(now)
         self.reload_regulators()
         self.handle_regulators()
@@ -234,20 +234,13 @@ class FarmManager(object):
             real_reg.initialize(reg)
                 #print('input['+inp+'] = '+str(inputs[inp])+', redis: '+reg.inputs[inp].redis_key)
             #print('maybe addind '+reg.name)
-            #print('reg inputs: '+str(reg.inputs))
-            inputs = {}
-            for inp in reg.inputs:
-                inputs[inp] = get_redis_number(self.redis_conn, reg.inputs[inp].redis_key)
-            if real_reg.is_executable(inputs) or reg.order > 0:
-                logging.info('using: '+str(reg))
-                print('using: '+reg.name)
-                self.regulators[reg.id] = reg
-                self.real_regulators[reg.id] = real_reg
-                if reg.order > self.max_regulation_order:
-                    print('setting max order: '+str(reg.order))
-                    self.max_regulation_order = reg.order
-            else:
-                print('not using: '+reg.name)
+            logging.info('using: '+str(reg))
+            print('using: '+reg.name)
+            self.regulators[reg.id] = reg
+            self.real_regulators[reg.id] = real_reg
+            if reg.order > self.max_regulation_order:
+                print('setting max order: '+str(reg.order))
+                self.max_regulation_order = reg.order
 
     def handle_messages(self):
         message = self.pubsub.get_message()
@@ -286,22 +279,15 @@ class FarmManager(object):
 
     def handle_regulators(self):
         for order in range(self.max_regulation_order + 1):
-            #print('regulators order: ' + str(order))
             for reg_key in self.regulators:
                 regulator = self.regulators[reg_key]
                 real_regulator = self.real_regulators[reg_key]
-                #print('checking regulator '+regulator.name+' (order='+str(regulator.order)+')')
                 if regulator.order == order:
-                    #print('handling '+regulator.name+' (order='+str(order)+')')
                     inputs = {}
                     for inp in regulator.inputs:
                         inputs[inp] = get_redis_number(self.redis_conn, regulator.inputs[inp].redis_key)
-                    #print('inputs: '+str(inputs))
                     outputs = real_regulator.execute(inputs)
-                    #print('outputs'+str(outputs))
-                    #print(regulator.name + ' (is executable: ' + str(real_regulator.is_executable(inputs)) + ')')
                     for outp in regulator.outputs:
-                        #print(regulator.name + '->' + outp + ': ' + regulator.outputs[outp].redis_key + ' ' + str(outputs[outp]))
                         self.redis_conn.setex(regulator.outputs[outp].redis_key, str(outputs[outp]), 2*self.loop_time)
 
     def work(self):

@@ -101,7 +101,6 @@ def component_property_panel(context, request):
                      use_ajax=True,
                      ajax_options='{"success": function (rText, sText, xhr, form) {edit_component_property(rText);}}',
                      buttons=('Save',))
-    print('\n\n'+edit_form.render({'name': context.name, 'value': context.value}))
     return {'component_property': context,
             'edit_form': edit_form.render()}
 

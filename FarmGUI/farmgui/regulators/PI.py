@@ -25,4 +25,6 @@ class PI(Regulator):
             self.esum += inputs['diff']
             i = self.constants['K_i'].value * self.constants['T_i'].value * self.esum
             ret_dict['result'] = round(p + i, 2)
+        else:
+            ret_dict['result'] = None
         return ret_dict

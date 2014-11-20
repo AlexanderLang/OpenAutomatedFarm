@@ -17,16 +17,6 @@ def get_redis_conn(config_uri):
 
 def get_redis_number(connection, key):
     res_str = connection.get(key)
-    #print('redis: key('+key+') = '+str(res_str))
     if res_str is not None and res_str != b'None':
         return float(res_str)
     return None
-
-
-def initialize_redis_sensor(connection, sensor):
-    """
-
-    :param connection:
-    :param sensor:
-    :return:
-    """
