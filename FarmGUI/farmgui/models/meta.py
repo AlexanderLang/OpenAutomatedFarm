@@ -4,7 +4,7 @@ from sqlalchemy.orm import class_mapper
 from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
 
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension(), autoflush=False))
 Base = declarative_base()
 
 def serialize(model):

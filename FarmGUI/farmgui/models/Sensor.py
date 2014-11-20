@@ -34,7 +34,6 @@ class Sensor(Hardware):
     def __init__(self, periphery_controller, index, name, parameter_type, precision, minimum, maximum):
         Hardware.__init__(self, periphery_controller, index, name, '')
         self.parameter_type = parameter_type
-        self.parameter_type_id = parameter_type.id
         self.precision = precision
         self.minimum = minimum
         self.maximum = maximum

@@ -1,102 +1,37 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <a href="${delete_href}" class="close">x</a>
+<div class="panel-heading">
+    <a class="close"  data-toggle="modal" href="#delete_component_modal_${component.id}">x</a>
 
-        <h2>
-            <a id="component_name_${component.id}" data-toggle="modal" href="#edit_component_modal_${component.id}">${component.name}</a>
-        </h2>
-
-        <h3>${component.description}</h3>
-
-        <div class="modal" id="edit_component_modal_${component._id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Edit Component</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure edit_component_form"/>
-                    </div>
+    <div class="modal" id="delete_component_modal_${component.id}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Are you sure?</h4>
+                </div>
+                <div class="modal-body">
+                    <button type="button" onclick="remove_component(${component.id})">Yes</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="panel-body">
+    <h4>
+        <a id="component_name_${component.id}" data-toggle="modal" href="#edit_component_modal_${component.id}">${component.name}</a>
+    </h4>
 
-        <a data-toggle="modal" href="#add_parameter_modal_${component.id}" class="btn btn-primary">Add Parameter</a>
-        <a data-toggle="modal" href="#add_device_modal_${component.id}" class="btn btn-primary">Add Device</a>
-        <a data-toggle="modal" href="#add_regulator_modal_${component.id}" class="btn btn-primary">Add Regulator</a>
+    <h5 id="component_description_${component.id}">${component.description}</h5>
 
-        <div class="row">
-            <h3>Parameters</h3>
-            <div id="parameter_list_${component.id}">
-                <div class="col-sm-4 panel_container" tal:repeat="p component.parameters">
-                    ${panel('parameter_panel', p)}
+    <div class="modal" id="edit_component_modal_${component.id}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Edit Component</h4>
                 </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <h3>Devices</h3>
-            <div id="device_list_${component.id}">
-                <div class="col-sm-4 panel_container" tal:repeat="d component.devices">
-                    ${panel('device_panel', d)}
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <h3>Regulators</h3>
-            <div id="regulator_list_${component.id}">
-                <div class="col-sm-4 panel_container" tal:repeat="r component.regulators">
-                    ${panel('regulator_panel', r)}
-                </div>
-            </div>
-        <div>
-
-        <div class="modal" id="add_parameter_modal_${component.id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Define new Parameter for ${component.name}</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure add_parameter_form"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal" id="add_device_modal_${component._id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Define new Device for ${component.name}</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure add_device_form"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal" id="add_regulator_modal_${component._id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Define new Regulator for ${component.name}</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure add_regulator_form"/>
-                    </div>
+                <div class="modal-body">
+                    <tal:form replace="structure edit_component_form"/>
                 </div>
             </div>
         </div>
     </div>
-
-</div><!-- /.container-fluid -->
+</div>

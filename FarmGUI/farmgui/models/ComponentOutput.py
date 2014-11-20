@@ -33,4 +33,15 @@ class ComponentOutput(Base):
 
     @property
     def redis_key(self):
-        return 'c'+str(self._id)
+        return 'co'+str(self._id)
+
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {'id': self._id,
+                'component_id': self.component_id,
+                'name': self.name,
+                'redis_key': self.redis_key}
+
+    def __repr__(self):
+        return str(self.serialize)

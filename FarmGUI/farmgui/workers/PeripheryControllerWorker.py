@@ -52,7 +52,7 @@ class PeripheryControllerWorker(object):
             logging.info('Working with Controller id=' + str(self.controller_id))
         db_session.commit()
         # let scheduler know the available sensors changed
-        self.redis_conn.publish('periphery_controller_changes', 'connected id: '+str(self.controller_id))
+        self.redis_conn.publish('periphery_controller_changes', 'connected '+str(self.controller_id))
 
     def register_new_controller(self, db_session):
         logging.info('Register new controller:')
@@ -85,7 +85,7 @@ class PeripheryControllerWorker(object):
 
     def get_actuator_value_from_redis(self, actuator):
         value = self.redis_conn.get(actuator.redis_key)
-        if value is None:
+        if value is None or value == b'None':
             # no setpoint, use default
             return actuator.default_value
         return float(value)
@@ -93,13 +93,13 @@ class PeripheryControllerWorker(object):
     def publish_sensor_values(self):
         try:
             values = self.serial.get_sensor_values()
+            for i in range(len(self.periphery_controller.sensors)):
+                sens = self.periphery_controller.sensors[i]
+                self.redis_conn.setex(sens.redis_key, str(values[i]), 2*self.loop_time)
         except SerialException:
             logging.error('SerialException on publish_sensor_values')
             self.close()
             exit()
-        for i in range(len(self.periphery_controller.sensors)):
-            sens = self.periphery_controller.sensors[i]
-            self.redis_conn.setex(sens.redis_key, str(values[i]), 2*self.loop_time)
 
     def apply_actuator_values(self):
         values = []
@@ -128,7 +128,7 @@ class PeripheryControllerWorker(object):
         db_session.commit()
         db_session.close()
         # let scheduler know the available sensors changed
-        self.redis_conn.publish('periphery_controller_changes', 'disconnected id: '+str(self.controller_id))
+        self.redis_conn.publish('periphery_controller_changes', 'disconnected '+str(self.controller_id))
 
 
 def usage(argv):

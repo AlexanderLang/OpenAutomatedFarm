@@ -1,46 +1,36 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <a href="${delete_href}" class="close">x</a>
+<div class="panel panel-default" id="component_${device.id}">
+    ${panel('component_panel', context=device)}
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h5>${device.device_type.name + ' [' + device.device_type.unit + ']'}:</h5>
+            </div>
+            <div class="col-sm-6">
+                <a id="device_actuator_name_${device.id}" data-toggle="modal" href="#edit_device_modal_${device.id}">
+                    ${actuator_name}
+                </a>
 
-        <h2>
-            <a id="device_name_${device.id}" data-toggle="modal" href="#edit_device_modal_${device.id}">${device.name}</a>
-        </h2>
-
-        <h4 id="device_description_${device.id}">${device.description}</h4>
-
-        <div class="modal" id="edit_device_modal_${device._id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Edit Device</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure edit_device_form"/>
+                <div class="modal" id="edit_device_modal_${device.id}">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title">Edit Device</h4>
+                            </div>
+                            <div class="modal-body">
+                                <tal:form replace="structure edit_device_form"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-sm-4">
-                <h5>Type: </h5>
-            </div>
-            <div id="device_type_${device.id}" class="col-sm-8">
-                    ${device.device_type.name}
-            </div>
-        </div>
         <!-- /.row -->
-        <div class="row">
-            <div class="col-sm-2">
-                <h5>Actuator: </h5>
-            </div>
-            <div id="device_actuator_${device.id}" class="col-sm-5">
-                ${device.actuator.periphery_controller.name + '-->' + device.actuator.name}
-            </div>
+        <div class="column">
+            ${panel('component_input_panel', context=device.inputs['value'])}
+            ${panel('component_output_panel', context=device.outputs['setpoint'])}
         </div>
-        <!-- /.row -->
+        <!-- /.column -->
     </div>
     <!-- /.panel-body -->
     <a href="#" class="btn btn-primary btn-lg">Calendar</a>

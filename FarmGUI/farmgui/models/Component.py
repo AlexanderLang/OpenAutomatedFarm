@@ -95,13 +95,31 @@ class Component(Base):
     def properties(self):
         return self._properties
 
-
-
     @property
-    def serialize(self):
+    def serialize_component(self):
         """Return data in serializeable (dictionary) format"""
-        return {
-            '_id': self.id,
+        ret_dict = {
+            'id': self.id,
             'name': self.name,
             'description': self.description
         }
+        inputs = {}
+        for key in self._inputs:
+            inputs[key] = self._inputs[key].serialize
+        ret_dict['inputs'] = inputs
+        outputs = {}
+        for key in self._outputs:
+            outputs[key] = self._outputs[key].serialize
+        ret_dict['outputs'] = outputs
+        properties = {}
+        for key in self._properties:
+            properties[key] = self._properties[key].serialize
+        ret_dict['properties'] = properties
+        return ret_dict
+
+    @property
+    def serialize(self):
+        return self.serialize_component
+
+    def __repr__(self):
+        return str(self.serialize)

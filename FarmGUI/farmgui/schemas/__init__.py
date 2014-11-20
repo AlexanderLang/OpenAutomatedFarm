@@ -1,10 +1,19 @@
-from .ParameterSchema import ParameterSchema
+from .ComponentSchemas import ComponentSchema
+from .ComponentSchemas import ComponentInputSchema
+from .ComponentSchemas import ComponentPropertySchema
+
+from .ParameterSchemas import EditParameterSchema
+from .ParameterSchemas import NewParameterSchema
+
+from .DeviceSchemas import EditDeviceSchema
+from .DeviceSchemas import NewDeviceSchema
+
+from .RegulatorSchemas import EditRegulatorSchema
+from .RegulatorSchemas import NewRegulatorSchema
+
 from .FarmComponentSchema import FarmComponentSchema
 from .FieldSettingSchema import FieldSettingSchema
 from .PeripheryControllerSchema import PeripheryControllerSchema
-from .DeviceSchema import DeviceSchema
 from .CalendarEntrySchema import CalendarEntrySchema
 from .SetpointInterpolationSchema import SetpointInterpolationSchema
 from .InterpolationKnotSchema import InterpolationKnotSchema
-from .RegulatorSchema import RegulatorSchema
-from .RegulatorConfigSchema import RegulatorConfigSchema

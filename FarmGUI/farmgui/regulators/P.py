@@ -15,6 +15,8 @@ class P(Regulator):
         self.constants['K_p'] = RegulatorProperty(1, 'Proportional constant')
         self.outputs['result'] = RegulatorProperty(0, 'Regulator output')
 
-    def execute(self):
-        if self.is_executable():
-            self.outputs['result'].value = round(self.inputs['diff'].value * self.constants['K_p'].value, 2)
+    def execute(self, inputs):
+        ret_dict = {}
+        if self.is_executable(inputs):
+            ret_dict['result'] = round(inputs['diff'] * self.constants['K_p'].value, 2)
+        return ret_dict

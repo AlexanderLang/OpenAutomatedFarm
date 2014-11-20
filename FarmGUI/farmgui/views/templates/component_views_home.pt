@@ -1,0 +1,75 @@
+<metal:block use-macro="main_template">
+    <div metal:fill-slot="content">
+        <h1>Components</h1>
+
+        <a data-toggle="modal" href="#add_parameter_modal" class="btn btn-primary">Add Parameter</a>
+        <div class="modal" id="add_parameter_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Define new Parameter</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_parameter_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a data-toggle="modal" href="#add_device_modal" class="btn btn-primary">Add Device</a>
+        <div class="modal" id="add_device_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Define new Device</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_device_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a data-toggle="modal" href="#add_regulator_modal" class="btn btn-primary">Add Regulator</a>
+        <div class="modal" id="add_regulator_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Define new Regulator</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_regulator_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <h3>Parameters</h3>
+            <div id="parameter_list">
+                <div class="col-sm-4 panel_container" tal:repeat="p parameters">
+                    ${panel('parameter_panel', context=p)}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <h3>Devices</h3>
+            <div id="device_list">
+                <div class="col-sm-4 panel_container" tal:repeat="d devices">
+                    ${panel('device_panel', context=d)}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <h3>Regulators</h3>
+            <div id="regulator_list">
+                <div class="col-sm-4 panel_container" tal:repeat="r regulators">
+                    ${panel('regulator_panel', context=r)}
+                </div>
+            </div>
+        </div>
+    </div>
+</metal:block>

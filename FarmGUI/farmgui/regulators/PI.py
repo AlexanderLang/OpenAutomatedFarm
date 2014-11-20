@@ -18,9 +18,11 @@ class PI(Regulator):
         self.outputs['result'] = RegulatorProperty(0, 'Regulator output')
         self.esum = 0
 
-    def execute(self):
-        if self.is_executable():
-            p = self.inputs['diff'].value * self.constants['K_p'].value
-            self.esum += self.inputs['diff'].value
+    def execute(self, inputs):
+        ret_dict = {}
+        if self.is_executable(inputs):
+            p = inputs['diff'] * self.constants['K_p'].value
+            self.esum += inputs['diff']
             i = self.constants['K_i'].value * self.constants['T_i'].value * self.esum
-            self.outputs['result'].value = round(p + i, 2)
+            ret_dict['result'] = round(p + i, 2)
+        return ret_dict

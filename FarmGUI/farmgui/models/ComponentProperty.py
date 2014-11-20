@@ -39,3 +39,10 @@ class ComponentProperty(Base):
     def id(self):
         return self._id
 
+    @property
+    def serialize(self):
+        """Return data in serializeable format"""
+        return {'id': self._id,
+                'name': self.name,
+                'value': self.value}
+

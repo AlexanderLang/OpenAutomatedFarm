@@ -23,23 +23,36 @@ def main(global_config, **settings):
 
 def add_routes(config):
     # project views
-    config.add_route('project_views_root',  '/')
-    config.add_route('project_views_home',  '/farm/home')
-    config.add_route('project_views_about', '/farm/about')
+    config.add_route('project_views_home',  '/')
+    config.add_route('project_views_about', '/about')
+    config.add_route('get_redis_values',     '/redis_values')
+    # hardware views
+    config.add_route('hardware_views_home', '/hardware')
+    # component views
+    config.add_route('component_views_home', '/components')
+
+    config.add_route('component_update',       '/components/update/{comp_id}')
+    config.add_route('component_delete',       '/components/delete/{comp_id}')
+    config.add_route('component_input_update', '/components/input/update/{comp_in_id}')
+    config.add_route('component_property_update', '/components/properties/update/{comp_prop_id}')
+
+    config.add_route('parameter_save',         '/components/param/save')
+    config.add_route('parameter_update',       '/components/param/update/{param_id}')
+    config.add_route('parameter_delete',       '/components/param/delete/{param_id}')
+
+    config.add_route('device_save',            '/components/dev/save')
+    config.add_route('device_update',          '/components/dev/update/{dev_id}')
+    config.add_route('device_delete',          '/components/dev/delete/{dev_id}')
+
+    config.add_route('regulator_save',         '/components/reg/save')
+    config.add_route('regulator_update',       '/components/reg/update/{reg_id}')
+    config.add_route('regulator_delete',       '/components/reg/delete/{reg_id}')
+    # settings views
+    config.add_route('setting_views_home',     '/settings')
+    config.add_route('setting_views_update',   '/settings/update/{name}')
+
     # configuration views
-    config.add_route('configuration_views_home',    '/conf')
-    config.add_route('components_list',             '/conf/comp')
-    config.add_route('component_delete',            '/conf/comp/{comp_id}/delete')
-    config.add_route('component_save',              '/conf/comp/{comp_id}/save')
-    config.add_route('parameter_save',              '/conf/comp/{comp_id}/param/{param_id}/save')
-    config.add_route('parameter_delete',            '/conf/comp/{comp_id}/param/{param_id}/delete')
-    config.add_route('device_save',                 '/conf/comp/{comp_id}/dev/{dev_id}/save')
-    config.add_route('device_delete',               '/conf/comp/{comp_id}/dev/{dev_id}/delete')
-    config.add_route('regulator_save',              '/conf/comp/{comp_id}/reg/{reg_id}/save')
-    config.add_route('regulator_delete',            '/conf/comp/{comp_id}/reg/{reg_id}/delete')
     config.add_route('regulator_config_update',     '/conf/reg/{reg_id}/config/{_id}/update')
-    config.add_route('field_settings_list',         '/conf/field_settings')
-    config.add_route('field_setting_update',        '/conf/field_settings/{name}/update')
     config.add_route('periphery_controllers_list',  '/conf/periphery_controllers')
     config.add_route('periphery_controller_update', '/conf/periphery_controllers/{_id}/update')
     config.add_route('periphery_controller_delete', '/conf/periphery_controllers/{_id}/delete')

@@ -10,6 +10,7 @@ from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 
 from farmgui.models import Component
 from farmgui.models import ComponentInput
@@ -41,10 +42,12 @@ class Device(Component):
                                nullable=False)
     device_type = relationship('DeviceType')
     actuator_id = Column(SmallInteger,
-                       ForeignKey('Actuators._id'),
-                       nullable=True)
-    actuator = relationship("Actuator")
-    value_logs = relationship("DeviceValueLog", order_by="DeviceValueLog.time")
+                         ForeignKey('Actuators._id'),
+                         nullable=True)
+    actuator = relationship("Actuator", lazy='joined', backref=backref("device", uselist=False))
+    value_logs = relationship("DeviceValueLog",
+                              order_by="DeviceValueLog.time",
+                              cascade='all, delete, delete-orphan')
     setpoint_logs = relationship("DeviceSetpointLog",
                                  order_by="DeviceSetpointLog.time",
                                  cascade='all, delete, delete-orphan')
@@ -80,8 +83,8 @@ class Device(Component):
                 self.current_calendar_entry = entry
             else:
                 start_time = end_time
-        if self.current_calendar_entry is None:
-            logging.warning(self.name + ': could not find calendar entry for ' + str(present))
+        #if self.current_calendar_entry is None:
+        #    logging.warning(self.name + ': could not find calendar entry for ' + str(present))
 
     def get_setpoint(self, cultivation_start, time):
         if self.current_calendar_entry is None:
@@ -94,13 +97,13 @@ class Device(Component):
 
     def update_setpoint(self, cultivation_start, time, redis_conn):
         value = self.get_setpoint(cultivation_start, time)
-        redis_conn.set(self._outputs['setpoint'].redis_key, value)
+        redis_conn.setex(self._outputs['setpoint'].redis_key, value, 3)
         self.log_setpoint(time, value)
 
     def update_value(self, redis_conn):
-        if self._inputs['value'].connected_output is not None:
+        if self._inputs['value'].connected_output is not None and self.actuator is not None:
             value = redis_conn.get(self._inputs['value'].connected_output.redis_key)
-            redis_conn.set(self.actuator.redis_key, value)
+            redis_conn.setex(self.actuator.redis_key, value, 3)
 
     def log_setpoint(self, time, value):
         remove_uneeded = True
@@ -150,9 +153,12 @@ class Device(Component):
     @property
     def serialize(self):
         """Return data in serializeable format"""
-        ret_dict = Component.serialize(self)
+        ret_dict = self.serialize_component
         ret_dict['device_type'] = serialize(self.device_type)
-        ret_dict['actuator'] = self.actuator.serialize
+        if self.actuator is not None:
+            ret_dict['actuator'] = self.actuator.serialize
+        else:
+            ret_dict['actuator'] = None
         return ret_dict
 
 

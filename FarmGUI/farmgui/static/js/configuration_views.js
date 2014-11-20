@@ -14,7 +14,7 @@ function add_component (rText, sText, xhr, form) {
         $('#component_list').append(rText.component);
     }
     // insert form again
-    var modal_body = $('#add_component_modal').find('.modal-body')
+    var modal_body = $('#add_component_modal').find('.modal-body');
     modal_body.append(rText.form);
     if (rText.error == true){
         modal_body.prepend(rText.error_msg);
@@ -31,7 +31,7 @@ function edit_component (rText, sText, xhr, form) {
         $('#component_name_'+rText.component._id).text(rText.component.name);
     }
     // insert form again
-    var modal_body = $('#edit_component_modal_'+rText.component._id).find('.modal-body')
+    var modal_body = $('#edit_component_modal_'+rText.component._id).find('.modal-body');
     modal_body.append(rText.form);
     if (rText.error == true){
         modal_body.prepend(rText.error_msg);

@@ -97,7 +97,7 @@ class SerialShell(object):
         start = time.time()
         self.serial.write(bytearray(cmd + '\n', 'ascii'))
         line = self.read_line()
-        logging.debug('SerialShell: \"' + cmd + '\"-->\"' + line + '\" in ' + str(time.time()-start) + ' [s]')
+        logging.debug('SerialShell: \"' + cmd + '\"-->\"' + line + '\" in %.4f [s]' % (time.time()-start))
         return line
 
     def read_line(self):

@@ -1,47 +1,36 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <a href="${delete_href}" class="close">x</a>
+<div class="panel panel-default" id="component_${parameter.id}">
+    ${panel('component_panel', context=parameter)}
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h5>${parameter.parameter_type.name + ' [' + parameter.parameter_type.unit + ']'}:</h5>
+            </div>
+            <div class="col-sm-6">
+                <a id="parameter_sensor_name_${parameter.id}" data-toggle="modal" href="#edit_parameter_modal_${parameter.id}">
+                    ${sensor_name}
+                </a>
 
-        <h2>
-            <a id="parameter_name_${parameter.id}" data-toggle="modal" href="#edit_parameter_modal_${parameter.id}">${parameter.name}</a>
-        </h2>
-
-        <h4 id="parameter_description_${parameter.id}">${parameter.description}</h4>
-
-        <div class="modal" id="edit_parameter_modal_${parameter._id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Edit Parameter</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure edit_parameter_form"/>
+                <div class="modal" id="edit_parameter_modal_${parameter.id}">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title">Edit Parameter</h4>
+                            </div>
+                            <div class="modal-body">
+                                <tal:form replace="structure edit_parameter_form"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-    </div>
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-sm-4">
-                <h5>Type: </h5>
-            </div>
-            <div class="col-sm-8" id="parameter_type_${parameter.id}">
-                ${parameter.parameter_type.name + ' [' + parameter.parameter_type.unit + ']'}
-            </div>
-        </div>
         <!-- /.row -->
-        <div class="row">
-            <div class="col-sm-4">
-                <h5>Sensor:</h5>
-            </div>
-            <div class="col-sm-8" id="parameter_sensor_${parameter.id}">
-                ${parameter.sensor.periphery_controller.name + '-->' + parameter.sensor.name}
-            </div>
+        <div class="column">
+            ${panel('component_output_panel', context=parameter.outputs['value'])}
+            ${panel('component_output_panel', context=parameter.outputs['setpoint'])}
         </div>
-        <!-- /.row -->
+        <!-- /.column -->
         <a href="${calendar_href}" class="btn btn-primary btn-lg">Calendar</a>
     </div>
     <!-- /.panel-body -->

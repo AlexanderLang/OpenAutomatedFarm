@@ -35,7 +35,7 @@ class PeripheryController(Base):
                              backref='periphery_controller',
                              cascade='all, delete-orphan')
 
-    def __init__(self, fw_name, fw_version, name, active=True):
+    def __init__(self, fw_name, fw_version, name, active=False):
         self.firmwareName = fw_name
         self.firmwareVersion = fw_version
         self.name = name
@@ -48,6 +48,6 @@ class PeripheryController(Base):
 
 def init_periphery_controllers(db_session):
     pc = PeripheryController('Dummy', '0.1', 'Dummy')
+    db_session.add(pc)
     init_sensors(db_session, pc)
     init_actuators(db_session, pc)
-    db_session.add(pc)

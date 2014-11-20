@@ -1,0 +1,10 @@
+<div class="panel panel-default" id="component_output_panel_${component_output.id}">
+    <div class="panel-body">
+        <div class="col-sm-6">
+            <h5>Out: ${component_output.name}</h5>
+        </div>
+        <div class="col-sm-6">
+            <h5 class="redis_value" id="co_${component_output.id}_redis_value" data-redis="${component_output.redis_key}"></h5>
+        </div>
+    </div><!-- /.panel-body -->
+</div><!-- /.panel -->

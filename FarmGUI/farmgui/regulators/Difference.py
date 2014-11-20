@@ -7,6 +7,7 @@ Created on Oct 15, 2014
 from farmgui.regulators import Regulator
 from farmgui.regulators import RegulatorProperty
 
+
 class Difference(Regulator):
 
     def __init__(self):
@@ -15,6 +16,8 @@ class Difference(Regulator):
         self.inputs['b'] = RegulatorProperty(0, 'input 2')
         self.outputs['result'] = RegulatorProperty(0, 'Result (a-b)')
 
-    def execute(self):
-        if self.is_executable():
-            self.outputs['result'].value = round(self.inputs['a'].value - self.inputs['b'].value, 2)
+    def execute(self, inputs):
+        ret_dict = {}
+        if self.is_executable(inputs):
+            ret_dict['result'] = round(inputs['a'] - inputs['b'], 2)
+        return ret_dict

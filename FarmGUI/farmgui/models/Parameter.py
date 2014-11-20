@@ -10,6 +10,7 @@ from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 import logging
 
 from farmgui.models import Component
@@ -20,6 +21,8 @@ from farmgui.models import ParameterSetpointLog
 from farmgui.models import SetpointInterpolation
 from farmgui.models import CalendarEntry
 from farmgui.models import Sensor
+
+from farmgui.communication import get_redis_number
 
 
 class Parameter(Component):
@@ -42,7 +45,7 @@ class Parameter(Component):
     sensor_id = Column(SmallInteger,
                        ForeignKey('Sensors._id'),
                        nullable=True)
-    sensor = relationship("Sensor", lazy='joined')
+    sensor = relationship("Sensor", lazy='joined',  backref=backref("parameter", uselist=False))
     value_logs = relationship("ParameterValueLog",
                               order_by="ParameterValueLog.time",
                               cascade='all, delete, delete-orphan')
@@ -55,6 +58,9 @@ class Parameter(Component):
 
     __mapper_args__ = {'polymorphic_identity': 'parameter'}
 
+    _value = None
+    _setpoint = None
+
     current_calendar_entry = None
 
     def __init__(self, name, parameter_type, sensor, description):
@@ -66,12 +72,8 @@ class Parameter(Component):
         Component.__init__(self, name, description)
         self.parameter_type = parameter_type
         self.sensor = sensor
-        if sensor is not None:
-            self._outputs['value'] = ComponentOutput(self, 'value')
-            self._outputs['setpoint'] = ComponentOutput(self, 'setpoint')
-        else:
-            self._outputs['value'] = ComponentOutput(self, 'value')
-            self._outputs['setpoint'] = ComponentOutput(self, 'setpoint')
+        self._outputs['value'] = ComponentOutput(self, 'value')
+        self._outputs['setpoint'] = ComponentOutput(self, 'setpoint')
 
     def configure_calendar(self, cultivation_start, present):
         start_time = cultivation_start
@@ -84,8 +86,8 @@ class Parameter(Component):
                 self.current_calendar_entry = entry
             else:
                 start_time = end_time
-        if self.current_calendar_entry is None:
-            logging.warning(self.name + ': could not find calendar entry for ' + str(present))
+        #if self.current_calendar_entry is None:
+        #    logging.warning(self.name + ': could not find calendar entry for ' + str(present))
 
     def get_setpoint(self, cultivation_start, time):
         if self.current_calendar_entry is None:
@@ -98,12 +100,16 @@ class Parameter(Component):
 
     def update_setpoint(self, cultivation_start, time, redis_conn):
         value = self.get_setpoint(cultivation_start, time)
-        redis_conn.set(self._outputs['setpoint'].redis_key, value)
-
+        redis_conn.setex(self._outputs['setpoint'].redis_key, value, 3)
 
     def update_value(self, redis_conn):
-        value = redis_conn.get(self.sensor.redis_key)
-        redis_conn.set(self._outputs['value'].redis_key, value)
+        if self.sensor is not None:
+            self._value = get_redis_number(redis_conn, self.sensor.redis_key)
+            #print('updating parameter: '+self.name+' (value = '+str(self._value)+') redis: '+self._outputs['value'].redis_key)
+        #print('id: '+str(self.id))
+        #print('value: '+str(self._value))
+        #print('outputs: '+str(self._outputs))
+        redis_conn.setex(self._outputs['value'].redis_key, self._value, 3)
 
     def log_setpoint(self, time, redis_conn):
         value_str = redis_conn.get(self._outputs['setpoint'].redis_key)
@@ -132,7 +138,10 @@ class Parameter(Component):
         value_str = redis_conn.get(self._outputs['value'].redis_key)
         value = None
         if value_str is not None:
-            value = float(value_str)
+            try:
+                value = float(value_str)
+            except ValueError:
+                value = None
         log_new = True
         try:
             old_1 = self.value_logs[-2].value
@@ -161,11 +170,21 @@ class Parameter(Component):
         return -1
 
     @property
+    def value(self):
+        if self._value is not None:
+            return self._value
+        self.update_value(self._redis_conn)
+        return self._value
+
+    @property
     def serialize(self):
         """Return data in serializeable format"""
-        ret_dict = Component.serialize(self)
+        ret_dict = self.serialize_component
         ret_dict['parameter_type'] = serialize(self.parameter_type)
-        ret_dict['sensor'] = self.sensor.serialize
+        if self.sensor is not None:
+            ret_dict['sensor'] = self.sensor.serialize
+        else:
+            ret_dict['sensor'] = None
         return ret_dict
 
 
@@ -180,7 +199,9 @@ def init_parameters(db_session):
     temp_inter = db_session.query(SetpointInterpolation).filter_by(name='Temperature Interpolation (long day)').one()
     # query sensors
     temp1_sensor = db_session.query(Sensor).filter_by(name='T1').first()
+    print('T1: '+str(temp1_sensor))
     humi1_sensor = db_session.query(Sensor).filter_by(name='H1').first()
+    print('H1: '+str(humi1_sensor))
     temp2_sensor = db_session.query(Sensor).filter_by(name='T2').first()
     humi2_sensor = db_session.query(Sensor).filter_by(name='H2').first()
     temp3_sensor = db_session.query(Sensor).filter_by(name='T3').first()
@@ -200,9 +221,9 @@ def init_parameters(db_session):
     db_session.add(new_param)
     new_param = Parameter('Nutrient Tank Water Temperature', temp_type, temp3_sensor, '')
     db_session.add(new_param)
-    new_param = Parameter('Nutrient Tank Water pH', ph_type, temp1_sensor, '')
+    new_param = Parameter('Nutrient Tank Water pH', ph_type, None, '')
     db_session.add(new_param)
-    new_param = Parameter('Nutrient Tank Water EC', ec_type, temp1_sensor, '')
+    new_param = Parameter('Nutrient Tank Water EC', ec_type, None, '')
     db_session.add(new_param)
-    new_param = Parameter('Nutrient Tank Water Content', vol_type, temp1_sensor, '')
+    new_param = Parameter('Nutrient Tank Water Content', vol_type, None, '')
     db_session.add(new_param)

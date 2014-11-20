@@ -1,0 +1,26 @@
+<div class="panel panel-default" id="component_property_panel_${component_property.id}">
+    <div class="panel-body">
+        <div class="col-sm-6">
+            <h5>Conf: ${component_property.name}</h5>
+        </div>
+        <div class="col-sm-6">
+            <a id="component_property_value_${component_property.id}" data-toggle="modal" href="#edit_component_property_modal_${component_property.id}">
+                    ${component_property.value}
+            </a>
+
+            <div class="modal" id="edit_component_property_modal_${component_property.id}">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title">Edit Component Property</h4>
+                        </div>
+                        <div class="modal-body">
+                            <tal:form replace="structure edit_form"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.panel-body -->
+</div><!-- /.panel -->

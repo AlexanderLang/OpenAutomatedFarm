@@ -28,7 +28,7 @@ $(document).ready(
 			}
 
 			function update_plot(data) {
-				plot.setData(data.data)
+				plot.setData(data.data);
 				plot.getOptions().xaxes[0].min = data.xmin;
 				plot.getOptions().xaxes[0].max = data.xmax;
 				plot.setupGrid();

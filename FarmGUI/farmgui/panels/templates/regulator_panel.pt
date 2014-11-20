@@ -1,57 +1,49 @@
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <a href="${delete_href}" class="close">x</a>
+<div class="panel panel-default" id="component_${regulator.id}">
+    ${panel('component_panel', context=regulator)}
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h5>Algorithm:</h5>
+            </div>
+            <div class="col-sm-6">
+                <a id="regulator_algorithm_name_${regulator.id}" data-toggle="modal" href="#edit_regulator_modal_${regulator.id}">
+                    ${regulator.algorithm_name}
+                </a>
 
-        <h2>
-            <a id="regulator_name_${regulator.id}" data-toggle="modal" href="#edit_regulator_modal_${regulator.id}">${regulator.name}</a>
-        </h2>
-
-        <h4 id="regulator_description_${regulator.id}">${regulator.description}</h4>
-
-        <div class="modal" id="edit_regulator_modal_${regulator._id}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Edit Regulator</h4>
-                    </div>
-                    <div class="modal-body">
-                        <tal:form replace="structure edit_regulator_form"/>
+                <div class="modal" id="edit_regulator_modal_${regulator.id}">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title">Edit Regulator</h4>
+                            </div>
+                            <div class="modal-body">
+                                <tal:form replace="structure edit_regulator_form"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-sm-2">
-                <h5>Type: </h5>
-            </div>
-            <div id="regulator_type_${regulator.id}" class="col-sm-3">
-                ${regulator.regulator_type.name}
-            </div>
-            <div class="col-sm-2">
-                <h5>Input Parameter</h5>
-            </div>
-            <div id="regulator_input_parameter_${regulator.id}" class="col-sm-5">
-                ${regulator.input_parameter.name}
-            </div>
-        </div>
         <!-- /.row -->
-        <div class="row">
-            <div class="col-sm-2">
-                <h5>Output Device</h5>
+        <div class="column">
+            <div id="regulator_inputs_${regulator.id}">
+                <div tal:repeat="key regulator.inputs">
+                    ${panel('component_input_panel', context=regulator.inputs[key])}
+                </div>
             </div>
-            <div id="regulator_output_device_${regulator.id}" class="col-sm-5">
-                ${regulator.output_device.name}
+            <div id="regulator_outputs_${regulator.id}">
+                <div tal:repeat="key regulator.outputs">
+                    ${panel('component_output_panel', context=regulator.outputs[key])}
+                </div>
+            </div>
+            <div id="regulator_properties_${regulator.id}">
+                <div tal:repeat="key regulator.properties">
+                    ${panel('component_property_panel', context=regulator.properties[key])}
+                </div>
             </div>
         </div>
-        <!-- /.row -->
-
-        <div tal:repeat="rc regulator.config">
-            ${panel('regulator_config_panel', regulator_config=rc)}
-        </div>
+        <!-- /.column -->
     </div>
     <!-- /.panel-body -->
 </div><!-- /.panel -->
