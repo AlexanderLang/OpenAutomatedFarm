@@ -10,7 +10,6 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from farmgui.models import serialize
 from farmgui.models import Hardware
 from farmgui.models import DeviceType
 
@@ -42,12 +41,10 @@ class Actuator(Hardware):
     @property
     def serialize(self):
         """Return data in serializeable format"""
-        return {
-            '_id': self.id,
-            'periphery_controller': serialize(self.periphery_controller),
-            'name': self.name,
-            'device_type': serialize(self.device_type)
-        }
+        ret_dict = self.serialize_hardware
+        ret_dict['device_type'] = self.device_type.serialize
+        ret_dict['default_value'] = self.default_value
+        return ret_dict
 
 
 def init_actuators(db_session, pc):

@@ -16,7 +16,6 @@ from farmgui.models import Component
 from farmgui.models import ComponentInput
 from farmgui.models import ComponentOutput
 from farmgui.models import DeviceType
-from farmgui.models import serialize
 from farmgui.models import DeviceValueLog
 from farmgui.models import DeviceSetpointLog
 from farmgui.models import Actuator
@@ -153,7 +152,7 @@ class Device(Component):
     def serialize(self):
         """Return data in serializeable format"""
         ret_dict = self.serialize_component
-        ret_dict['device_type'] = serialize(self.device_type)
+        ret_dict['device_type'] = self.device_type.serialize
         if self.actuator is not None:
             ret_dict['actuator'] = self.actuator.serialize
         else:

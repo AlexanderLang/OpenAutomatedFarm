@@ -29,6 +29,19 @@ class ParameterType(Base):
     def id(self):
         return self._id
 
+    @property
+    def serialize(self):
+        """Return data in serializeable (dictionary) format"""
+        ret_dict = {
+            'id': self.id,
+            'name': self.name,
+            'unit': self.unit
+        }
+        return ret_dict
+
+    def __repr__(self):
+        return str(self.serialize)
+
 
 def init_parameter_types(db_session):
     db_session.add(ParameterType('Temperature', '°C'))

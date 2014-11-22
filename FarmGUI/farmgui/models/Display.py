@@ -5,47 +5,44 @@ Created on Nov 17, 2013
 """
 
 from sqlalchemy import Column
-from sqlalchemy import ForeignKey
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy.types import Text
+from sqlalchemy.orm import relationship
 
 from farmgui.models import Base
 
 
-class Hardware(Base):
+class Display(Base):
     """
     classdocs
     """
 
-    __tablename__ = 'Hardware'
+    __tablename__ = 'Displays'
 
     _id = Column(SmallInteger,
                  primary_key=True,
                  autoincrement=True,
                  nullable=False,
                  unique=True)
-    hardware_type = Column(Unicode(250))
-    periphery_controller_id = Column(SmallInteger, ForeignKey('PeripheryControllers._id'), nullable=False)
-    index = Column(SmallInteger, nullable=False)
+    display_type = Column(Unicode(250))
     name = Column(Unicode(250),
                   nullable=False,
-                  unique=False)
+                  unique=True)
     description = Column(Text,
                          nullable=True)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'hardware',
-        'polymorphic_on': hardware_type,
+        'polymorphic_identity': 'display',
+        'polymorphic_on': display_type,
     }
 
-    def __init__(self, preiphery_controller, index, name, description):
+    def __init__(self, name, description):
         """
         Constructor
         :type component: FarmComponent
         """
-        self.periphery_controller = preiphery_controller
-        self.index = index
         self.name = name
         self.description = description
 
@@ -54,12 +51,18 @@ class Hardware(Base):
         return self._id
 
     @property
-    def serialize_hardware(self):
+    def serialize_display(self):
         """Return data in serializeable (dictionary) format"""
-        return {
-            '_id': self.id,
+        ret_dict = {
+            'id': self.id,
             'name': self.name,
-            'description': self.description,
-            'periphery_controller_id': self.periphery_controller_id,
-            'index': self.index
+            'description': self.description
         }
+        return ret_dict
+
+    @property
+    def serialize(self):
+        return self.serialize_display
+
+    def __repr__(self):
+        return str(self.serialize)

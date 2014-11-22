@@ -23,9 +23,17 @@
                href="#edit_periphery_controller_modal_${periphery_controller.id}">${periphery_controller.name}</a>
         </h4>
 
-        <h5 id="periphery_controller_firmware_${periphery_controller.id}">
-             ${periphery_controller.firmwareName + ' (' + periphery_controller.firmwareVersion + ')'}
-        </h5>
+        <div class="row">
+            <div class="col-sm-4">
+                <h4>Firmware:</h4>
+            </div>
+            <div class="col-sm-8">
+                <h5 id="periphery_controller_firmware_${periphery_controller.id}">
+                        ${periphery_controller.firmwareName + ' (' + periphery_controller.firmwareVersion + ')'}
+                </h5>
+            </div>
+        </div>
+
 
         <div class="modal" id="edit_periphery_controller_modal_${periphery_controller.id}">
             <div class="modal-dialog">
@@ -42,16 +50,6 @@
         </div>
     </div>
     <div class="panel-body">
-        <div class="row">
-            <div class="col-sm-4">
-                <h3>Firmware</h3>
-            </div>
-            <div class="col-sm-8">
-                <h3>${periphery_controller.firmwareName + ' (' + periphery_controller.firmwareVersion + ')'}</h3>
-            </div>
-        </div>
-        <!-- /.row -->
-
         <h2>Sensors:</h2>
 
         <div tal:repeat="s periphery_controller.sensors">

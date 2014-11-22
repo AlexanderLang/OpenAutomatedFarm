@@ -23,15 +23,9 @@ def sidebar(context, request):
 
     config_items = []
     components = []
-
-    if request.current_route_url().startswith('nope'):
-        # configuration sidebar
-        config_items.append(config_item('Settings', request.route_url('setting_views_home')))
-        config_items.append(config_item('Components', request.route_url('component_views_home')))
-        config_items.append(config_item('Periphery Controllers', request.route_url('periphery_controllers_list')))
-    if request.current_route_url().startswith('nope'):
-        # display sidebar
-        components = DBSession.query(Parameter).all()
+    # display sidebar
+    #if request.current_route_url().startswith(request.route_url('display_views_home')):
+    #    components = DBSession.query(Parameter).all()
 
     return {'configuration_items': config_items,
             'components': components}

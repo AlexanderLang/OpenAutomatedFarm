@@ -1,13 +1,11 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPFound
 from deform_bootstrap import Form
 from deform import ValidationFailure
 
 from sqlalchemy.exc import DBAPIError
 
 from farmgui.models import DBSession
-from farmgui.models import serialize
 from farmgui.models import FieldSetting
 
 from farmgui.schemas import FieldSettingSchema

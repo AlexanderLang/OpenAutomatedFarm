@@ -11,7 +11,6 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Float
 from sqlalchemy.orm import relationship
 
-from farmgui.models import serialize
 from farmgui.models import Hardware
 from farmgui.models import ParameterType
 
@@ -46,15 +45,12 @@ class Sensor(Hardware):
     @property
     def serialize(self):
         """Return data in serializeable format"""
-        return {
-            '_id': self.id,
-            'periphery_controller': serialize(self.periphery_controller),
-            'name': self.name,
-            'parameter_type': serialize(self.parameter_type),
-            'precision': self.precision,
-            'minimum': self.minimum,
-            'maximum': self.maximum
-        }
+        ret_dict = self.serialize_hardware
+        ret_dict['parameter_type'] = self.parameter_type.serialize
+        ret_dict['precision'] = self.precision
+        ret_dict['minimum'] = self.minimum
+        ret_dict['maximum'] = self.maximum
+        return ret_dict
 
 
 def init_sensors(db_session, pc):

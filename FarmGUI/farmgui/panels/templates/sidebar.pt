@@ -6,13 +6,8 @@
     </ul>
     <ul id="plot-sidebar" class="nav menu">
         <li class="deeper parent" tal:repeat="comp components">
-            <span class="lbl">${comp.name}</span>
-            <ul class="children nav-item">
-                <li class="deeper" tal:repeat="param comp.parameters">
-                    <input type="checkbox" name="${param.name}" id="${param.name+'_checkbox'}" data="${param.id}"/>
-                    <label for="${param.name+'_checkbox'}">${param.name}</label>
-                </li>
-            </ul>
+            <input type="checkbox" name="${comp.name}" id="${comp.name+'_checkbox'}" data="${comp.id}"/>
+            <label for="${comp.name+'_checkbox'}">${comp.name}</label>
         </li>
     </ul>
 </div>

@@ -16,3 +16,7 @@ from .PeripheryControllerSchema import PeripheryControllerSchema
 from .CalendarEntrySchema import CalendarEntrySchema
 from .SetpointInterpolationSchema import SetpointInterpolationSchema
 from .InterpolationKnotSchema import InterpolationKnotSchema
+
+from .DisplaySchemas import DisplaySchema
+from .LogDiagramSchemas import LogDiagramSchema
+from .ParameterLinkSchemas import ParameterLinkSchema

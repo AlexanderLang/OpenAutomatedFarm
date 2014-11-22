@@ -6,7 +6,6 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.exc import IntegrityError
 
 from farmgui.models import DBSession
-from farmgui.models import serialize
 from farmgui.models import Parameter
 from farmgui.models import ParameterType
 from farmgui.models import Sensor

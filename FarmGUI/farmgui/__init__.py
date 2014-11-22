@@ -52,10 +52,16 @@ def add_routes(config):
     config.add_route('setting_views_home',     '/settings')
     config.add_route('field_setting_update',   '/settings/update/{name}')
     # display views
-    config.add_route('display_views_home', '/display')
+    config.add_route('display_views_home',    '/display')
+    config.add_route('log_diagram_save',      '/display/log_diagram/save')
+    config.add_route('log_diagram_update',    '/display/log_diagram/update/{ld_id}')
+    config.add_route('log_diagram_delete',    '/display/log_diagram/delete/{ld_id}')
+    config.add_route('log_diagram_data',      '/display/log_diagram/data')
+    config.add_route('parameter_link_save',   '/display/parameter_link/save/{dis_id}')
+    config.add_route('parameter_link_update', '/display/parameter_link/update/{pl_id}')
+    config.add_route('parameter_link_delete', '/display/parameter_link/delete/{pl_id}')
 
 
-    config.add_route('plot_parameter_data', '/display/parameter/data')
     # calendar views
     config.add_route('calendar_home', '/calendar/{parameter_id}')
     config.add_route('calendar_entry_save', '/calendar/{parameter_id}/save')

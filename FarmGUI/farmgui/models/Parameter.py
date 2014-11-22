@@ -11,11 +11,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
-import logging
 
 from farmgui.models import Component
 from farmgui.models import ComponentOutput
-from farmgui.models import serialize
 from farmgui.models import ParameterValueLog
 from farmgui.models import ParameterSetpointLog
 from farmgui.models import SetpointInterpolation
@@ -174,7 +172,7 @@ class Parameter(Component):
     def serialize(self):
         """Return data in serializeable format"""
         ret_dict = self.serialize_component
-        ret_dict['parameter_type'] = serialize(self.parameter_type)
+        ret_dict['parameter_type'] = self.parameter_type.serialize
         if self.sensor is not None:
             ret_dict['sensor'] = self.sensor.serialize
         else:

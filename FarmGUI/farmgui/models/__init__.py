@@ -1,6 +1,5 @@
 from .meta import Base
 from .meta import DBSession
-from .meta import serialize
 
 from .FieldSetting import FieldSetting
 from .FieldSetting import init_field_settings
@@ -38,3 +37,7 @@ from .Device import Device
 from .Device import init_devices
 from .Regulator import Regulator
 from .Regulator import init_regulators
+
+from .Display import Display
+from .LogDiagram import LogDiagram
+from .ParameterLink import ParameterLink

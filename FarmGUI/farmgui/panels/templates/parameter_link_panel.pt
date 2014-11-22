@@ -1,0 +1,49 @@
+<div class="panel panel-default"
+     id="parameter_link_panel_${parameter_link.id}"
+     data-target="${parameter_link.target}"
+     data-parameter_id="${parameter_link.parameter_id}">
+    <div class="panel-body">
+        <a class="close" data-toggle="modal" href="#delete_parameter_link_modal_${parameter_link.id}">x</a>
+
+        <div class="modal" id="delete_parameter_link_modal_${parameter_link.id}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Are you sure?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" onclick="remove_parameter_link(${parameter_link.id})">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <h5>Parameter Link:</h5>
+            </div>
+            <div class="col-sm-6">
+                <a id="parameter_link_name_${parameter_link.id}"
+                   data-toggle="modal"
+                   href="#edit_parameter_link_modal_${parameter_link.id}">
+                        ${parameter_link_name}
+                </a>
+
+                <div class="modal" id="edit_parameter_link_modal_${parameter_link.id}">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h4 class="modal-title">Edit Parameter Link</h4>
+                            </div>
+                            <div class="modal-body">
+                                <tal:form replace="structure edit_parameter_link_form"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.panel-body -->
+</div><!-- /.panel -->
