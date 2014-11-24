@@ -29,16 +29,36 @@ def deferred_parameter_default(node, kw):
     return colander.null
 
 
+@colander.deferred
+def deferred_target_default(node, kw):
+    if 'parameter_link' in kw:
+        target = kw['parameter_link'].target
+        if target is None:
+            return colander.null
+        return target
+    return colander.null
+
+
+@colander.deferred
+def deferred_color_default(node, kw):
+    if 'parameter_link' in kw:
+        color = kw['parameter_link'].color
+        if color is None:
+            return colander.null
+        return color
+    return colander.null
+
+
 class ParameterLinkSchema(MappingSchema):
     parameter = SchemaNode(typ=Int(),
-                         title='Parameter',
-                         default=deferred_parameter_default,
-                         widget=deferred_parameter_widget)
+                           title='Parameter',
+                           default=deferred_parameter_default,
+                           widget=deferred_parameter_widget)
     target = SchemaNode(typ=String(),
-                             title='Target Log',
-                             default='value',
-                             widget=SelectWidget(values=[('value', 'Values'), ('setpoint', 'Setpoints')]))
+                        title='Target Log',
+                        default=deferred_target_default,
+                        widget=SelectWidget(values=[('value', 'Values'), ('setpoint', 'Setpoints')]))
     color = SchemaNode(typ=String(),
                        title='Color',
-                       default='#FF0000',
+                       default=deferred_color_default,
                        widget=TextInputWidget())

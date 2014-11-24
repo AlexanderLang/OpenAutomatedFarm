@@ -236,7 +236,7 @@ class ComponentViews(object):
         DBSession.flush()
         ret_dict['form'] = form.render()
         ret_dict['device_panel'] = self.request.layout_manager.render_panel('device_panel', context=new_dev)
-        self.request.redis.publish('device_changes', 'device added')
+        self.request.redis.publish('device_changes', 'added '+str(new_dev.id))
         return ret_dict
 
     @view_config(route_name='device_update', renderer='json')
@@ -267,13 +267,15 @@ class ComponentViews(object):
             dev.actuator = None
         ret_dict['form'] = form.render(device=dev)
         ret_dict['device'] = dev.serialize
-        self.request.redis.publish('device_changes', 'device changed')
+        self.request.redis.publish('device_changes', 'changed '+str(dev.id))
         return ret_dict
 
     @view_config(route_name='device_delete', renderer='json')
     def device_delete(self):
-        device = DBSession.query(Device).filter_by(_id=self.request.matchdict['dev_id']).first()
+        device = DBSession.query(Device).filter_by(_id=self.request.matchdict['dev_id']).one()
+        dev_id = device.id
         DBSession.delete(device)
+        self.request.redis.publish('device_changes', 'removed '+str(dev_id))
         return {'delete': True}
 
     @view_config(route_name='regulator_save', renderer='json')
@@ -326,6 +328,7 @@ class ComponentViews(object):
         reg.algorithm_name = vals['algorithm']
         real_reg = regulator_factory(reg.algorithm_name)
         real_reg.initialize_db(reg)
+        DBSession.flush()
         ret_dict['form'] = form.render(regulator=reg)
         ret_dict['regulator'] = reg.serialize
         ret_dict['regulator_panel'] = self.request.layout_manager.render_panel('regulator_panel', context=reg)
