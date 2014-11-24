@@ -33,6 +33,10 @@ class LogDiagram(Display):
                                    order_by="ParameterLink._id",
                                    backref='display',
                                    cascade='all, delete, delete-orphan')
+    device_links = relationship('DeviceLink',
+                                order_by='DeviceLink._id',
+                                backref='display',
+                                cascade='all, delete, delete-orphan')
 
     __mapper_args__ = {'polymorphic_identity': 'log_diagram'}
 
@@ -58,4 +62,8 @@ class LogDiagram(Display):
         for pl in self.parameter_links:
             pls.append(pl.serialize)
         ret_dict['parameter_links'] = pls
+        dls = []
+        for dl in self.device_links:
+            dls.append(dl.serialize)
+        ret_dict['device_links'] = dls
         return ret_dict

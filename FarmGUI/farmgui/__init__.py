@@ -60,6 +60,9 @@ def add_routes(config):
     config.add_route('parameter_link_save',   '/display/parameter_link/save/{dis_id}')
     config.add_route('parameter_link_update', '/display/parameter_link/update/{pl_id}')
     config.add_route('parameter_link_delete', '/display/parameter_link/delete/{pl_id}')
+    config.add_route('device_link_save',      '/display/device_link/save/{dis_id}')
+    config.add_route('device_link_update',    '/display/device_link/update/{dl_id}')
+    config.add_route('device_link_delete',    '/display/device_link/delete/{dl_id}')
 
 
     # calendar views

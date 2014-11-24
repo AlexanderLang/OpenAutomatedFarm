@@ -2,7 +2,22 @@
      id="display_${log_diagram.id}"
      data-period="${log_diagram.period}">
     <div class="panel-heading">
+
         <a class="close" data-toggle="modal" href="#delete_log_diagram_modal_${log_diagram.id}">x</a>
+
+        <div class="modal" id="delete_log_diagram_modal_${log_diagram.id}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Are you sure?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" onclick="remove_log_diagram(${log_diagram.id})">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <h2>
             <a data-toggle="modal"
@@ -25,42 +40,52 @@
         </div>
         <h4 id="log_diagram_description_${log_diagram.id}">${log_diagram.description}</h4>
         <h5 id="log_diagram_period_${log_diagram.id}">Period: ${log_diagram.period} s</h5>
+    </div>
 
-        <div class="modal" id="delete_log_diagram_modal_${log_diagram.id}">
+    <div class="panel-body">
+
+        <a data-toggle="modal" href="#add_parameter_link_modal" class="btn btn-primary">Add Parameter Link</a>
+        <div class="modal" id="add_parameter_link_modal">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">Are you sure?</h4>
+                        <h4 class="modal-title">Define new Parameter Link</h4>
                     </div>
                     <div class="modal-body">
-                        <button type="button" onclick="remove_log_diagram(${log_diagram.id})">Yes</button>
+                        <tal:form replace="structure add_parameter_link_form"/>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <a data-toggle="modal" href="#add_parameter_link_modal" class="btn btn-primary">Add Parameter Link</a>
 
-    <div class="modal" id="add_parameter_link_modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h4 class="modal-title">Define new Parameter Link</h4>
-                </div>
-                <div class="modal-body">
-                    <tal:form replace="structure add_parameter_link_form"/>
+        <a data-toggle="modal" href="#add_device_link_modal" class="btn btn-primary">Add Device Link</a>
+        <div class="modal" id="add_device_link_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Define new Device Link</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_device_link_form"/>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="parameter_link_list_${log_diagram.id}">
-        <div class="panel_container" tal:repeat="pl log_diagram.parameter_links">
-                ${panel('parameter_link_panel', context=pl)}
+
+        <div id="parameter_link_list_${log_diagram.id}">
+            <div class="panel_container" tal:repeat="pl log_diagram.parameter_links">
+                    ${panel('parameter_link_panel', context=pl)}
+            </div>
         </div>
-    </div>
-    <div class="plot-container">
-        <div id="plot_placeholder_${log_diagram.id}" class="plot-placeholder"></div>
+        <div id="device_link_list_${log_diagram.id}">
+            <div class="panel_container" tal:repeat="dl log_diagram.device_links">
+                    ${panel('device_link_panel', context=dl)}
+            </div>
+        </div>
+        <div class="plot-container">
+            <div id="plot_placeholder_${log_diagram.id}" class="plot-placeholder"></div>
+        </div>
     </div>
 </div><!-- /.panel -->

@@ -14,23 +14,23 @@ from sqlalchemy.types import Unicode
 from .meta import Base
 
 
-class ParameterLink(Base):
+class DeviceLink(Base):
     """
     classdocs
     """
-    __tablename__ = 'ParameterLinks'
+    __tablename__ = 'DeviceLinks'
 
     _id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False, unique=True)
     display_id = Column(SmallInteger, ForeignKey('Displays._id'), nullable=False)
-    parameter_id = Column(SmallInteger, ForeignKey('Parameters._id'), nullable=False)
+    device_id = Column(SmallInteger, ForeignKey('Devices._id'), nullable=False)
     target = Column(Unicode(250), nullable=False)
     color = Column(Unicode(20), nullable=False)
 
-    parameter = relationship('Parameter')
+    device = relationship('Device')
 
-    def __init__(self, display, parameter, target, color):
+    def __init__(self, display, device, target, color):
         self.display = display
-        self.parameter = parameter
+        self.device = device
         self.target = target
         self.color = color
 
@@ -42,7 +42,7 @@ class ParameterLink(Base):
     def serialize(self):
         return {'id': self._id,
                 'display_id': self.display_id,
-                'parameter_id': self.parameter_id,
+                'device_id': self.device_id,
                 'target': self.target}
 
     def __repr__(self):

@@ -58,10 +58,8 @@ Getting Started
 
 3) Start the workers
 
-	measurement_scheduler &
-	measurement_logger &
-	periphery_controller_manager &
-	periphery_controller_worker /dev/ttyACM0
+	oaf_pc development.ini /dev/ttyACM0
+	oaf_fm development.ini
 
 4) Run pserve
 

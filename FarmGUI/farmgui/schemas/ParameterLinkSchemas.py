@@ -4,6 +4,7 @@ from colander import SchemaNode
 from colander import Int
 from colander import String
 from deform.widget import SelectWidget
+from deform.widget import TextInputWidget
 
 from farmgui.models import DBSession
 from farmgui.models import Parameter
@@ -37,3 +38,7 @@ class ParameterLinkSchema(MappingSchema):
                              title='Target Log',
                              default='value',
                              widget=SelectWidget(values=[('value', 'Values'), ('setpoint', 'Setpoints')]))
+    color = SchemaNode(typ=String(),
+                       title='Color',
+                       default='#FF0000',
+                       widget=TextInputWidget())

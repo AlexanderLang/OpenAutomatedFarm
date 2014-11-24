@@ -20,3 +20,4 @@ from .InterpolationKnotSchema import InterpolationKnotSchema
 from .DisplaySchemas import DisplaySchema
 from .LogDiagramSchemas import LogDiagramSchema
 from .ParameterLinkSchemas import ParameterLinkSchema
+from .DeviceLinkSchemas import DeviceLinkSchema

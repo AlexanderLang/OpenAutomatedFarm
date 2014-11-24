@@ -1,13 +1,13 @@
 <div class="panel panel-default"
-     id="parameter_link_panel_${parameter_link.id}"
-     data-target="${parameter_link.target}"
-     data-parameter_id="${parameter_link.parameter_id}"
-     data-link_name="${parameter_link_name}"
-     data-color="${parameter_link.color}">
+     id="device_link_panel_${device_link.id}"
+     data-target="${device_link.target}"
+     data-device_id="${device_link.device_id}"
+     data-link_name="${device_link_name}"
+     data-color="${device_link.color}">
     <div class="panel-body">
-        <a class="close" data-toggle="modal" href="#delete_parameter_link_modal_${parameter_link.id}">x</a>
+        <a class="close" data-toggle="modal" href="#delete_device_link_modal_${device_link.id}">x</a>
 
-        <div class="modal" id="delete_parameter_link_modal_${parameter_link.id}">
+        <div class="modal" id="delete_device_link_modal_${device_link.id}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -15,31 +15,31 @@
                         <h4 class="modal-title">Are you sure?</h4>
                     </div>
                     <div class="modal-body">
-                        <button type="button" onclick="remove_parameter_link(${parameter_link.id})">Yes</button>
+                        <button type="button" onclick="remove_device_link(${device_link.id})">Yes</button>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-6">
-                <h5>Parameter Link:</h5>
+                <h5>Device Link:</h5>
             </div>
             <div class="col-sm-6">
-                <a id="parameter_link_name_${parameter_link.id}"
+                <a id="device_link_name_${device_link.id}"
                    data-toggle="modal"
-                   href="#edit_parameter_link_modal_${parameter_link.id}">
-                        ${parameter_link_name}
+                   href="#edit_device_link_modal_${device_link.id}">
+                        ${device_link_name}
                 </a>
 
-                <div class="modal" id="edit_parameter_link_modal_${parameter_link.id}">
+                <div class="modal" id="edit_device_link_modal_${device_link.id}">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                <h4 class="modal-title">Edit Parameter Link</h4>
+                                <h4 class="modal-title">Edit Device Link</h4>
                             </div>
                             <div class="modal-body">
-                                <tal:form replace="structure edit_parameter_link_form"/>
+                                <tal:form replace="structure edit_device_link_form"/>
                             </div>
                         </div>
                     </div>
