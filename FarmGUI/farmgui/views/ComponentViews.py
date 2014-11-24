@@ -299,7 +299,7 @@ class ComponentViews(object):
         DBSession.add(new_reg)
         DBSession.flush()
         ret_dict['form'] = form.render()
-        ret_dict['regulator_panel'] = self.request.layout_manager.render_panel('regulator_panel', new_reg)
+        ret_dict['regulator_panel'] = self.request.layout_manager.render_panel('regulator_panel', context=new_reg)
         self.request.redis.publish('regulator_changes', 'added '+str(new_reg.id))
         return ret_dict
 
@@ -328,6 +328,7 @@ class ComponentViews(object):
         real_reg.initialize_db(reg)
         ret_dict['form'] = form.render(regulator=reg)
         ret_dict['regulator'] = reg.serialize
+        ret_dict['regulator_panel'] = self.request.layout_manager.render_panel('regulator_panel', context=reg)
         self.request.redis.publish('regulator_changes', 'changed '+str(reg.id))
         return ret_dict
 

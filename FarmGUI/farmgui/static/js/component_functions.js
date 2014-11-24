@@ -148,24 +148,14 @@ function edit_regulator (response) {
     // dismiss modal dialog (if there was no error)
     if (response.error == false){
         $('#edit_regulator_modal_'+response.regulator.id).modal('hide');
-        // replace name
-        $('#regulator_algorithm_name_'+response.regulator.id).text(response.regulator.algorithm_name);
-    }
+    } else {
     // insert form again
-    $('#edit_regulator_modal_'+response.regulator.id).find('.modal-body').append(response.form);
-
-    deform.processCallbacks();
-}
-
-function edit_regulator_config (rText, sText, xhr, form) {
-    // dismiss modal dialog (if there was no error)
-    if (rText.error == false){
-        $('#edit_regulator_config_modal_'+rText.regulator_config_id).modal('hide');
-        // replace value
-        $('#regulator_config_value_'+rText.regulator_config_id).text(rText.regulator_config.value);
+        $('#edit_regulator_modal_'+response.regulator.id).find('.modal-body').append(response.form);
     }
-    // insert form again
-    $('#edit_regulator_config_modal_'+rText.regulator_config._id).find('.modal-body').append(rText.form);
-
     deform.processCallbacks();
+
+    if (response.error == false) {
+        var reg_panel = $('#component_'+response.regulator.id);
+        reg_panel.replaceWith(response.regulator_panel);
+    }
 }
