@@ -110,11 +110,8 @@ class Parameter(Component):
         redis_conn.setex(self._outputs['value'].redis_key, self._value, 10)
 
     def log_setpoint(self, time, redis_conn):
-        value_str = redis_conn.get(self._outputs['setpoint'].redis_key)
-        value = None
+        value = get_redis_number(redis_conn, self._outputs['setpoint'].redis_key)
         remove_uneeded = True
-        if value_str != b'None':
-            value = float(value_str)
         try:
             old_1 = self.setpoint_logs[-2].setpoint
             old_2 = self.setpoint_logs[-1].setpoint

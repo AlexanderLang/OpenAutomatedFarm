@@ -112,13 +112,15 @@ class ComponentViews(object):
         comp_id = self.request.matchdict['comp_id']
         component = DBSession.query(Component).filter_by(_id=comp_id).one()
         channel = component.component_type + '_changes'
+        self.request.redis.publish(channel, 'removed '+str(comp_id))
         DBSession.delete(component)
-        self.request.redis.publish(channel, 'deleted '+str(comp_id))
         return {'delete': True}
 
     @view_config(route_name='component_input_update', renderer='json')
     def component_input_update(self):
         ret_dict = {}
+        if self.request.POST['connected_output'] == 'None':
+            self.request.POST['connected_output'] = None
         controls = self.request.POST.items()
         comp_in_id = self.request.matchdict['comp_in_id']
         comp_in = DBSession.query(ComponentInput).filter_by(_id=comp_in_id).one()
@@ -203,14 +205,18 @@ class ComponentViews(object):
             param.sensor = None
         ret_dict['form'] = form.render(parameter=param)
         ret_dict['parameter'] = param.serialize
+        if param.sensor is not None:
+            ret_dict['sensor_name'] = param.sensor.periphery_controller.name + '-->' + param.sensor.name
+        else:
+            ret_dict['sensor_name'] = 'not connected'
         self.request.redis.publish('parameter_changes', 'changed ' + str(param.id))
         return ret_dict
 
     @view_config(route_name='parameter_delete', renderer='json')
     def parameter_delete(self):
-        parameter = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['param_id']).first()
-        DBSession.delete(parameter)
+        parameter = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['param_id']).one()
         self.request.redis.publish('parameter_changes', 'removed ' + str(parameter.id))
+        DBSession.delete(parameter)
         return {'delete': True}
 
     @view_config(route_name='device_save', renderer='json')
@@ -267,6 +273,8 @@ class ComponentViews(object):
             dev.actuator = None
         ret_dict['form'] = form.render(device=dev)
         ret_dict['device'] = dev.serialize
+        if dev.actuator is not None:
+            ret_dict['actuator_name'] = dev.actuator.periphery_controller.name + '-->' + dev.actuator.name
         self.request.redis.publish('device_changes', 'changed '+str(dev.id))
         return ret_dict
 

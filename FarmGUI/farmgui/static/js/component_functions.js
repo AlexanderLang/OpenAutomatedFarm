@@ -22,7 +22,12 @@ function edit_component_input (response) {
     if (response.error == false){
         $('#edit_component_input_modal_'+response.component_input.id).modal('hide');
         $('#component_input_connected_output_'+response.component_input.id).text(response.connected_output_name);
-        $('#ci_'+response.component_input.id+'_redis_value').attr('data-redis', response.component_input.connected_output.redis_key)
+        if (response.component_input.connected_output != null) {
+            var redis_val = $('#ci_' + response.component_input.id + '_redis_value');
+            redis_val.attr('data-redis', response.component_input.redis_key);
+        } else {
+            $('#ci_' + response.component_input.id + '_redis_value').attr('data-redis', 'nc');
+        }
     }
     // insert form again
     var modal_body = $('#edit_component_input_modal_'+response.component_input.id).find('.modal-body');
@@ -80,7 +85,7 @@ function edit_parameter (response) {
         $('#edit_parameter_modal_'+response.parameter.id).modal('hide');
         // replace sensor name
         if(response.parameter.sensor != null) {
-            $('#parameter_sensor_name_' + response.parameter.id).text(response.parameter.sensor.periphery_controller.name + "-->" + response.parameter.sensor.name);
+            $('#parameter_sensor_name_' + response.parameter.id).text(response.sensor_name);
         } else {
             $('#parameter_sensor_name_' + response.parameter.id).text("No sensor selected");
         }
@@ -119,7 +124,7 @@ function edit_device (response) {
         $('#edit_device_modal_'+response.device.id).modal('hide');
         // replace sensor name
         if(response.device.actuator != null) {
-            $('#device_actuator_name_' + response.device.id).text(response.device.actuator.periphery_controller.name + "-->" + response.device.actuator.name);
+            $('#device_actuator_name_' + response.device.id).text(response.actuator_name);
         } else {
             $('#device_actuator_name_' + response.device.id).text("No actuator selected");
         }

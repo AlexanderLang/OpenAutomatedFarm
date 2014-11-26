@@ -14,6 +14,7 @@ from pyramid.paster import get_appsettings
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import ObjectDeletedError
 
 from farmgui.models import Base
 from farmgui.models import Parameter
@@ -123,10 +124,17 @@ class FarmManager(object):
                         self.parameters.pop(pid, None)
                         break
         elif change_type == 'removed':
+            logging.info('removing parameter: '+str(param_id))
+            print('removing parameter: '+str(param_id))
             if param_id in self.parameters.keys():
-                logging.info('removing parameter: '+self.parameters[param_id].name)
-                print('removing device: '+self.parameters[param_id].name)
-                self.devices.pop(param_id, None)
+                print('found match in self.parameters, removing')
+                print('old: '+str(self.parameters.keys()))
+                param = self.parameters.pop(param_id)
+                try:
+                    self.db_session.expunge(param)
+                except ObjectDeletedError:
+                    pass
+                print('new: '+str(self.parameters.keys()))
 
     def handle_device_changes(self, msg):
         print('handling device changes')
@@ -357,6 +365,7 @@ class FarmManager(object):
 
     def work(self):
         logging.info('Farm Manager entered work loop')
+        print('Farm Manager entered work loop')
         last_run = datetime.now()
         loop_counter = 0
         while True:
@@ -367,12 +376,16 @@ class FarmManager(object):
             now = datetime.now()
             last_run = now
             self.handle_messages()
-            self.db_session.commit()
             # calculate setpoints, log parameters
             self.handle_parameters(now)
             self.handle_device_setpoints(now)
             self.handle_regulators()
             self.handle_device_values(now)
+            try:
+                self.db_session.commit()
+            except IntegrityError as e:
+                print('\n\nError: '+str(e)+'\n\n')
+                self.db_session.rollback()
 
 
 def usage(argv):
