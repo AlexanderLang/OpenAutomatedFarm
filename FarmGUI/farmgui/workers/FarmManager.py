@@ -38,7 +38,6 @@ class FarmManager(object):
     def __init__(self, db_sm, redis):
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
-        self.loop_time = timedelta(seconds=1)
         self.db_session = self.db_sessionmaker(expire_on_commit=False, autoflush=False)
         self.parameters = None
         self.regulators = None
@@ -48,6 +47,7 @@ class FarmManager(object):
         now = datetime.now()
         # query database
         self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
+        self.loop_time = FieldSetting.get_loop_time(self.db_session)
         self.reload_parameters()
         self.reload_devices()
         self.handle_parameters(now)
@@ -333,6 +333,8 @@ class FarmManager(object):
                 self.handle_component_input_changes(data)
             elif message['channel'] == b'component_property_changes':
                 self.handle_component_property_changes(data)
+            elif message['channel'] == b'field_setting_changes':
+                self.loop_time = FieldSetting.get_loop_time(self.db_session)
 
     def handle_parameters(self, now):
         for param_key in self.parameters:

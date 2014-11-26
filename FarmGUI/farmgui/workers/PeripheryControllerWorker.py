@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
 from farmgui.models import Base
+from farmgui.models import FieldSetting
 from farmgui.models import ParameterType
 from farmgui.models import PeripheryController
 from farmgui.models import Sensor
@@ -35,33 +36,33 @@ class PeripheryControllerWorker(object):
     def __init__(self, devicename, redis, db_sm):
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
-        self.loop_time = timedelta(seconds=1)
         logging.info('\n\nInitializing Periphery Controller Worker')
         # connect with serial port
         self.serial = SerialShell(devicename)
         logging.info('connected to serial port ' + devicename)
         # register in database
-        db_session = self.db_sessionmaker(expire_on_commit=False)
+        self.db_session = self.db_sessionmaker(expire_on_commit=False)
+        self.loop_time = FieldSetting.get_loop_time(self.db_session)
         self.controller_id = self.serial.get_id()
         if self.controller_id == 0:
             # new controller
-            self.register_new_controller(db_session)
+            self.register_new_controller(self.db_session)
         else:
             # known controller (set active)
             try:
-                self.periphery_controller = db_session.query(PeripheryController).filter_by(_id=self.controller_id).one()
+                self.periphery_controller = self.db_session.query(PeripheryController).filter_by(_id=self.controller_id).one()
                 self.periphery_controller.active = True
             except NoResultFound:
                 # controller was deleted, will not be used until reset
                 self.close()
                 exit()
             logging.info('Working with Controller id=' + str(self.controller_id))
-        db_session.commit()
+        self.db_session.commit()
         # let scheduler know the available sensors changed
         self.redis_conn.publish('periphery_controller_changes', 'connected '+str(self.controller_id))
         # listen for changes in the database
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
-        self.pubsub.subscribe('periphery_controller_changes')
+        self.pubsub.subscribe('periphery_controller_changes', 'field_setting_changes')
 
     def register_new_controller(self, db_session):
         logging.info('Register new controller:')
@@ -127,10 +128,12 @@ class PeripheryControllerWorker(object):
             # something in the database changed
             data = message['data'].decode('UTF-8')
             print('message: ' + str(message))
-            change_type, pc_id_str = data.split(' ')
-            if change_type == 'deleted' and int(pc_id_str) == self.controller_id:
-                exit()
-
+            if message['channel'] == b'periphery_controller_changes':
+                change_type, pc_id_str = data.split(' ')
+                if change_type == 'deleted' and int(pc_id_str) == self.controller_id:
+                    exit()
+            elif message['channel'] == b'field_setting_changes':
+                self.loop_time = FieldSetting.get_loop_time(self.db_session)
 
     def work(self):
         last_run = datetime.now()
