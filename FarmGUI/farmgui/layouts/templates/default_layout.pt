@@ -12,6 +12,8 @@
             src="${request.static_url('farmgui:static/js/jquery-2.1.0.min.js')}"></script>
     <script language="javascript" type="text/javascript"
             src="${request.static_url('farmgui:static/js/bootstrap.min.js')}"></script>
+    <script language="javascript" type="text/javascript"
+            src="${request.static_url('farmgui:static/js/redis_values.js')}"></script>
     <script tal:repeat="js layout.additional_javascript" language="javascript" type="text/javascript"
             src="${js}"></script>
 </head>

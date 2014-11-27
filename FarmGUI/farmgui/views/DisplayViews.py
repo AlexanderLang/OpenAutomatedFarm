@@ -41,7 +41,6 @@ class DisplayViews(object):
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
         layout.add_javascript(self.request.static_url('farmgui:static/js/display_functions.js'))
-        layout.add_javascript(self.request.static_url('farmgui:static/js/redis_values.js'))
         layout.add_css(self.request.static_url('farmgui:static/css/plot_parameter.css'))
 
         add_log_diagram_form = Form(LogDiagramSchema().bind(),

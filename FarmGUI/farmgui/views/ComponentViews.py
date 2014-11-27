@@ -45,7 +45,6 @@ class ComponentViews(object):
         layout = self.request.layout_manager.layout
         # layout.add_css(self.request.static_url('deform_bootstrap:static/deform_bootstrap.css'))
         layout.add_javascript(self.request.static_url('farmgui:static/js/component_functions.js'))
-        layout.add_javascript(self.request.static_url('farmgui:static/js/redis_values.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
 

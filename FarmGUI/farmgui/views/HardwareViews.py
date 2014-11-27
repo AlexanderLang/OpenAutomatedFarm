@@ -26,7 +26,6 @@ class HardwareViews(object):
     def periphery_controllers_list(self):
         layout = self.request.layout_manager.layout
         layout.add_javascript(self.request.static_url('farmgui:static/js/hardware_functions.js'))
-        layout.add_javascript(self.request.static_url('farmgui:static/js/redis_values.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
         try:
