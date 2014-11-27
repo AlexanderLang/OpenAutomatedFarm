@@ -123,8 +123,6 @@ class Parameter(Component):
             # value is constant, remove last entry (if there are at least 2 entries)
             if remove_uneeded:
                 self.setpoint_logs.remove(self.setpoint_logs[-1])
-        else:
-            print('o1='+str(old_1)+' o2='+str(old_2)+' sp='+str(value))
         # add new log entry
         new_log = ParameterSetpointLog(self, time, value)
         self.setpoint_logs.append(new_log)

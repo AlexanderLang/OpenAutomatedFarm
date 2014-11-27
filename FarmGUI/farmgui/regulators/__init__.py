@@ -3,6 +3,7 @@ from .RegulatorProperty import RegulatorProperty
 from .P import P
 from .PI import PI
 from .Difference import Difference
+from .RootHumidifier import RootHumidifier
 
 
 def regulator_factory(name):

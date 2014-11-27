@@ -53,7 +53,7 @@ class FarmManager(object):
         self.handle_parameters(now)
         self.handle_device_setpoints(now)
         self.reload_regulators()
-        self.handle_regulators()
+        self.handle_regulators(now)
         # listen for database changes (broadcat on redis channels)
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('parameter_changes',
@@ -352,13 +352,13 @@ class FarmManager(object):
             self.devices[dev_key].update_value(self.redis_conn)
             self.devices[dev_key].log_value(now, self.redis_conn)
 
-    def handle_regulators(self):
+    def handle_regulators(self, now):
         for order in range(self.max_regulation_order + 1):
             for reg_key in self.regulators:
                 regulator = self.regulators[reg_key]
                 real_regulator = self.real_regulators[reg_key]
                 if regulator.order == order:
-                    inputs = {}
+                    inputs = {'now': now}
                     for inp in regulator.inputs:
                         inputs[inp] = get_redis_number(self.redis_conn, regulator.inputs[inp].redis_key)
                     outputs = real_regulator.execute(inputs)
@@ -381,7 +381,7 @@ class FarmManager(object):
             # calculate setpoints, log parameters
             self.handle_parameters(now)
             self.handle_device_setpoints(now)
-            self.handle_regulators()
+            self.handle_regulators(now)
             self.handle_device_values(now)
             try:
                 self.db_session.commit()
