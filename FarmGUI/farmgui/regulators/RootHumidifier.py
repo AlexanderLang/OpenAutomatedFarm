@@ -72,5 +72,6 @@ class RootHumidifier(Regulator):
             ret_dict['t_off'] = self.outputs['t_off'].value
             ret_dict['pump'] = self.pump_value
         else:
+            ret_dict['t_off'] = None
             ret_dict['pump'] = None
         return ret_dict

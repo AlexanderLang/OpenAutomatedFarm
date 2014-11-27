@@ -1,13 +1,20 @@
-<div class="col-sm-2">
-    <ul id="config-sidebar" class="nav nav-stacked affix">
-        <li tal:repeat="item configuration_items" tal:attributes="class 'active' if item.active else ''">
-            <a href="${item.url}">${item.name}</a>
+<div class="col-sm-3">
+    <ul id="status-sidebar" class="nav nav-stacked affix">
+        <li>
+            <div class="row">
+                <div class="panel">
+                    <h4>Farm Manager CPU:</h4>
+                    <h4 data-redis="fm-cpu"></h4>
+                </div>
+            </div>
         </li>
-    </ul>
-    <ul id="plot-sidebar" class="nav menu">
-        <li class="deeper parent" tal:repeat="comp components">
-            <input type="checkbox" name="${comp.name}" id="${comp.name+'_checkbox'}" data="${comp.id}"/>
-            <label for="${comp.name+'_checkbox'}">${comp.name}</label>
+        <li>
+            <div class="row">
+                <div class="panel">
+                    <h4>Periphery Controller 1 CPU:</h4>
+                    <h4 data-redis="pc-cpu-0"></h4>
+                </div>
+            </div>
         </li>
     </ul>
 </div>

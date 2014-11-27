@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 from datetime import timedelta
 from time import sleep
+from multiprocessing import Process
 
 import logging
 
@@ -28,12 +29,22 @@ from farmgui.communication import SerialShell
 from farmgui.communication import get_redis_conn
 
 
-class PeripheryControllerWorker(object):
+class PeripheryControllerWorker(Process):
     """
     classdocs
     """
 
-    def __init__(self, devicename, redis, db_sm):
+    def __init__(self, devicename, config_uri):
+        super(PeripheryControllerWorker, self).__init__()
+        settings = get_appsettings(config_uri)
+        db_engine = engine_from_config(settings, 'sqlalchemy.')
+        db_sm = sessionmaker(bind=db_engine)
+        Base.metadata.bind = db_engine
+        redis = get_redis_conn(config_uri)
+        logging.basicConfig(filename=settings['log_directory'] + '/farm_manager.log',
+                            format='%(levelname)s:%(asctime)s: %(message)s',
+                            datefmt='%Y.%m.%d %H:%M:%S',
+                            level=logging.DEBUG)
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
         logging.info('\n\nInitializing Periphery Controller Worker')
@@ -135,7 +146,7 @@ class PeripheryControllerWorker(object):
             elif message['channel'] == b'field_setting_changes':
                 self.loop_time = FieldSetting.get_loop_time(self.db_session)
 
-    def work(self):
+    def run(self):
         last_run = datetime.now()
         while True:
             while datetime.now() - last_run < self.loop_time:
@@ -156,33 +167,3 @@ class PeripheryControllerWorker(object):
             self.redis_conn.publish('periphery_controller_changes', 'disconnected '+str(self.controller_id))
         except NoResultFound:
             pass
-
-
-def usage(argv):
-    cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <dev_name>\n'
-          '(example: "%s development.ini /dev/ttyACM0")' % (cmd, cmd))
-    sys.exit(1)
-
-
-def main(argv=sys.argv):
-    if len(argv) < 3:
-        usage(argv)
-    config_uri = argv[1]
-    dev_name = argv[2]
-
-    settings = get_appsettings(config_uri)
-    db_engine = engine_from_config(settings, 'sqlalchemy.')
-    db_sessionmaker = sessionmaker(bind=db_engine)
-    Base.metadata.bind = db_engine
-    redis_conn = get_redis_conn(config_uri)
-    logging.basicConfig(filename=settings['log_directory'] + '/pc_' + dev_name.split('/')[-1] + '.log',
-                        format='%(levelname)s:%(asctime)s: %(message)s',
-                        datefmt='%Y.%m.%d %H:%M:%S',
-                        level=logging.DEBUG)
-
-    worker = PeripheryControllerWorker(dev_name, redis_conn, db_sessionmaker)
-    try:
-        worker.work()
-    finally:
-        worker.close()

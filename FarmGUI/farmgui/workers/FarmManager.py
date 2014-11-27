@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 from datetime import timedelta
 from time import sleep
+from multiprocessing import Process
 
 import logging
 
@@ -30,12 +31,22 @@ from farmgui.communication import get_redis_number
 from farmgui.regulators import regulator_factory
 
 
-class FarmManager(object):
+class FarmManager(Process):
     """
     classdocs
     """
 
-    def __init__(self, db_sm, redis):
+    def __init__(self, config_uri):
+        super(FarmManager, self).__init__()
+        settings = get_appsettings(config_uri)
+        db_engine = engine_from_config(settings, 'sqlalchemy.')
+        db_sm = sessionmaker(bind=db_engine)
+        Base.metadata.bind = db_engine
+        redis = get_redis_conn(config_uri)
+        logging.basicConfig(filename=settings['log_directory'] + '/farm_manager.log',
+                            format='%(levelname)s:%(asctime)s: %(message)s',
+                            datefmt='%Y.%m.%d %H:%M:%S',
+                            level=logging.DEBUG)
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
         self.db_session = self.db_sessionmaker(expire_on_commit=False, autoflush=False)
@@ -74,8 +85,8 @@ class FarmManager(object):
         for param in self.db_session.query(Parameter).filter(Parameter.sensor_id != None).all():
             # make sure sensors are active
             if param.sensor.periphery_controller.active is True:
-                print('using: '+param.name)
-                logging.info('using: '+str(param))
+                print('using: ' + param.name)
+                logging.info('using: ' + str(param))
                 self.parameters[param.id] = param
 
     def handle_parameter_changes(self, msg):
@@ -88,20 +99,20 @@ class FarmManager(object):
             if new_param.sensor is not None:
                 if new_param.sensor.periphery_controller.active is True:
                     self.parameters[new_param.id] = new_param
-                    logging.info('adding parameter: '+new_param.name)
-                    print('adding parameter: '+new_param.name)
+                    logging.info('adding parameter: ' + new_param.name)
+                    print('adding parameter: ' + new_param.name)
                 else:
-                    logging.info('not adding parameter (inactive sensor): '+new_param.name)
-                    print('not adding parameter (inactive sensor): '+new_param.name)
+                    logging.info('not adding parameter (inactive sensor): ' + new_param.name)
+                    print('not adding parameter (inactive sensor): ' + new_param.name)
             else:
-                logging.info('not adding parameter (not connected): '+new_param.name)
-                print('not adding parameter (not connected): '+new_param.name)
+                logging.info('not adding parameter (not connected): ' + new_param.name)
+                print('not adding parameter (not connected): ' + new_param.name)
         elif change_type == 'changed':
             look_for_duplicates = True
             if param_id in self.parameters.keys():
                 # refresh device
-                logging.info('refreshing parameter: '+self.parameters[param_id].name)
-                print('refreshing parameter: '+self.parameters[param_id].name)
+                logging.info('refreshing parameter: ' + self.parameters[param_id].name)
+                print('refreshing parameter: ' + self.parameters[param_id].name)
                 self.db_session.refresh(self.parameters[param_id])
                 if self.parameters[param_id].sensor_id is not None:
                     if self.parameters[param_id].sensor.periphery_controller.active == False:
@@ -113,28 +124,28 @@ class FarmManager(object):
             else:
                 new_param = self.db_session.query(Parameter).filter_by(_id=param_id).one()
                 self.parameters[new_param.id] = new_param
-                logging.info('adding parameter: '+new_param.name)
-                print('adding parameter: '+new_param.name)
+                logging.info('adding parameter: ' + new_param.name)
+                print('adding parameter: ' + new_param.name)
             # check if another device was using that actuator
             if look_for_duplicates:
                 for pid in self.parameters:
                     if self.parameters[pid].sensor_id == self.parameters[param_id].sensor_id and pid != param_id:
-                        logging.info('colateral remove: '+self.parameters[pid].name)
-                        print('colateral remove: '+self.parameters[pid].name)
+                        logging.info('colateral remove: ' + self.parameters[pid].name)
+                        print('colateral remove: ' + self.parameters[pid].name)
                         self.parameters.pop(pid, None)
                         break
         elif change_type == 'removed':
-            logging.info('removing parameter: '+str(param_id))
-            print('removing parameter: '+str(param_id))
+            logging.info('removing parameter: ' + str(param_id))
+            print('removing parameter: ' + str(param_id))
             if param_id in self.parameters.keys():
                 print('found match in self.parameters, removing')
-                print('old: '+str(self.parameters.keys()))
+                print('old: ' + str(self.parameters.keys()))
                 param = self.parameters.pop(param_id)
                 try:
                     self.db_session.expunge(param)
                 except ObjectDeletedError:
                     pass
-                print('new: '+str(self.parameters.keys()))
+                print('new: ' + str(self.parameters.keys()))
 
     def handle_device_changes(self, msg):
         print('handling device changes')
@@ -147,20 +158,20 @@ class FarmManager(object):
                 if new_dev.actuator.periphery_controller.active is True:
                     # device usable, add it
                     self.devices[new_dev.id] = new_dev
-                    logging.info('adding device: '+new_dev.name)
-                    print('adding device: '+new_dev.name)
+                    logging.info('adding device: ' + new_dev.name)
+                    print('adding device: ' + new_dev.name)
                 else:
-                    logging.info('not adding device (inactive controller): '+new_dev.name)
-                    print('not adding device (inactive controller): '+new_dev.name)
+                    logging.info('not adding device (inactive controller): ' + new_dev.name)
+                    print('not adding device (inactive controller): ' + new_dev.name)
             else:
-                logging.info('not adding device (not connected): '+new_dev.name)
-                print('not adding device (not connected): '+new_dev.name)
+                logging.info('not adding device (not connected): ' + new_dev.name)
+                print('not adding device (not connected): ' + new_dev.name)
         elif change_type == 'changed':
             look_for_duplicates = True
             if dev_id in self.devices.keys():
                 # refresh device
-                logging.info('refreshing device: '+self.devices[dev_id].name)
-                print('refreshing device: '+self.devices[dev_id].name)
+                logging.info('refreshing device: ' + self.devices[dev_id].name)
+                print('refreshing device: ' + self.devices[dev_id].name)
                 self.db_session.refresh(self.devices[dev_id])
                 if self.devices[dev_id].actuator_id is not None:
                     if self.devices[dev_id].actuator.periphery_controller.active == False:
@@ -172,20 +183,20 @@ class FarmManager(object):
             else:
                 new_dev = self.db_session.query(Device).filter_by(_id=dev_id).one()
                 self.devices[new_dev.id] = new_dev
-                logging.info('adding device: '+new_dev.name)
-                print('adding device: '+new_dev.name)
+                logging.info('adding device: ' + new_dev.name)
+                print('adding device: ' + new_dev.name)
             # check if another device was using that actuator
             if look_for_duplicates:
                 for did in self.devices:
                     if self.devices[did].actuator_id == self.devices[dev_id].actuator_id and did != dev_id:
-                        logging.info('colateral remove: '+self.devices[did].name)
-                        print('colateral remove: '+self.devices[did].name)
+                        logging.info('colateral remove: ' + self.devices[did].name)
+                        print('colateral remove: ' + self.devices[did].name)
                         self.devices.pop(did, None)
                         break
         elif change_type == 'removed':
             if dev_id in self.devices.keys():
-                logging.info('removing device: '+self.devices[dev_id].name)
-                print('removing device: '+self.devices[dev_id].name)
+                logging.info('removing device: ' + self.devices[dev_id].name)
+                print('removing device: ' + self.devices[dev_id].name)
                 self.devices.pop(dev_id, None)
 
     def handle_periphery_controller_changes(self, msg):
@@ -257,8 +268,8 @@ class FarmManager(object):
             if rr.is_executable(inputs):
                 self.regulators[r.id] = r
                 self.real_regulators[r.id] = rr
-                logging.info('added '+str(r))
-                print('added '+str(r))
+                logging.info('added ' + str(r))
+                print('added ' + str(r))
         if change_type == 'changed':
             if r_id in self.regulators.keys():
                 r = self.regulators[r_id]
@@ -271,16 +282,16 @@ class FarmManager(object):
             for inp in r.inputs:
                 inputs[inp] = get_redis_number(self.redis_conn, r.inputs[inp].redis_key)
             if rr.is_executable(inputs) or r.order > 0:
-                logging.info('using: '+str(r))
-                print('using: '+r.name)
+                logging.info('using: ' + str(r))
+                print('using: ' + r.name)
                 self.regulators[r.id] = r
                 self.real_regulators[r.id] = rr
                 if r.order > self.max_regulation_order:
                     self.max_regulation_order = r.order
         elif change_type == 'removed':
             if r_id in self.regulators.keys():
-                logging.info('removing regulator: '+self.regulators[r_id].name)
-                print('removing regulator: '+self.regulators[r_id].name)
+                logging.info('removing regulator: ' + self.regulators[r_id].name)
+                print('removing regulator: ' + self.regulators[r_id].name)
                 self.devices.pop(r_id, None)
 
     def reload_devices(self):
@@ -290,9 +301,9 @@ class FarmManager(object):
         for dev in self.db_session.query(Device).filter(Device.actuator_id != None).all():
             # make sure actuators are active
             if dev.actuator.periphery_controller.active is True:
-                #print('using: '+str(dev))
-                logging.info('using: '+str(dev.name))
-                print('using: '+str(dev.name))
+                # print('using: '+str(dev))
+                logging.info('using: ' + str(dev.name))
+                print('using: ' + str(dev.name))
                 self.devices[dev.id] = dev
 
     def reload_regulators(self):
@@ -305,14 +316,14 @@ class FarmManager(object):
         for reg in regs:
             real_reg = regulator_factory(reg.algorithm_name)
             real_reg.initialize(reg)
-                #print('input['+inp+'] = '+str(inputs[inp])+', redis: '+reg.inputs[inp].redis_key)
+            # print('input['+inp+'] = '+str(inputs[inp])+', redis: '+reg.inputs[inp].redis_key)
             #print('maybe addind '+reg.name)
-            logging.info('using: '+str(reg))
-            print('using: '+reg.name)
+            logging.info('using: ' + str(reg))
+            print('using: ' + reg.name)
             self.regulators[reg.id] = reg
             self.real_regulators[reg.id] = real_reg
             if reg.order > self.max_regulation_order:
-                print('setting max order: '+str(reg.order))
+                print('setting max order: ' + str(reg.order))
                 self.max_regulation_order = reg.order
 
     def handle_messages(self):
@@ -320,7 +331,7 @@ class FarmManager(object):
         if message is not None:
             # something in the database changed
             data = message['data'].decode('UTF-8')
-            print('\n\nmessage: '+str(message))
+            print('\n\nmessage: ' + str(message))
             if message['channel'] == b'parameter_changes':
                 self.handle_parameter_changes(data)
             elif message['channel'] == b'device_changes':
@@ -363,9 +374,9 @@ class FarmManager(object):
                         inputs[inp] = get_redis_number(self.redis_conn, regulator.inputs[inp].redis_key)
                     outputs = real_regulator.execute(inputs)
                     for outp in regulator.outputs:
-                        self.redis_conn.setex(regulator.outputs[outp].redis_key, str(outputs[outp]), 2*self.loop_time)
+                        self.redis_conn.setex(regulator.outputs[outp].redis_key, str(outputs[outp]), 2 * self.loop_time)
 
-    def work(self):
+    def run(self):
         logging.info('Farm Manager entered work loop')
         print('Farm Manager entered work loop')
         last_run = datetime.now()
@@ -386,29 +397,5 @@ class FarmManager(object):
             try:
                 self.db_session.commit()
             except IntegrityError as e:
-                print('\n\nError: '+str(e)+'\n\n')
+                print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
-
-
-def usage(argv):
-    cmd = os.path.basename(argv[0])
-    print('usage: %s\n'
-          '(example: "%s")' % (cmd, cmd))
-    sys.exit(1)
-
-
-def main(argv=sys.argv):
-    if len(argv) < 2:
-        usage(argv)
-    config_uri = argv[1]
-    settings = get_appsettings(config_uri)
-    db_engine = engine_from_config(settings, 'sqlalchemy.')
-    db_sessionmaker = sessionmaker(bind=db_engine)
-    Base.metadata.bind = db_engine
-    redis_conn = get_redis_conn(config_uri)
-    logging.basicConfig(filename=settings['log_directory'] + '/farm_manager.log',
-                        format='%(levelname)s:%(asctime)s: %(message)s',
-                        datefmt='%Y.%m.%d %H:%M:%S',
-                        level=logging.DEBUG)
-    worker = FarmManager(db_sessionmaker, redis_conn)
-    worker.work()
