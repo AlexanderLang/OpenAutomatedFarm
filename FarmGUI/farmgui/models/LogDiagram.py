@@ -13,6 +13,10 @@ from sqlalchemy.orm import relationship
 
 from farmgui.models import Sensor
 from farmgui.models import Display
+from farmgui.models import ParameterLink
+from farmgui.models import DeviceLink
+from farmgui.models import Parameter
+from farmgui.models import Device
 
 
 class LogDiagram(Display):
@@ -67,3 +71,16 @@ class LogDiagram(Display):
             dls.append(dl.serialize)
         ret_dict['device_links'] = dls
         return ret_dict
+
+
+def init_log_diagrams(db_session):
+    # query parameters and devices
+    T_i = db_session.query(Parameter).filter_by(name='Inside Air Temperature').one()
+    T_o = db_session.query(Parameter).filter_by(name='Outside Air Temperature').one()
+    M_f = db_session.query(Device).filter_by(name='Exhaust Fan').one()
+    dia = LogDiagram('Air Temperature Diagram', 'measuring parameters and influencing devices', 7200)
+    dia.parameter_links.append(ParameterLink(dia, T_i, 'value', '#aa0000'))
+    dia.parameter_links.append(ParameterLink(dia, T_i, 'setpoint', '#ff0000'))
+    dia.parameter_links.append(ParameterLink(dia, T_o, 'value', '#0000aa'))
+    dia.device_links.append(DeviceLink(dia, M_f, 'value', '#00aa00'))
+    db_session.add(dia)

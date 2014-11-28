@@ -149,6 +149,7 @@ def init_parameters(db_session):
     vol_type = db_session.query(ParameterType).filter_by(name='Volume').first()
     # query interpolations
     temp_inter = db_session.query(SetpointInterpolation).filter_by(name='Temperature Interpolation (long day)').one()
+    humi_inter = db_session.query(SetpointInterpolation).filter_by(name='Humidity Interpolation (long day)').one()
     # query sensors
     temp1_sensor = db_session.query(Sensor).filter_by(name='T1').first()
     print('T1: '+str(temp1_sensor))
@@ -164,9 +165,21 @@ def init_parameters(db_session):
     new_param.calendar.append(CalendarEntry(new_param, 2, temp_inter))
     new_param.calendar.append(CalendarEntry(new_param, 3, temp_inter))
     new_param.calendar.append(CalendarEntry(new_param, 4, temp_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 5, temp_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 6, temp_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 7, temp_inter))
     db_session.add(new_param)
+
     new_param = Parameter('Inside Air Humidity', humidity_type, humi1_sensor, '')
+    new_param.calendar.append(CalendarEntry(new_param, 1, humi_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 2, humi_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 3, humi_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 4, humi_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 5, humi_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 6, humi_inter))
+    new_param.calendar.append(CalendarEntry(new_param, 7, humi_inter))
     db_session.add(new_param)
+
     new_param = Parameter('Outside Air Temperature', temp_type, temp2_sensor, '')
     db_session.add(new_param)
     new_param = Parameter('Outside Air Humidity', humidity_type, humi2_sensor, '')

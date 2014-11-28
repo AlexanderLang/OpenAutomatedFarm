@@ -39,6 +39,7 @@ from .Regulator import Regulator
 from .Regulator import init_regulators
 
 from .Display import Display
-from .LogDiagram import LogDiagram
 from .ParameterLink import ParameterLink
 from .DeviceLink import DeviceLink
+from .LogDiagram import LogDiagram
+from .LogDiagram import init_log_diagrams

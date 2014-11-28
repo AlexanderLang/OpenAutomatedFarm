@@ -48,9 +48,11 @@ class Device(Component):
     actuator = relationship("Actuator", lazy='joined', backref=backref("device", uselist=False))
     value_logs = relationship("DeviceValueLog",
                               order_by="DeviceValueLog.time",
+                              backref='device',
                               cascade='all, delete, delete-orphan')
     setpoint_logs = relationship("DeviceSetpointLog",
                                  order_by="DeviceSetpointLog.time",
+                                 backref='device',
                                  cascade='all, delete, delete-orphan')
     calendar = relationship('DeviceCalendarEntry',
                             order_by='DeviceCalendarEntry.entry_number',

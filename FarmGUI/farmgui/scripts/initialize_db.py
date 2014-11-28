@@ -17,6 +17,7 @@ from farmgui.models import init_device_types
 from farmgui.models import init_field_settings
 from farmgui.models import init_regulators
 from farmgui.models import init_periphery_controllers
+from farmgui.models import init_log_diagrams
 
 
 def usage(argv):
@@ -58,3 +59,4 @@ def main(argv=sys.argv):
         print('\ninit_regulators:\n')
         DBSession.flush()
         init_regulators(DBSession)
+        init_log_diagrams(DBSession)

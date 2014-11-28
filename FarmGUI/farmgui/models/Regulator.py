@@ -67,7 +67,9 @@ class Regulator(Component):
 def init_regulators(db_session):
     # query components needed for initialisation
     inside_temp = db_session.query(Parameter).filter_by(name='Inside Air Temperature').one()
+    inside_humi = db_session.query(Parameter).filter_by(name='Inside Air Humidity').one()
     exhaust_fan = db_session.query(Device).filter_by(name='Exhaust Fan').one()
+    root_mist_pump = db_session.query(Device).filter_by(name='Rootchamber Mist pump').one()
 
     # create regulators
     air_temp_diff = Regulator('Air Temperature Difference', 'Difference', '')
@@ -82,9 +84,16 @@ def init_regulators(db_session):
     real_reg.initialize_db(air_temp_reg)
     air_temp_reg.inputs['diff'].connected_output = air_temp_diff.outputs['result']
     db_session.add(air_temp_reg)
+
+    root_humidifier = Regulator('Root Humidifier', 'RootHumidifier', '')
+    real_reg = regulator_factory(root_humidifier.algorithm_name)
+    real_reg.initialize_db(root_humidifier)
+    root_humidifier.inputs['T_i'].connected_output = inside_temp.outputs['value']
+    root_humidifier.inputs['H_i'].connected_output = inside_humi.outputs['value']
+    root_humidifier.inputs['T_i_sp'].connected_output = inside_temp.outputs['setpoint']
+    root_humidifier.inputs['H_i_sp'].connected_output = inside_humi.outputs['setpoint']
+    db_session.add(root_humidifier)
+
     # connect output device
     exhaust_fan.inputs['value'].connected_output = air_temp_reg.outputs['result']
-    test_reg = Regulator('Test Regulator', 'P', '')
-    real_reg = regulator_factory('P')
-    real_reg.initialize_db(test_reg)
-    db_session.add(test_reg)
+    root_mist_pump.inputs['value'].connected_output = root_humidifier.outputs['pump']
