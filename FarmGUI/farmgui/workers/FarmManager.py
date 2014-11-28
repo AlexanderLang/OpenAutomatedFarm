@@ -349,19 +349,17 @@ class FarmManager(Process):
 
     def handle_parameters(self, now):
         for param_key in self.parameters:
-            self.parameters[param_key].update_setpoint(self.cultivation_start, now, self.redis_conn)
-            self.parameters[param_key].update_value(self.redis_conn)
-            self.parameters[param_key].log_value(now, self.redis_conn)
-            self.parameters[param_key].log_setpoint(now, self.redis_conn)
+            self.parameters[param_key].update_setpoint(self.db_session, self.cultivation_start, now, self.redis_conn, 2*self.loop_time)
+            self.parameters[param_key].update_value(self.db_session, self.redis_conn, now, 2*self.loop_time)
 
     def handle_device_setpoints(self, now):
         for dev_key in self.devices:
-            self.devices[dev_key].update_setpoint(self.cultivation_start, now, self.redis_conn)
+            self.devices[dev_key].update_setpoint(self.db_session, self.cultivation_start, now, self.redis_conn, 2*self.loop_time)
 
     def handle_device_values(self, now):
         for dev_key in self.devices:
-            self.devices[dev_key].update_value(self.redis_conn)
-            self.devices[dev_key].log_value(now, self.redis_conn)
+            self.devices[dev_key].update_value(self.db_session, self.redis_conn, now, 2*self.loop_time)
+            #self.devices[dev_key].log_value(now, self.redis_conn)
 
     def handle_regulators(self, now):
         for order in range(self.max_regulation_order + 1):
@@ -376,6 +374,12 @@ class FarmManager(Process):
                     for outp in regulator.outputs:
                         self.redis_conn.setex(regulator.outputs[outp].redis_key, str(outputs[outp]), 2 * self.loop_time)
 
+    def unprecise_now(self, now):
+        second = now.second
+        if now.microsecond >= 500000:
+            second += 1
+        return datetime(now.year, now.month, now.day, now.hour, now.minute, second)
+
     def run(self):
         logging.info('Farm Manager entered work loop')
         print('Farm Manager entered work loop')
@@ -386,7 +390,8 @@ class FarmManager(Process):
             # sleep
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
-            now = datetime.now()
+            st = datetime.now()
+            now = self.unprecise_now(datetime.now())
             last_run = now
             self.handle_messages()
             # calculate setpoints, log parameters

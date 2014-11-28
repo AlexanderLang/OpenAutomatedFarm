@@ -46,9 +46,11 @@ class Parameter(Component):
     sensor = relationship("Sensor", lazy='joined',  backref=backref("parameter", uselist=False))
     value_logs = relationship("ParameterValueLog",
                               order_by="ParameterValueLog.time",
+                              backref='parameter',
                               cascade='all, delete, delete-orphan')
     setpoint_logs = relationship("ParameterSetpointLog",
                                  order_by="ParameterSetpointLog.time",
+                                 backref='parameter',
                                  cascade='all, delete, delete-orphan')
     calendar = relationship('CalendarEntry',
                             order_by='CalendarEntry.entry_number',
@@ -56,8 +58,8 @@ class Parameter(Component):
 
     __mapper_args__ = {'polymorphic_identity': 'parameter'}
 
-    _value = None
-    _setpoint = None
+    old_value = None
+    old_setpoint = None
 
     current_calendar_entry = None
 
@@ -96,57 +98,19 @@ class Parameter(Component):
             return self.current_calendar_entry.get_value_at(time)
         return None
 
-    def update_setpoint(self, cultivation_start, time, redis_conn):
+    def update_setpoint(self, db_session, cultivation_start, time, redis_conn, timeout):
         value = self.get_setpoint(cultivation_start, time)
-        redis_conn.setex(self._outputs['setpoint'].redis_key, value, 3)
+        self._outputs['setpoint'].update_value(redis_conn, value, timeout)
+        ParameterSetpointLog.log(db_session, self, time, value)
+        self.old_setpoint = value
 
-    def update_value(self, redis_conn):
+    def update_value(self, db_session, redis_conn, now, timeout):
+        value = None
         if self.sensor is not None:
-            self._value = get_redis_number(redis_conn, self.sensor.redis_key)
-            #print('updating parameter: '+self.name+' (value = '+str(self._value)+') redis: '+self._outputs['value'].redis_key)
-        #print('id: '+str(self.id))
-        #print('value: '+str(self._value))
-        #print('outputs: '+str(self._outputs))
-        redis_conn.setex(self._outputs['value'].redis_key, self._value, 10)
-
-    def log_setpoint(self, time, redis_conn):
-        value = get_redis_number(redis_conn, self._outputs['setpoint'].redis_key)
-        remove_uneeded = True
-        try:
-            old_1 = self.setpoint_logs[-2].setpoint
-            old_2 = self.setpoint_logs[-1].setpoint
-        except IndexError:
-            old_1 = None
-            old_2 = None
-            remove_uneeded = False
-        if old_2 == value and old_1 == value:
-            # value is constant, remove last entry (if there are at least 2 entries)
-            if remove_uneeded:
-                self.setpoint_logs.remove(self.setpoint_logs[-1])
-        # add new log entry
-        new_log = ParameterSetpointLog(self, time, value)
-        self.setpoint_logs.append(new_log)
-
-    def log_value(self, time, redis_conn):
-        value = get_redis_number(redis_conn, self._outputs['value'].redis_key)
-        log_new = True
-        try:
-            old_1 = self.value_logs[-2].value
-            old_2 = self.value_logs[-1].value
-        except IndexError:
-            old_1 = None
-            old_2 = None
-        if old_2 == value and old_1 == value:
-            # value is constant, update time of last entry
-            try:
-                self.value_logs[-1].time = time
-                log_new = False
-            except IndexError:
-                log_new = True
-        if log_new:
-            # value changed, add new log entry
-            new_log = ParameterValueLog(self, time, value)
-            self.value_logs.append(new_log)
+            value = get_redis_number(redis_conn, self.sensor.redis_key)
+        self._outputs['value'].update_value(redis_conn, value, timeout)
+        ParameterValueLog.log(db_session, self, now, value)
+        self.old_value = value
 
     @property
     def id(self):
@@ -158,10 +122,11 @@ class Parameter(Component):
 
     @property
     def value(self):
-        if self._value is not None:
-            return self._value
-        self.update_value(self._redis_conn)
-        return self._value
+        return self.outputs['value'].value
+
+    @property
+    def setpoint(self):
+        return self.outputs['setpoint'].value
 
     @property
     def serialize(self):

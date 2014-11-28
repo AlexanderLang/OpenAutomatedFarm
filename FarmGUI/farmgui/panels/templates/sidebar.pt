@@ -1,18 +1,28 @@
 <div class="col-sm-3">
     <ul id="status-sidebar" class="nav nav-stacked affix">
         <li>
-            <div class="row">
-                <div class="panel">
-                    <h4>Farm Manager CPU:</h4>
-                    <h4 data-redis="fm-cpu"></h4>
+            <div class="panel">
+                <h4>Farm Manager</h4>
+                <div class="row">
+                    <div class="col-sm-4">CPU:</div>
+                    <div class="col-sm-8" data-redis="fm-cpu"></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">Mem:</div>
+                    <div class="col-sm-8" data-redis="fm-mem"></div>
                 </div>
             </div>
         </li>
         <li>
-            <div class="row">
-                <div class="panel">
-                    <h4>Periphery Controller 1 CPU:</h4>
-                    <h4 data-redis="pc-cpu-0"></h4>
+            <div class="panel">
+                <h4>Periphery Controller 1</h4>
+                <div class="row">
+                    <div class="col-sm-4">CPU:</div>
+                    <div class="col-sm-8" data-redis="pc-cpu-0"></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">Mem:</div>
+                    <div class="col-sm-8" data-redis="pc-mem-0"></div>
                 </div>
             </div>
         </li>

@@ -56,6 +56,8 @@ class Device(Component):
                             order_by='DeviceCalendarEntry.entry_number',
                             cascade='all, delete, delete-orphan')
     current_calendar_entry = None
+    old_value = None
+    old_setpoint = None
 
     __mapper_args__ = {'polymorphic_identity': 'device'}
 
@@ -96,53 +98,17 @@ class Device(Component):
             return self.current_calendar_entry.get_value_at(time)
         return None
 
-    def update_setpoint(self, cultivation_start, time, redis_conn):
+    def update_setpoint(self, db_session, cultivation_start, time, redis_conn, timeout):
         value = self.get_setpoint(cultivation_start, time)
-        redis_conn.setex(self._outputs['setpoint'].redis_key, value, 3)
-        self.log_setpoint(time, value)
+        self._outputs['setpoint'].update_value(redis_conn, value, timeout)
+        DeviceSetpointLog.log(db_session, self, time, value)
 
-    def update_value(self, redis_conn):
-        if self._inputs['value'].connected_output is not None and self.actuator is not None:
-            value = redis_conn.get(self._inputs['value'].connected_output.redis_key)
-            redis_conn.setex(self.actuator.redis_key, value, 3)
-
-    def log_setpoint(self, time, value):
-        remove_uneeded = True
-        try:
-            old_1 = self.setpoint_logs[-2].setpoint
-            old_2 = self.setpoint_logs[-1].setpoint
-        except IndexError:
-            old_1 = None
-            old_2 = None
-            remove_uneeded = False
-        if old_2 == value and old_1 == value:
-            # value is constant, remove last entry (if there are at least 2 entries)
-            if remove_uneeded:
-                self.setpoint_logs.remove(self.setpoint_logs[-1])
-        self.setpoint_logs.append(DeviceSetpointLog(self, time, value))
-
-    def log_value(self, time, redis_conn):
-        value = None
-        if self._inputs['value'].connected_output is not None:
-            value = get_redis_number(redis_conn, self._inputs['value'].connected_output.redis_key)
-        log_new = True
-        try:
-            old_1 = self.value_logs[-2].value
-            old_2 = self.value_logs[-1].value
-        except IndexError:
-            old_1 = None
-            old_2 = None
-        if old_2 == value and old_1 == value:
-            # value is constant, update time of last entry
-            try:
-                self.value_logs[-1].time = time
-                log_new = False
-            except IndexError:
-                log_new = True
-        if log_new:
-            # value changed, add new log entry
-            new_log = DeviceValueLog(self, time, value)
-            self.value_logs.append(new_log)
+    def update_value(self, db_session, redis_conn, now, timeout):
+        if self.actuator is not None:
+            value = get_redis_number(redis_conn, self._inputs['value'].redis_key)
+            DeviceValueLog.log(db_session, self, now, value)
+            self.old_value = value
+            redis_conn.setex(self.actuator.redis_key, value, timeout)
 
     @property
     def id(self):

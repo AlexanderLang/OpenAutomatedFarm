@@ -34,14 +34,17 @@ class Component(Base):
                          nullable=True)
     _inputs = relationship('ComponentInput',
                            collection_class=attribute_mapped_collection('name'),
+                           order_by="ComponentInput.name",
                            backref="component",
                            cascade="all, delete, delete-orphan")
     _outputs = relationship('ComponentOutput',
                             collection_class=attribute_mapped_collection('name'),
+                            order_by="ComponentOutput.name",
                             backref="component",
                             cascade="all, delete, delete-orphan")
     _properties = relationship('ComponentProperty',
                                collection_class=attribute_mapped_collection('name'),
+                               order_by="ComponentProperty.name",
                                backref="component",
                                cascade="all, delete, delete-orphan")
 
@@ -66,6 +69,16 @@ class Component(Base):
         inp.connected_output = output
         #print('after conn: ' + str(self._inputs))
 
+    def update_order(self):
+        order = -1
+        for in_key in self._inputs:
+            inp = self._inputs[in_key]
+            if inp.connected_output is not None:
+                output_comp = inp.connected_output.component
+                if output_comp.order > order:
+                    order = output_comp.order
+        self._order = order + 1
+
     @property
     def id(self):
         return self._id
@@ -73,14 +86,7 @@ class Component(Base):
     @property
     def order(self):
         if self._order is None:
-            order = -1
-            for in_key in self._inputs:
-                inp = self._inputs[in_key]
-                if inp.connected_output is not None:
-                    output_comp = inp.connected_output.component
-                    if output_comp.order > order:
-                        order = output_comp.order
-            self._order = order + 1
+            self.update_order()
         return self._order
 
     @property

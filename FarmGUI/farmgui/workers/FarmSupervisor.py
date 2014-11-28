@@ -76,6 +76,12 @@ class FarmSupervisor(object):
             for pc_index in range(len(self.mpcs)):
                 pc_cpu = self.mpcs[pc_index].get_cpu_percent()
                 self.redis_conn.setex('pc-cpu-'+str(pc_index), pc_cpu, 2*self.loop_time)
+            # publish memory usage
+            fm_mem = self.mfm.get_memory_info()[0] / float(2 ** 20)
+            self.redis_conn.setex('fm-mem', fm_mem, 2*self.loop_time)
+            for pc_index in range(len(self.mpcs)):
+                pc_mem = self.mpcs[pc_index].get_memory_info()[0] / float(2 ** 20)
+                self.redis_conn.setex('pc-mem-'+str(pc_index), pc_mem, 2*self.loop_time)
 
 
 def usage(argv):

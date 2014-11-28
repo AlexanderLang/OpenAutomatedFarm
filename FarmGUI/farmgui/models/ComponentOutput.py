@@ -11,6 +11,7 @@ from sqlalchemy.types import Unicode
 from sqlalchemy.orm import relationship
 
 from farmgui.models import Base
+from farmgui.communication import get_redis_number
 
 
 class ComponentOutput(Base):
@@ -23,9 +24,15 @@ class ComponentOutput(Base):
     component_id = Column(SmallInteger, ForeignKey('Components._id'))
     name = Column(Unicode(250), nullable=False)
 
+    _value = None
+
     def __init__(self, component, name):
         self.component = component
         self.name = name
+
+    def update_value(self, redis_conn, value, timeout):
+        self._value = value
+        redis_conn.setex(self.redis_key, self._value, timeout)
 
     @property
     def id(self):
@@ -34,6 +41,10 @@ class ComponentOutput(Base):
     @property
     def redis_key(self):
         return 'co'+str(self._id)
+
+    @property
+    def value(self):
+        return self._value
 
     @property
     def serialize(self):
