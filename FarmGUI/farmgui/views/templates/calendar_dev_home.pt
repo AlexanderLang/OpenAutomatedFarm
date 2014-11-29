@@ -1,0 +1,47 @@
+<metal:block use-macro="main_template">
+    <div metal:fill-slot="content">
+
+        <h1>${page_title}</h1>
+
+        <a data-toggle="modal" href="#add_calendar_entry_modal" class="btn btn-primary">Add Calendar Entry</a>
+        <a data-toggle="modal" href="#add_interpolation_modal" class="btn btn-primary">Define Interpolation</a>
+
+        <div class="row">
+            <div tal:repeat="entry calendar" class="col-sm-2">
+                ${panel('calendar_dev_entry', context=entry)}
+            </div>
+        </div>
+        <div tal:repeat="inter interpolations">
+            ${panel('setpoint_interpolation', context=inter)}
+        </div>
+
+        <div class="modal" id="add_calendar_entry_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Add Entry</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_calendar_entry_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="add_interpolation_modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Add Interpolation</h4>
+                    </div>
+                    <div class="modal-body">
+                        <tal:form replace="structure add_interpolation_form"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</metal:block>

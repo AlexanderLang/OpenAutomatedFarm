@@ -51,7 +51,7 @@ def parameter_panel(context, request):
             'sensor_name': sensor_name,
             'edit_parameter_form': edit_parameter_form.render(),
             'delete_href': request.route_url('parameter_delete', param_id=context.id),
-            'calendar_href': request.route_url('calendar_home', parameter_id=context.id)}
+            'calendar_href': request.route_url('calendar_param_home', param_id=context.id)}
 
 
 @panel_config(name='device_panel',
@@ -72,7 +72,8 @@ def device_panel(context, request):
     return {'device': context,
             'actuator_name': actuator_name,
             'edit_device_form': edit_device_form.render(),
-            'delete_href': request.route_url('device_delete', dev_id=context.id)}
+            'delete_href': request.route_url('device_delete', dev_id=context.id),
+            'calendar_href': request.route_url('calendar_dev_home', dev_id=context.id)}
 
 
 @panel_config(name='regulator_panel',

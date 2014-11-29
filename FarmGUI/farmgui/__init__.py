@@ -64,14 +64,17 @@ def add_routes(config):
     config.add_route('device_link_update',    '/display/device_link/update/{dl_id}')
     config.add_route('device_link_delete',    '/display/device_link/delete/{dl_id}')
 
-
     # calendar views
-    config.add_route('calendar_home', '/calendar/{parameter_id}')
-    config.add_route('calendar_entry_save', '/calendar/{parameter_id}/save')
-    config.add_route('calendar_entry_delete', '/calendar/{parameter_id}/delete/{entry_id}')
-    config.add_route('interpolation_save', '/calendar/{parameter_id}/interpolation/save')
-    config.add_route('interpolation_update', '/calendar/{parameter_id}/interpolation/{interpolation_id}/update')
-    config.add_route('interpolation_delete', '/calendar/{parameter_id}/interpolation/{interpolation_id}/delete')
-    config.add_route('interpolation_knot_save', '/calendar/{parameter_id}/interpolation/{interpolation_id}/knot/save')
-    config.add_route('interpolation_knot_update', '/calendar/{parameter_id}/interpolation/{interpolation_id}/{knot_id}/update')
-    config.add_route('interpolation_knot_delete', '/calendar/{parameter_id}/interpolation/{interpolation_id}/{knot_id}/delete')
+    config.add_route('calendar_param_home',         '/calendar/param/{param_id}')
+    config.add_route('calendar_param_entry_save',   '/calendar/param/save/{param_id}')
+    config.add_route('calendar_param_entry_delete', '/calendar/param/delete/{param_id}/{entry_id}')
+    config.add_route('calendar_dev_home',           '/calendar/dev/{dev_id}')
+    config.add_route('calendar_dev_entry_save',     '/calendar/dev/save/{dev_id}')
+    config.add_route('calendar_dev_entry_delete',   '/calendar/dev/delete/{dev_id}/{entry_id}')
+
+    config.add_route('interpolation_save',          '/calendar/inter/save')
+    config.add_route('interpolation_update',        '/calendar/inter/update/{inter_id}')
+    config.add_route('interpolation_delete',        '/calendar/inter/delete/{inter_id}')
+    config.add_route('interpolation_knot_save',     '/calendar/inter/{inter_id}/knot/save')
+    config.add_route('interpolation_knot_update',   '/calendar/inter/update/{inter_id}/{knot_id}')
+    config.add_route('interpolation_knot_delete',   '/calendar/inter/delete/{inter_id}/{knot_id}')

@@ -5,15 +5,17 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from sqlalchemy import desc
 
-from ..models import DBSession
-from ..models import InterpolationKnot
-from ..models import Parameter
-from ..models import CalendarEntry
-from ..models import SetpointInterpolation
+from farmgui.models import DBSession
+from farmgui.models import InterpolationKnot
+from farmgui.models import Parameter
+from farmgui.models import Device
+from farmgui.models import CalendarEntry
+from farmgui.models import DeviceCalendarEntry
+from farmgui.models import SetpointInterpolation
 
-from ..schemas import CalendarEntrySchema
-from ..schemas import SetpointInterpolationSchema
-from ..schemas import InterpolationKnotSchema
+from farmgui.schemas import CalendarEntrySchema
+from farmgui.schemas import SetpointInterpolationSchema
+from farmgui.schemas import InterpolationKnotSchema
 from sqlalchemy.exc import DBAPIError
 
 
@@ -25,77 +27,165 @@ class CalendarViews(object):
     def __init__(self, request):
         self.request = request
 
-    @view_config(route_name='calendar_home', renderer='templates/calendar_home.pt', layout='default')
-    def calendar_home(self):
+    @view_config(route_name='calendar_param_home', renderer='templates/calendar_param_home.pt', layout='default')
+    def calendar_param_home(self):
         layout = self.request.layout_manager.layout
         layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
         layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
         layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.js'))
         layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.time.js'))
-        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
+        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['param_id']).one()
         interpolations = DBSession.query(SetpointInterpolation).all()
         calendar_schema = CalendarEntrySchema().bind()
         add_calendar_form = Form(calendar_schema,
-                                 action=self.request.route_url('calendar_entry_save', parameter_id=param.id),
+                                 action=self.request.route_url('calendar_param_entry_save', param_id=param.id),
                                  formid='add_calendar_entry_form',
                                  buttons=('Save',))
         interpolation_schema = SetpointInterpolationSchema().bind()
         add_interpolation_form = Form(interpolation_schema,
-                                      action=self.request.route_url('interpolation_save', parameter_id=param.id),
+                                      action=self.request.route_url('interpolation_save'),
                                       formid='add_interpolation_form',
                                       buttons=('Save',))
-        return {"page_title": param.name + " Calendar",
+        return {'parameter': param,
                 'calendar': param.calendar,
                 'interpolations': interpolations,
                 'add_calendar_entry_form': add_calendar_form.render(),
                 'add_interpolation_form': add_interpolation_form.render()}
 
-    @view_config(route_name='calendar_entry_save', renderer='templates/error_form.pt', layout='default')
-    def calendar_entry_save(self):
-        controls = self.request.POST
-        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
-        controls['parameter'] = param.id
+    @view_config(route_name='calendar_dev_home', renderer='templates/calendar_dev_home.pt', layout='default')
+    def calendar_dev_home(self):
+        layout = self.request.layout_manager.layout
+        layout.add_javascript(self.request.static_url('deform:static/scripts/deform.js'))
+        layout.add_javascript(self.request.static_url('deform:static/scripts/jquery.form.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.js'))
+        layout.add_javascript(self.request.static_url('farmgui:static/js/jquery.flot.time.js'))
+        dev = DBSession.query(Device).filter_by(_id=self.request.matchdict['dev_id']).one()
+        interpolations = DBSession.query(SetpointInterpolation).all()
+        calendar_schema = CalendarEntrySchema().bind()
+        add_calendar_form = Form(calendar_schema,
+                                 action=self.request.route_url('calendar_dev_entry_save', dev_id=dev.id),
+                                 formid='add_calendar_entry_form',
+                                 buttons=('Save',))
+        interpolation_schema = SetpointInterpolationSchema().bind()
+        add_interpolation_form = Form(interpolation_schema,
+                                      action=self.request.route_url('interpolation_save'),
+                                      formid='add_interpolation_form',
+                                      buttons=('Save',))
+        return {"page_title": dev.name + " Calendar",
+                'calendar': dev.calendar,
+                'interpolations': interpolations,
+                'add_calendar_entry_form': add_calendar_form.render(),
+                'add_interpolation_form': add_interpolation_form.render()}
+
+    @view_config(route_name='calendar_param_entry_save', renderer='json')
+    def calendar_param_entry_save(self):
+        """
+        save new calendar entry
+        """
+        ret_dict = {}
+        controls = self.request.POST.items()
+        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['param_id']).one()
         last_entry = DBSession.query(CalendarEntry).filter_by(parameter_id=param.id).order_by(desc(CalendarEntry.entry_number)).first()
-        if last_entry is not None:
-            controls['entry_number'] = last_entry.entry_number + 1
-        else:
-            controls['entry_number'] = 1
-        add_form = Form(CalendarEntrySchema().bind())
+        add_form = Form(CalendarEntrySchema().bind(),
+                        formid='add_param_calender_entry',
+                        action=self.request.route_url('calendar_param_entry_save', param_id=param.id),
+                        use_ajax=True,
+                        ajax_options='{"success": function(rt, st, xhr, form) { add_calendar_param_entry(rt);}}',
+                        buttons=('Save',))
         try:
-            p = add_form.validate(controls.items())
-            inter = DBSession.query(SetpointInterpolation).filter_by(_id=p['interpolation']).first()
-            new_par = CalendarEntry(param, p['entry_number'], inter)
-            DBSession.add(new_par)
+            vals = add_form.validate(controls)
+            ret_dict['error'] = False
         except ValidationFailure as e:
-            return {'error_form': e.render()}
-        self.request.redis.publish('calendar_changes', 'entry saved')
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
+            ret_dict['error'] = True
+            ret_dict['form'] = e.render()
+            return ret_dict
+        inter = DBSession.query(SetpointInterpolation).filter_by(_id=vals['interpolation']).one()
+        new_entry = CalendarEntry(param, last_entry.entry_number + 1, inter)
+        DBSession.add(new_entry)
+        DBSession.flush()
+        ret_dict['form'] = add_form.render()
+        ret_dict['entry_panel'] = self.request.layout_manager.render_panel('calendar_param_entry', context=new_entry)
+        self.request.redis.publish('calendar_changes', 'param '+str(param.id))
+        return ret_dict
 
-    @view_config(route_name='calendar_entry_delete')
-    def calendar_entry_delete(self):
-        entry = DBSession.query(CalendarEntry).filter_by(_id=self.request.matchdict['entry_id']).first()
+    @view_config(route_name='calendar_param_entry_delete', renderer='json')
+    def calendar_param_entry_delete(self):
+        entry_id = self.request.matchdict['entry_id']
+        entry = DBSession.query(CalendarEntry).filter_by(_id=entry_id).one()
+        self.request.redis.publish('calendar_changes', 'removed '+str(entry_id))
         DBSession.delete(entry)
-        self.request.redis.publish('calendar_changes', 'entry deleted')
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return {'delete': True}
 
-    @view_config(route_name='interpolation_save', renderer='templates/error_form.pt', layout='default')
-    def interpolation_save(self):
-        controls = self.request.POST
-        param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
-        add_form = Form(SetpointInterpolationSchema().bind(), buttons=('Save',))
+    @view_config(route_name='calendar_dev_entry_save', renderer='json')
+    def calendar_dev_entry_save(self):
+        """
+        save new calendar entry
+        """
+        ret_dict = {}
+        controls = self.request.POST.items()
+        dev = DBSession.query(Device).filter_by(_id=self.request.matchdict['dev_id']).one()
+        last_entry = DBSession.query(DeviceCalendarEntry).filter_by(device_id=dev.id).order_by(desc(DeviceCalendarEntry.entry_number)).first()
+        add_form = Form(CalendarEntrySchema().bind(),
+                        formid='add_dev_calender_entry',
+                        action=self.request.route_url('calendar_dev_entry_save', dev_id=dev.id),
+                        use_ajax=True,
+                        ajax_options='{"success": function(rt, st, xhr, form) { add_calendar_dev_entry(rt);}}',
+                        buttons=('Save',))
         try:
-            p = add_form.validate(controls.items())
-            new_inter = SetpointInterpolation(p['name'], p['order'], p['start_value'], p['end_time'], p['end_value'], p['description'])
-            DBSession.add(new_inter)
-            DBSession.flush()
-            filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(new_inter.id) + '.png'
-            new_inter.plot('', filename)
+            vals = add_form.validate(controls)
+            ret_dict['error'] = False
         except ValidationFailure as e:
-            return {'error_form': e.render()}
-        self.request.redis.publish('calendar_changes', 'interpolation saved')
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
+            ret_dict['error'] = True
+            ret_dict['form'] = e.render()
+            return ret_dict
+        inter = DBSession.query(SetpointInterpolation).filter_by(_id=vals['interpolation']).one()
+        new_entry = DeviceCalendarEntry(dev, last_entry.entry_number + 1, inter)
+        DBSession.add(new_entry)
+        DBSession.flush()
+        ret_dict['form'] = add_form.render()
+        ret_dict['entry_panel'] = self.request.layout_manager.render_panel('calendar_dev_entry', context=new_entry)
+        self.request.redis.publish('calendar_changes', 'dev '+str(dev.id))
+        return ret_dict
 
-    @view_config(route_name='interpolation_update', renderer='templates/error_form.pt', layout='default')
+    @view_config(route_name='calendar_dev_entry_delete', renderer='json')
+    def calendar_dev_entry_delete(self):
+        entry_id = self.request.matchdict['entry_id']
+        entry = DBSession.query(CalendarEntry).filter_by(_id=entry_id).one()
+        self.request.redis.publish('calendar_changes', 'removed '+str(entry_id))
+        DBSession.delete(entry)
+        return {'delete': True}
+
+    @view_config(route_name='interpolation_save', renderer='json')
+    def interpolation_save(self):
+        """
+        save new setpoint interpolation
+        """
+        ret_dict = {}
+        controls = self.request.POST.items()
+        add_form = Form(SetpointInterpolationSchema().bind(),
+                        formid='add_interpolation_form',
+                        action=self.request.route_url('interpolation_save'),
+                        use_ajax=True,
+                        ajax_options='{"success": function(rText, sText, xhr, form) { add_interpolation(rText);}}',
+                        buttons=('Save',))
+        try:
+            vals = add_form.validate(controls)
+            ret_dict['error'] = False
+        except ValidationFailure as e:
+            ret_dict['error'] = True
+            ret_dict['form'] = e.render()
+            return ret_dict
+        new_inter = SetpointInterpolation(vals['name'], vals['order'], vals['start_value'], vals['end_time'], vals['end_value'], vals['description'])
+        DBSession.add(new_inter)
+        DBSession.flush()
+        ret_dict['form'] = add_form.render()
+        ret_dict['interpolation_panel'] = self.request.layout_manager.render_panel('interpolation_panel', context=new_inter)
+        filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(new_inter.id) + '.png'
+        new_inter.plot('', filename)
+        self.request.redis.publish('calendar_changes', 'interpolation saved')
+        return ret_dict
+
+    @view_config(route_name='interpolation_update', renderer='json')
     def interpolation_update(self):
         try:
             spip = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()

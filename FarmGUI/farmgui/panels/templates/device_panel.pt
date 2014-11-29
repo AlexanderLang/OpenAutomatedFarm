@@ -33,5 +33,5 @@
         <!-- /.column -->
     </div>
     <!-- /.panel-body -->
-    <a href="#" class="btn btn-primary btn-lg">Calendar</a>
+    <a href="${calendar_href}" class="btn btn-primary btn-lg">Calendar</a>
 </div><!-- /.panel -->

@@ -60,7 +60,7 @@
 
         <div class="row">
         <div tal:repeat="knot interpolation.knots" class="col-sm-4">
-            ${panel('interpolation_knot', knot=knot)}
+            ${panel('interpolation_knot', context=knot)}
         </div>
         </div>
 
