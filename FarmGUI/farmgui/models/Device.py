@@ -117,6 +117,10 @@ class Device(Component):
         return self._id
 
     @property
+    def order(self):
+        return -1
+
+    @property
     def serialize(self):
         """Return data in serializeable format"""
         ret_dict = self.serialize_component
