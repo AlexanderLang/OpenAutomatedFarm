@@ -86,7 +86,7 @@ class FarmManager(Process):
             # make sure sensors are active
             if param.sensor.periphery_controller.active is True:
                 print('using: ' + param.name)
-                logging.info('using: ' + str(param))
+                logging.info('using: ' + str(param.name))
                 self.parameters[param.id] = param
 
     def handle_parameter_changes(self, msg):
@@ -268,8 +268,8 @@ class FarmManager(Process):
             if rr.is_executable(inputs):
                 self.regulators[r.id] = r
                 self.real_regulators[r.id] = rr
-                logging.info('added ' + str(r))
-                print('added ' + str(r))
+                logging.info('added ' + str(r.name))
+                print('added ' + str(r.name))
         if change_type == 'changed':
             if r_id in self.regulators.keys():
                 r = self.regulators[r_id]
@@ -282,7 +282,7 @@ class FarmManager(Process):
             for inp in r.inputs:
                 inputs[inp] = get_redis_number(self.redis_conn, r.inputs[inp].redis_key)
             if rr.is_executable(inputs) or r.order > 0:
-                logging.info('using: ' + str(r))
+                logging.info('using: ' + str(r.name))
                 print('using: ' + r.name)
                 self.regulators[r.id] = r
                 self.real_regulators[r.id] = rr
@@ -318,7 +318,7 @@ class FarmManager(Process):
             real_reg.initialize(reg)
             # print('input['+inp+'] = '+str(inputs[inp])+', redis: '+reg.inputs[inp].redis_key)
             #print('maybe addind '+reg.name)
-            logging.info('using: ' + str(reg))
+            logging.info('using: ' + str(reg.name))
             print('using: ' + reg.name)
             self.regulators[reg.id] = reg
             self.real_regulators[reg.id] = real_reg
