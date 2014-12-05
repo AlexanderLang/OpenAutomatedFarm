@@ -35,9 +35,10 @@ class ParameterSetpointLog(Base):
         return self._id
 
     @staticmethod
-    def log(db_session, parameter, time, setpoint):
-        query = db_session.query(ParameterSetpointLog).filter_by(parameter_id=parameter.id)
-        old_logs = query.order_by(ParameterSetpointLog.time.desc()).limit(2).all()
+    def log(db_session, parameter, time, setpoint, old_logs):
+        if old_logs is None:
+            query = db_session.query(ParameterSetpointLog).filter_by(parameter_id=parameter.id)
+            old_logs = query.order_by(ParameterSetpointLog.time.desc()).limit(2).all()
         insert_new_setpoint = False
         if len(old_logs) < 2:
             # there aren't enought logs jet for interpolation
@@ -49,7 +50,7 @@ class ParameterSetpointLog(Base):
             if y1 is None and y2 is None and setpoint is None:
                 # still no value, update last log
                 old_logs[0].time = time
-                return
+                return old_logs
             elif y1 is not None and y2 is None:
                 # (only)last value is None, add new entry (no matter if None or Number)
                 insert_new_setpoint = True
@@ -91,4 +92,8 @@ class ParameterSetpointLog(Base):
                     else:
                         insert_new_setpoint = True
         if insert_new_setpoint:
-            db_session.add(ParameterSetpointLog(parameter, time, setpoint))
+            new_log = ParameterSetpointLog(parameter, time, setpoint)
+            db_session.add(new_log)
+            old_logs[:0] = [new_log]
+            old_logs.pop()
+        return old_logs

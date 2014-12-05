@@ -57,11 +57,12 @@ class Device(Component):
     calendar = relationship('DeviceCalendarEntry',
                             order_by='DeviceCalendarEntry.entry_number',
                             cascade='all, delete, delete-orphan')
-    current_calendar_entry = None
-    old_value = None
-    old_setpoint = None
 
     __mapper_args__ = {'polymorphic_identity': 'device'}
+
+    current_calendar_entry = None
+    old_value_logs = None
+    old_setpoint_logs = None
 
     def __init__(self, name, device_type, actuator, description):
         """
@@ -103,13 +104,12 @@ class Device(Component):
     def update_setpoint(self, db_session, cultivation_start, time, redis_conn, timeout):
         value = self.get_setpoint(cultivation_start, time)
         self._outputs['setpoint'].update_value(redis_conn, value, timeout)
-        DeviceSetpointLog.log(db_session, self, time, value)
+        self.old_setpoint_logs = DeviceSetpointLog.log(db_session, self, time, value, self.old_setpoint_logs)
 
     def update_value(self, db_session, redis_conn, now, timeout):
         if self.actuator is not None:
             value = get_redis_number(redis_conn, self._inputs['value'].redis_key)
-            DeviceValueLog.log(db_session, self, now, value)
-            self.old_value = value
+            self.old_value_logs = DeviceValueLog.log(db_session, self, now, value, self.old_value_logs)
             redis_conn.setex(self.actuator.redis_key, value, timeout)
 
     @property

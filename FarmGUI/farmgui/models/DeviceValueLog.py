@@ -36,9 +36,10 @@ class DeviceValueLog(Base):
         return self._id
 
     @staticmethod
-    def log(db_session, device, time, value):
-        query = db_session.query(DeviceValueLog).filter_by(device_id=device.id)
-        old_logs = query.order_by(DeviceValueLog.time.desc()).limit(2).all()
+    def log(db_session, device, time, value, old_logs):
+        if old_logs is None:
+            query = db_session.query(DeviceValueLog).filter_by(device_id=device.id)
+            old_logs = query.order_by(DeviceValueLog.time.desc()).limit(2).all()
         insert_new_value = False
         if len(old_logs) < 2:
             # there aren't enought logs jet for interpolation
@@ -50,7 +51,7 @@ class DeviceValueLog(Base):
             if y1 is None and y2 is None and value is None:
                 # still no value, update last log
                 old_logs[0].time = time
-                return
+                return old_logs
             elif y1 is not None and y2 is None:
                 # (only)last value is None, add new entry (no matter if None or Number)
                 insert_new_value = True
@@ -92,5 +93,9 @@ class DeviceValueLog(Base):
                     else:
                         insert_new_value = True
         if insert_new_value:
-            db_session.add(DeviceValueLog(device, time, value))
+            new_log = DeviceValueLog(device, time, value)
+            db_session.add(new_log)
+            old_logs[:0] = [new_log]
+            old_logs.pop()
+        return old_logs
 

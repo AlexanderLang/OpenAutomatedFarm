@@ -32,9 +32,10 @@ class ParameterValueLog(Base):
         self.value = value
 
     @staticmethod
-    def log(db_session, parameter, time, value):
-        query = db_session.query(ParameterValueLog).filter_by(parameter_id=parameter.id)
-        old_logs = query.order_by(ParameterValueLog.time.desc()).limit(2).all()
+    def log(db_session, parameter, time, value, old_logs):
+        if old_logs is None:
+            query = db_session.query(ParameterValueLog).filter_by(parameter_id=parameter.id)
+            old_logs = query.order_by(ParameterValueLog.time.desc()).limit(2).all()
         insert_new_value = False
         if len(old_logs) < 2:
             # there aren't enought logs jet for interpolation
@@ -46,7 +47,7 @@ class ParameterValueLog(Base):
             if y1 is None and y2 is None and value is None:
                 # still no value, update last log
                 old_logs[0].time = time
-                return
+                return old_logs
             elif y1 is not None and y2 is None:
                 # (only)last value is None, add new entry (no matter if None or Number)
                 insert_new_value = True
@@ -88,5 +89,9 @@ class ParameterValueLog(Base):
                     else:
                         insert_new_value = True
         if insert_new_value:
-            db_session.add(ParameterValueLog(parameter, time, value))
+            new_log = ParameterValueLog(parameter, time, value)
+            db_session.add(new_log)
+            old_logs[:0] = [new_log]
+            old_logs.pop()
+        return old_logs
 

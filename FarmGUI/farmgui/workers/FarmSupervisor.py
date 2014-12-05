@@ -23,6 +23,7 @@ from farmgui.communication import get_redis_conn
 from farmgui.workers import FarmManager
 from farmgui.workers import PeripheryControllerWorker
 
+
 class FarmSupervisor(object):
     """
     classdocs

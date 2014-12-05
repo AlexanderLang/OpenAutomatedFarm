@@ -404,3 +404,4 @@ class FarmManager(Process):
             except IntegrityError as e:
                 print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
+

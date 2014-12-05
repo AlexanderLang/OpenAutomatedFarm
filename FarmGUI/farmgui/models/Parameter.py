@@ -58,10 +58,10 @@ class Parameter(Component):
 
     __mapper_args__ = {'polymorphic_identity': 'parameter'}
 
-    old_value = None
-    old_setpoint = None
-
     current_calendar_entry = None
+    old_value_logs = None
+    old_setpoint_logs = None
+
 
     def __init__(self, name, parameter_type, sensor, description):
         """
@@ -101,16 +101,14 @@ class Parameter(Component):
     def update_setpoint(self, db_session, cultivation_start, time, redis_conn, timeout):
         value = self.get_setpoint(cultivation_start, time)
         self._outputs['setpoint'].update_value(redis_conn, value, timeout)
-        ParameterSetpointLog.log(db_session, self, time, value)
-        self.old_setpoint = value
+        self.old_setpoint_logs = ParameterSetpointLog.log(db_session, self, time, value, self.old_setpoint_logs)
 
     def update_value(self, db_session, redis_conn, now, timeout):
         value = None
         if self.sensor is not None:
             value = get_redis_number(redis_conn, self.sensor.redis_key)
         self._outputs['value'].update_value(redis_conn, value, timeout)
-        ParameterValueLog.log(db_session, self, now, value)
-        self.old_value = value
+        self.old_value_logs = ParameterValueLog.log(db_session, self, now, value, self.old_value_logs)
 
     @property
     def id(self):
