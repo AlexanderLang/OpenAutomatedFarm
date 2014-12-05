@@ -8,10 +8,8 @@ from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
-from sqlalchemy.orm import relationship
 
 from farmgui.models import Base
-from farmgui.communication import get_redis_number
 
 
 class ComponentOutput(Base):

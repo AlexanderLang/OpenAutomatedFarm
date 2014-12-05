@@ -119,12 +119,12 @@ def component_output_panel(context, request):
 def component_input_panel(context, request):
     schema = ComponentInputSchema().bind(component_input=context)
     edit_form = Form(schema,
-                               action=request.route_url('component_input_update', comp_in_id=context.id),
-                               formid='edit_component_input_form_' + str(context.id),
-                               use_ajax=True,
-                               ajax_options='{"success": function (rText, sText, xhr, form) {'
-                                            '  edit_component_input(rText);}}',
-                               buttons=('Save',))
+                     action=request.route_url('component_input_update', comp_in_id=context.id),
+                     formid='edit_component_input_form_' + str(context.id),
+                     use_ajax=True,
+                     ajax_options='{"success": function (rText, sText, xhr, form) {'
+                                  '  edit_component_input(rText);}}',
+                     buttons=('Save',))
     connected_output_name = 'not connected'
     if context.connected_output is not None:
         connected_output_name = context.connected_output.component.name + ': ' + context.connected_output.name

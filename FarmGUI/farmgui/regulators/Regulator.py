@@ -7,7 +7,6 @@ Created on Oct 15, 2014
 from farmgui.models import ComponentInput
 from farmgui.models import ComponentOutput
 from farmgui.models import ComponentProperty
-from farmgui.communication import get_redis_number
 
 
 class Regulator(object):
@@ -41,7 +40,6 @@ class Regulator(object):
     def initialize_db(self, reg_model):
         """
 
-        :param db_regulator:
         """
         # add needed inputs
         inputs = {}

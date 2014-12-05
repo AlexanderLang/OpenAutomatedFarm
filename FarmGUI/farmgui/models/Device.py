@@ -4,7 +4,6 @@ Created on Nov 17, 2013
 @author: alex
 """
 
-import logging
 from datetime import timedelta
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
@@ -39,8 +38,8 @@ class Device(Component):
                  nullable=False,
                  unique=True)
     device_type_id = Column(SmallInteger,
-                               ForeignKey('DeviceTypes._id'),
-                               nullable=False)
+                            ForeignKey('DeviceTypes._id'),
+                            nullable=False)
     device_type = relationship('DeviceType')
     actuator_id = Column(SmallInteger,
                          ForeignKey('Actuators._id'),
@@ -89,8 +88,8 @@ class Device(Component):
                 self.current_calendar_entry = entry
             else:
                 start_time = end_time
-        #if self.current_calendar_entry is None:
-        #    logging.warning(self.name + ': could not find calendar entry for ' + str(present))
+                # if self.current_calendar_entry is None:
+                #    logging.warning(self.name + ': could not find calendar entry for ' + str(present))
 
     def get_setpoint(self, cultivation_start, time):
         if self.current_calendar_entry is None:

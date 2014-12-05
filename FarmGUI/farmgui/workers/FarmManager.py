@@ -1,10 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import os
-import sys
 from datetime import datetime
-from datetime import timedelta
 from time import sleep
 from multiprocessing import Process
 
@@ -115,7 +112,7 @@ class FarmManager(Process):
                 print('refreshing parameter: ' + self.parameters[param_id].name)
                 self.db_session.refresh(self.parameters[param_id])
                 if self.parameters[param_id].sensor_id is not None:
-                    if self.parameters[param_id].sensor.periphery_controller.active == False:
+                    if not self.parameters[param_id].sensor.periphery_controller.active:
                         self.parameters.pop(param_id, None)
                         look_for_duplicates = False
                 else:
@@ -174,7 +171,7 @@ class FarmManager(Process):
                 print('refreshing device: ' + self.devices[dev_id].name)
                 self.db_session.refresh(self.devices[dev_id])
                 if self.devices[dev_id].actuator_id is not None:
-                    if self.devices[dev_id].actuator.periphery_controller.active == False:
+                    if not self.devices[dev_id].actuator.periphery_controller.active:
                         self.devices.pop(dev_id, None)
                         look_for_duplicates = False
                 else:
@@ -317,7 +314,7 @@ class FarmManager(Process):
             real_reg = regulator_factory(reg.algorithm_name)
             real_reg.initialize(reg)
             # print('input['+inp+'] = '+str(inputs[inp])+', redis: '+reg.inputs[inp].redis_key)
-            #print('maybe addind '+reg.name)
+            # print('maybe addind '+reg.name)
             logging.info('using: ' + str(reg.name))
             print('using: ' + reg.name)
             self.regulators[reg.id] = reg
@@ -349,17 +346,19 @@ class FarmManager(Process):
 
     def handle_parameters(self, now):
         for param_key in self.parameters:
-            self.parameters[param_key].update_setpoint(self.db_session, self.cultivation_start, now, self.redis_conn, 2*self.loop_time)
-            self.parameters[param_key].update_value(self.db_session, self.redis_conn, now, 2*self.loop_time)
+            self.parameters[param_key].update_setpoint(self.db_session, self.cultivation_start, now, self.redis_conn,
+                                                       2 * self.loop_time)
+            self.parameters[param_key].update_value(self.db_session, self.redis_conn, now, 2 * self.loop_time)
 
     def handle_device_setpoints(self, now):
         for dev_key in self.devices:
-            self.devices[dev_key].update_setpoint(self.db_session, self.cultivation_start, now, self.redis_conn, 2*self.loop_time)
+            self.devices[dev_key].update_setpoint(self.db_session, self.cultivation_start, now, self.redis_conn,
+                                                  2 * self.loop_time)
 
     def handle_device_values(self, now):
         for dev_key in self.devices:
-            self.devices[dev_key].update_value(self.db_session, self.redis_conn, now, 2*self.loop_time)
-            #self.devices[dev_key].log_value(now, self.redis_conn)
+            self.devices[dev_key].update_value(self.db_session, self.redis_conn, now, 2 * self.loop_time)
+            # self.devices[dev_key].log_value(now, self.redis_conn)
 
     def handle_regulators(self, now):
         for order in range(self.max_regulation_order + 1):
@@ -404,4 +403,6 @@ class FarmManager(Process):
             except IntegrityError as e:
                 print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
+            worktime = datetime.now() - st
+            logging.debug('worktime: '+str(worktime))
 

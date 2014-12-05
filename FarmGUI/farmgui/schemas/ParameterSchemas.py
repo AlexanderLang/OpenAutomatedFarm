@@ -44,8 +44,8 @@ def deferred_type_widget(node, kw):
 
 class NewParameterSchema(ComponentSchema):
     parameter_type = SchemaNode(typ=Int(),
-                            title='Parameter Type',
-                            widget=deferred_type_widget)
+                                title='Parameter Type',
+                                widget=deferred_type_widget)
 
 
 class EditParameterSchema(MappingSchema):

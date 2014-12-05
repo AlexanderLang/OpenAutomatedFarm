@@ -1,6 +1,5 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPFound
 from deform_bootstrap import Form
 from deform import ValidationFailure
 

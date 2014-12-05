@@ -21,7 +21,12 @@ class Sensor(Hardware):
     """
     __tablename__ = 'Sensors'
 
-    _id = Column(SmallInteger, ForeignKey('Hardware._id'), primary_key=True, autoincrement=True, nullable=False, unique=True)
+    _id = Column(SmallInteger,
+                 ForeignKey('Hardware._id'),
+                 primary_key=True,
+                 autoincrement=True,
+                 nullable=False,
+                 unique=True)
     parameter_type_id = Column(SmallInteger, ForeignKey('ParameterTypes._id'), nullable=False)
     parameter_type = relationship('ParameterType')
     precision = Column(Float(), nullable=False)

@@ -8,6 +8,7 @@ from deform.widget import TextInputWidget
 from ..models import DBSession
 from ..models import FieldSetting
 
+
 @colander.deferred
 def deferred_name_default(node, kw):
     if len(kw) > 0:
@@ -15,12 +16,14 @@ def deferred_name_default(node, kw):
     fs = DBSession.query(FieldSetting).first()
     return fs.name
 
+
 @colander.deferred
 def deferred_value_default(node, kw):
     if len(kw) > 0:
         return kw['field_setting'].value
     fs = DBSession.query(FieldSetting).first()
     return fs.value
+
 
 @colander.deferred
 def deferred_description_default(node, kw):

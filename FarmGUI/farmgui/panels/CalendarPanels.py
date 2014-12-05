@@ -20,6 +20,7 @@ def calendar_param_entry(context, request):
                                              param_id=request.matchdict['param_id'],
                                              entry_id=context.id)}
 
+
 @panel_config(name='calendar_dev_entry', renderer='farmgui:panels/templates/calendar_entry.pt')
 def calendar_dev_entry(context, request):
     """
@@ -54,6 +55,7 @@ def setpoint_interpolation(context, request):
             'plot_href': plot_href,
             'add_knot_form': add_knot_form.render(),
             'edit_form': edit_form}
+
 
 @panel_config(name='interpolation_knot', renderer='farmgui:panels/templates/interpolation_knot.pt')
 def interpolation_knot(context, request):

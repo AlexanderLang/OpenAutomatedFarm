@@ -10,13 +10,11 @@ from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 
 from farmgui.models import Component
-from farmgui.models import ComponentInput
-from farmgui.models import ComponentOutput
-from farmgui.models import ComponentProperty
 from farmgui.models import Parameter
 from farmgui.models import Device
 
 from farmgui.regulators import regulator_factory
+
 
 class Regulator(Component):
     """
@@ -42,7 +40,6 @@ class Regulator(Component):
         """
         Component.__init__(self, name, description)
         self.algorithm_name = algorithm_name
-
 
     @property
     def id(self):

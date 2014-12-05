@@ -11,7 +11,6 @@ from sqlalchemy.types import DateTime
 from sqlalchemy.types import Float
 from sqlalchemy import ForeignKey
 
-from farmgui.models import DBSession
 from farmgui.models import Base
 
 

@@ -4,11 +4,9 @@ from colander import SchemaNode
 from colander import String
 from colander import Int
 from colander import Float
-from colander import Time
 
 from deform.widget import SelectWidget
 
-from datetime import time
 
 @colander.deferred
 def deferred_order_default(node, kw):
@@ -44,13 +42,18 @@ def deferred_description_default(node, kw):
         return kw['interpolation'].description
     return ''
 
+
 class SetpointInterpolationSchema(MappingSchema):
     name = SchemaNode(typ=String(),
                       title='Name')
     order = SchemaNode(typ=Int(),
                        title='Type (order)',
                        default=deferred_order_default,
-                       widget=SelectWidget(values=[(0, 'Constant'), (1, 'Linear'), (2, 'Quadratic'), (3, 'Cubic'), (4, 'Spline')]))
+                       widget=SelectWidget(values=[(0, 'Constant'),
+                                                   (1, 'Linear'),
+                                                   (2, 'Quadratic'),
+                                                   (3, 'Cubic'),
+                                                   (4, 'Spline')]))
     start_value = SchemaNode(typ=Float(),
                              title='Start Value',
                              default=deferred_start_value_default)
@@ -58,9 +61,9 @@ class SetpointInterpolationSchema(MappingSchema):
                           title='End Time',
                           default=deferred_end_time_default)
     end_value = SchemaNode(typ=Float(),
-                             title='End Value',
-                             default=deferred_end_value_default,
-                             missing=None)
+                           title='End Value',
+                           default=deferred_end_value_default,
+                           missing=None)
     description = SchemaNode(typ=String(),
                              title='Description',
                              default=deferred_description_default,

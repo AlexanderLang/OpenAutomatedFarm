@@ -62,7 +62,6 @@ class Parameter(Component):
     old_value_logs = None
     old_setpoint_logs = None
 
-
     def __init__(self, name, parameter_type, sensor, description):
         """
         Constructor

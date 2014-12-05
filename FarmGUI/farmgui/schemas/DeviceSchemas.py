@@ -53,15 +53,15 @@ def deferred_actuator_default(node, kw):
 
 class NewDeviceSchema(ComponentSchema):
     device_type = SchemaNode(typ=Int(),
-                                title='Device Type',
-                                descripition='the type of device being controlled',
-                                default=deferred_type_default,
-                                widget=deferred_type_widget)
+                             title='Device Type',
+                             descripition='the type of device being controlled',
+                             default=deferred_type_default,
+                             widget=deferred_type_widget)
 
 
 class EditDeviceSchema(MappingSchema):
     actuator = SchemaNode(typ=Int(),
-                        title='Associated Actuator',
-                        default=deferred_actuator_default,
-                        widget=deferred_actuator_widget,
-                        missing=None)
+                          title='Associated Actuator',
+                          default=deferred_actuator_default,
+                          widget=deferred_actuator_widget,
+                          missing=None)

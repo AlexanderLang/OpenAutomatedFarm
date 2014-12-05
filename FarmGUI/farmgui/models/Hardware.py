@@ -42,7 +42,6 @@ class Hardware(Base):
     def __init__(self, preiphery_controller, index, name, description):
         """
         Constructor
-        :type component: FarmComponent
         """
         self.periphery_controller = preiphery_controller
         self.index = index

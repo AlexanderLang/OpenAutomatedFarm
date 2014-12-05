@@ -85,7 +85,8 @@ class CalendarViews(object):
         ret_dict = {}
         controls = self.request.POST.items()
         param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['param_id']).one()
-        last_entry = DBSession.query(CalendarEntry).filter_by(parameter_id=param.id).order_by(desc(CalendarEntry.entry_number)).first()
+        last_entry = DBSession.query(CalendarEntry).filter_by(parameter_id=param.id).order_by(
+            desc(CalendarEntry.entry_number)).first()
         add_form = Form(CalendarEntrySchema().bind(),
                         formid='add_param_calender_entry',
                         action=self.request.route_url('calendar_param_entry_save', param_id=param.id),
@@ -105,14 +106,14 @@ class CalendarViews(object):
         DBSession.flush()
         ret_dict['form'] = add_form.render()
         ret_dict['entry_panel'] = self.request.layout_manager.render_panel('calendar_param_entry', context=new_entry)
-        self.request.redis.publish('calendar_changes', 'param '+str(param.id))
+        self.request.redis.publish('calendar_changes', 'param ' + str(param.id))
         return ret_dict
 
     @view_config(route_name='calendar_param_entry_delete', renderer='json')
     def calendar_param_entry_delete(self):
         entry_id = self.request.matchdict['entry_id']
         entry = DBSession.query(CalendarEntry).filter_by(_id=entry_id).one()
-        self.request.redis.publish('calendar_changes', 'removed '+str(entry_id))
+        self.request.redis.publish('calendar_changes', 'removed ' + str(entry_id))
         DBSession.delete(entry)
         return {'delete': True}
 
@@ -124,7 +125,8 @@ class CalendarViews(object):
         ret_dict = {}
         controls = self.request.POST.items()
         dev = DBSession.query(Device).filter_by(_id=self.request.matchdict['dev_id']).one()
-        last_entry = DBSession.query(DeviceCalendarEntry).filter_by(device_id=dev.id).order_by(desc(DeviceCalendarEntry.entry_number)).first()
+        last_entry = DBSession.query(DeviceCalendarEntry).filter_by(device_id=dev.id).order_by(
+            desc(DeviceCalendarEntry.entry_number)).first()
         add_form = Form(CalendarEntrySchema().bind(),
                         formid='add_dev_calender_entry',
                         action=self.request.route_url('calendar_dev_entry_save', dev_id=dev.id),
@@ -144,14 +146,14 @@ class CalendarViews(object):
         DBSession.flush()
         ret_dict['form'] = add_form.render()
         ret_dict['entry_panel'] = self.request.layout_manager.render_panel('calendar_dev_entry', context=new_entry)
-        self.request.redis.publish('calendar_changes', 'dev '+str(dev.id))
+        self.request.redis.publish('calendar_changes', 'dev ' + str(dev.id))
         return ret_dict
 
     @view_config(route_name='calendar_dev_entry_delete', renderer='json')
     def calendar_dev_entry_delete(self):
         entry_id = self.request.matchdict['entry_id']
         entry = DBSession.query(CalendarEntry).filter_by(_id=entry_id).one()
-        self.request.redis.publish('calendar_changes', 'removed '+str(entry_id))
+        self.request.redis.publish('calendar_changes', 'removed ' + str(entry_id))
         DBSession.delete(entry)
         return {'delete': True}
 
@@ -175,11 +177,13 @@ class CalendarViews(object):
             ret_dict['error'] = True
             ret_dict['form'] = e.render()
             return ret_dict
-        new_inter = SetpointInterpolation(vals['name'], vals['order'], vals['start_value'], vals['end_time'], vals['end_value'], vals['description'])
+        new_inter = SetpointInterpolation(vals['name'], vals['order'], vals['start_value'], vals['end_time'],
+                                          vals['end_value'], vals['description'])
         DBSession.add(new_inter)
         DBSession.flush()
         ret_dict['form'] = add_form.render()
-        ret_dict['interpolation_panel'] = self.request.layout_manager.render_panel('interpolation_panel', context=new_inter)
+        ret_dict['interpolation_panel'] = self.request.layout_manager.render_panel('interpolation_panel',
+                                                                                   context=new_inter)
         filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(new_inter.id) + '.png'
         new_inter.plot('', filename)
         self.request.redis.publish('calendar_changes', 'interpolation saved')
@@ -188,7 +192,8 @@ class CalendarViews(object):
     @view_config(route_name='interpolation_update', renderer='json')
     def interpolation_update(self):
         try:
-            spip = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+            spip = DBSession.query(SetpointInterpolation).filter_by(
+                _id=self.request.matchdict['interpolation_id']).first()
         except DBAPIError:
             return Response('database error (query SetpointInterpolation)', content_type='text/plain', status_int=500)
         form = Form(SetpointInterpolationSchema().bind(interpolation=spip), buttons=('Save',))
@@ -207,14 +212,17 @@ class CalendarViews(object):
         filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(spip.id) + '.png'
         spip.plot('', filename)
         self.request.redis.publish('calendar_changes', 'interpolation changed')
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return HTTPFound(
+            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
 
     @view_config(route_name='interpolation_delete')
     def interpolation_delete(self):
-        interpolation = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+        interpolation = DBSession.query(SetpointInterpolation).filter_by(
+            _id=self.request.matchdict['interpolation_id']).first()
         DBSession.delete(interpolation)
         self.request.redis.publish('calendar_changes', 'interpolation deleted')
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return HTTPFound(
+            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
 
     @view_config(route_name='interpolation_knot_save', renderer='templates/error_form.pt', layout='default')
     def interpolation_knot_save(self):
@@ -236,7 +244,8 @@ class CalendarViews(object):
     def interpolation_knot_update(self):
         try:
             knot = DBSession.query(InterpolationKnot).filter_by(_id=self.request.matchdict['knot_id']).first()
-            inter = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+            inter = DBSession.query(SetpointInterpolation).filter_by(
+                _id=self.request.matchdict['interpolation_id']).first()
         except DBAPIError:
             return Response('database error (query InterpolationKnot)', content_type='text/plain', status_int=500)
         form = Form(InterpolationKnotSchema().bind(knot=knot), buttons=('Save',))
@@ -251,10 +260,12 @@ class CalendarViews(object):
         filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(inter.id) + '.png'
         inter.plot('', filename)
         self.request.redis.publish('parameter_changes', 'interpolation changed')
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return HTTPFound(
+            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
 
     @view_config(route_name='interpolation_knot_delete')
     def interpolation_knot_delete(self):
         interpolation_knot = DBSession.query(InterpolationKnot).filter_by(_id=self.request.matchdict['knot_id']).first()
         DBSession.delete(interpolation_knot)
-        return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return HTTPFound(
+            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))

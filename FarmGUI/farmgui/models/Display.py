@@ -5,11 +5,9 @@ Created on Nov 17, 2013
 """
 
 from sqlalchemy import Column
-from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.types import SmallInteger
 from sqlalchemy.types import Unicode
 from sqlalchemy.types import Text
-from sqlalchemy.orm import relationship
 
 from farmgui.models import Base
 
@@ -41,7 +39,6 @@ class Display(Base):
     def __init__(self, name, description):
         """
         Constructor
-        :type component: FarmComponent
         """
         self.name = name
         self.description = description

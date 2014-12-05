@@ -20,10 +20,15 @@ class Actuator(Hardware):
     """
     __tablename__ = 'Actuators'
 
-    _id = Column(SmallInteger, ForeignKey('Hardware._id'), primary_key=True, autoincrement=True, nullable=False, unique=True)
+    _id = Column(SmallInteger,
+                 ForeignKey('Hardware._id'),
+                 primary_key=True,
+                 autoincrement=True,
+                 nullable=False,
+                 unique=True)
     device_type_id = Column(SmallInteger,
-                               ForeignKey('DeviceTypes._id'),
-                               nullable=False)
+                            ForeignKey('DeviceTypes._id'),
+                            nullable=False)
     device_type = relationship('DeviceType')
     default_value = Column(Float, nullable=False)
 
@@ -36,7 +41,7 @@ class Actuator(Hardware):
 
     @property
     def redis_key(self):
-        return 'p'+str(self.periphery_controller_id)+'_a'+str(self.index)+'_value'
+        return 'p' + str(self.periphery_controller_id) + '_a' + str(self.index) + '_value'
 
     @property
     def serialize(self):

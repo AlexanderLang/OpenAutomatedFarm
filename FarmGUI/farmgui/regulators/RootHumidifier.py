@@ -9,6 +9,7 @@ from datetime import timedelta
 from farmgui.regulators import Regulator
 from farmgui.regulators import RegulatorProperty
 
+
 class RootHumidifier(Regulator):
 
     def __init__(self):
@@ -34,7 +35,7 @@ class RootHumidifier(Regulator):
             dT = inputs['T_i_sp'] - inputs['T_i']
             dH = inputs['H_i_sp'] - inputs['H_i']
             dt = self.constants['t_off_max'].value - self.constants['t_off_min'].value
-            if dT < 0 and dH >= 0:
+            if dT < 0 <= dH:
                 # too hot and too dry
                 self.outputs['t_off'].value = self.constants['t_off_min'].value
             elif dT < 0 and dH < 0:
@@ -43,10 +44,9 @@ class RootHumidifier(Regulator):
             elif dT >= 0 and dH >= 0:
                 # too cold and too dry
                 self.outputs['t_off'].value = self.constants['t_off_min'].value + dt * 0.66
-            elif dT >= 0 and dH < 0:
+            elif dT >= 0 > dH:
                 # too cold and too wet
                 self.outputs['t_off'].value = self.constants['t_off_max'].value
-
 
             t = inputs['now'] - self.last_change
             t_off = timedelta(seconds=self.outputs['t_off'].value)

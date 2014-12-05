@@ -1,10 +1,8 @@
-import time
 from time import mktime
 from datetime import datetime
 from datetime import timedelta
 from pyramid.view import view_config
 from sqlalchemy import asc
-from sqlalchemy import desc
 from deform_bootstrap import Form
 from deform import ValidationFailure
 
@@ -130,7 +128,8 @@ class DisplayViews(object):
         DBSession.add(new_parameter_link)
         DBSession.flush()
         ret_dict['form'] = form.render()
-        ret_dict['parameter_link_panel'] = self.request.layout_manager.render_panel('parameter_link_panel', context=new_parameter_link)
+        ret_dict['parameter_link_panel'] = self.request.layout_manager.render_panel('parameter_link_panel',
+                                                                                    context=new_parameter_link)
         ret_dict['parameter_link'] = new_parameter_link.serialize
         return ret_dict
 
@@ -158,7 +157,8 @@ class DisplayViews(object):
         DBSession.add(new_device_link)
         DBSession.flush()
         ret_dict['form'] = form.render()
-        ret_dict['device_link_panel'] = self.request.layout_manager.render_panel('device_link_panel', context=new_device_link)
+        ret_dict['device_link_panel'] = self.request.layout_manager.render_panel('device_link_panel',
+                                                                                 context=new_device_link)
         ret_dict['device_link'] = new_device_link.serialize
         return ret_dict
 
@@ -264,10 +264,10 @@ class DisplayViews(object):
                     print('error detecting device link target')
         now = datetime.now()
         start_time = now - timedelta(seconds=period)
-        #utc_offset = time.altzone * 1000
+        # utc_offset = time.altzone * 1000
         #now_millis = int(mktime(now.timetuple())) * 1000 - utc_offset
         now_millis = int(mktime(now.timetuple()))
-        start_time_millis = now_millis - period*1000
+        start_time_millis = now_millis - period * 1000
         data = []
         for pid in p_va_ids:
             param = DBSession.query(Parameter).filter_by(_id=pid).one()

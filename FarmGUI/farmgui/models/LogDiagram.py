@@ -47,8 +47,6 @@ class LogDiagram(Display):
     def __init__(self, name, description, period):
         """
         Constructor
-        :type sensor: Sensor
-        :type parameter_type: ParameterType
         """
         Display.__init__(self, name, description)
         self.period = period

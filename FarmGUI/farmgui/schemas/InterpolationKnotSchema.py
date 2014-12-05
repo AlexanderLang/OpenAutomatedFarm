@@ -29,13 +29,13 @@ def deferred_value_default(node, kw):
 
 class InterpolationKnotSchema(MappingSchema):
     interpolation_id = SchemaNode(typ=Int(),
-                      title='Name',
-                      default=deferred_interpolation_id_default,
-                      widget=HiddenWidget(readonly=True))
+                                  title='Name',
+                                  default=deferred_interpolation_id_default,
+                                  widget=HiddenWidget(readonly=True))
     time = SchemaNode(typ=Float(),
-                       title='Time',
-                       description='between 0 and 1 (becomes start to end time)',
-                       default=deferred_time_default)
+                      title='Time',
+                      description='between 0 and 1 (becomes start to end time)',
+                      default=deferred_time_default)
     value = SchemaNode(typ=Float(),
                        title='Value',
                        default=deferred_value_default)

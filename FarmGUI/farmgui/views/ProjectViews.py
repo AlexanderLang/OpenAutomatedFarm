@@ -1,5 +1,4 @@
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound
 
 
 class ProjectViews(object):

@@ -2,9 +2,6 @@ from pyramid.view import view_config
 from deform_bootstrap import Form
 from deform import ValidationFailure
 
-from sqlalchemy.exc import DBAPIError
-from sqlalchemy.exc import IntegrityError
-
 from farmgui.models import DBSession
 from farmgui.models import Parameter
 from farmgui.models import ParameterType

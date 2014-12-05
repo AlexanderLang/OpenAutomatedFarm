@@ -7,9 +7,6 @@ Created on Jul 20, 2014
 from pyramid_layout.panel import panel_config
 from deform_bootstrap import Form
 
-from farmgui.models import DBSession
-from farmgui.models import FieldSetting
-
 from farmgui.schemas import FieldSettingSchema
 
 

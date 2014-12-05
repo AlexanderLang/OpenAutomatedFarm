@@ -58,7 +58,6 @@ class Component(Base):
     def __init__(self, name, description):
         """
         Constructor
-        :type component: FarmComponent
         """
         self.name = name
         self.description = description

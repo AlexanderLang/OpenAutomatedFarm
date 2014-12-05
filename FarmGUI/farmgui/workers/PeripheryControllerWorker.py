@@ -1,10 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import os
-import sys
 from datetime import datetime
-from datetime import timedelta
 from time import sleep
 from multiprocessing import Process
 
@@ -61,7 +58,8 @@ class PeripheryControllerWorker(Process):
         else:
             # known controller (set active)
             try:
-                self.periphery_controller = self.db_session.query(PeripheryController).filter_by(_id=self.controller_id).one()
+                query = self.db_session.query(PeripheryController)
+                self.periphery_controller = query.filter_by(_id=self.controller_id).one()
                 self.periphery_controller.active = True
             except NoResultFound:
                 # controller was deleted, will not be used until reset
@@ -70,7 +68,7 @@ class PeripheryControllerWorker(Process):
             logging.info('Working with Controller id=' + str(self.controller_id))
         self.db_session.commit()
         # let scheduler know the available sensors changed
-        self.redis_conn.publish('periphery_controller_changes', 'connected '+str(self.controller_id))
+        self.redis_conn.publish('periphery_controller_changes', 'connected ' + str(self.controller_id))
         # listen for changes in the database
         self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('periphery_controller_changes', 'field_setting_changes')
@@ -87,15 +85,16 @@ class PeripheryControllerWorker(Process):
         for i in range(len(sensors)):
             s = sensors[i]
             param_type = db_session.query(ParameterType).filter_by(unit=s['unit']).first()
-            self.periphery_controller.sensors.append(Sensor(self.periphery_controller, i, s['name'], param_type, s['precision'],
-                                                s['min'], s['max']))
+            sen = Sensor(self.periphery_controller, i, s['name'], param_type, s['precision'], s['min'], s['max'])
+            self.periphery_controller.sensors.append(sen)
             logging.info('added sensor ' + s['name'] + ' (type=' + param_type.name + ')')
         # register actuators
         actuators = self.serial.get_actuators()
         for i in range(len(actuators)):
             a = actuators[i]
             device_type = db_session.query(DeviceType).filter_by(unit=a['unit']).first()
-            self.periphery_controller.actuators.append(Actuator(self.periphery_controller, i, a['name'], device_type, a['default']))
+            self.periphery_controller.actuators.append(
+                Actuator(self.periphery_controller, i, a['name'], device_type, a['default']))
             logging.info('added actuator ' + a['name'] + ' (type=' + device_type.name + ')')
         db_session.add(self.periphery_controller)
         db_session.flush()
@@ -116,7 +115,7 @@ class PeripheryControllerWorker(Process):
             values = self.serial.get_sensor_values()
             for i in range(len(self.periphery_controller.sensors)):
                 sens = self.periphery_controller.sensors[i]
-                self.redis_conn.setex(sens.redis_key, str(values[i]), 2*self.loop_time)
+                self.redis_conn.setex(sens.redis_key, str(values[i]), 2 * self.loop_time)
         except SerialException:
             logging.error('SerialException on publish_sensor_values')
             self.close()
@@ -164,6 +163,6 @@ class PeripheryControllerWorker(Process):
             db_session.commit()
             db_session.close()
             # let scheduler know the available sensors changed
-            self.redis_conn.publish('periphery_controller_changes', 'disconnected '+str(self.controller_id))
+            self.redis_conn.publish('periphery_controller_changes', 'disconnected ' + str(self.controller_id))
         except NoResultFound:
             pass
