@@ -36,16 +36,30 @@ class FarmSupervisor(object):
         self.db_session = db_sm(expire_on_commit=False, autoflush=False)
         self.devs = glob('/dev/ttyA*')
         self.pcs = []
+        self.pcids = []
         self.mpcs = []
         self.loop_time = FieldSetting.get_loop_time(self.db_session)
         for dev in self.devs:
             pc = PeripheryControllerWorker(dev, config_uri)
             self.pcs.append(pc)
+            self.pcids.append(pc.periphery_controller.id)
             pc.start()
             self.mpcs.append(psutil.Process(pc.pid))
         self.fm = FarmManager(config_uri)
         self.fm.start()
         self.mfm = psutil.Process(self.fm.pid)
+        self.mfs = psutil.Process(os.getpid())
+        # look for other interesting processes
+        self.mps = None
+        self.mdb = None
+        self.mredis = None
+        for proc in psutil.process_iter():
+            if proc.name() == 'pserve':
+                self.mps = psutil.Process(proc.pid)
+            elif proc.name() == 'mysqld':
+                self.mdb = psutil.Process(proc.pid)
+            elif proc.name() == 'redis-server':
+                self.mredis = psutil.Process(proc.pid)
         logging.info('Farm Supervisor initialized')
 
     def work(self):
@@ -71,18 +85,37 @@ class FarmSupervisor(object):
                 self.fm = FarmManager(self.config_uri)
                 self.fm.start()
                 self.mfm = psutil.Process(self.fm.pid)
-            # publish cpu usage
+            # publish cpu and memory usage
+            mb_div = float(2 ** 20)
+            timeout = 2 * self.loop_time
             fm_cpu = self.mfm.get_cpu_percent()
-            self.redis_conn.setex('fm-cpu', fm_cpu, 2*self.loop_time)
+            self.redis_conn.setex('fm-cpu', fm_cpu, timeout)
+            fm_mem = self.mfm.get_memory_info()[0] / mb_div
+            self.redis_conn.setex('fm-mem', fm_mem, timeout)
+            fs_cpu = self.mfs.get_cpu_percent()
+            self.redis_conn.setex('fs-cpu', fs_cpu, timeout)
+            fs_mem = self.mfs.get_memory_info()[0] / mb_div
+            self.redis_conn.setex('fs-mem', fs_mem, timeout)
+            if self.mps is not None:
+                ps_cpu = self.mps.get_cpu_percent()
+                self.redis_conn.setex('ps-cpu', ps_cpu, timeout)
+                ps_mem = self.mps.get_memory_info()[0] / mb_div
+                self.redis_conn.setex('ps-mem', ps_mem, timeout)
+            if self.mdb is not None:
+                db_cpu = self.mdb.get_cpu_percent()
+                self.redis_conn.setex('db-cpu', db_cpu, timeout)
+                db_mem = self.mdb.get_memory_info()[0] / mb_div
+                self.redis_conn.setex('db-mem', db_mem, timeout)
+            if self.mredis is not None:
+                redis_cpu = self.mredis.get_cpu_percent()
+                self.redis_conn.setex('redis-cpu', redis_cpu, timeout)
+                redis_mem = self.mredis.get_memory_info()[0] / mb_div
+                self.redis_conn.setex('redis-mem', redis_mem, timeout)
             for pc_index in range(len(self.mpcs)):
                 pc_cpu = self.mpcs[pc_index].get_cpu_percent()
-                self.redis_conn.setex('pc-cpu-'+str(pc_index), pc_cpu, 2*self.loop_time)
-            # publish memory usage
-            fm_mem = self.mfm.get_memory_info()[0] / float(2 ** 20)
-            self.redis_conn.setex('fm-mem', fm_mem, 2*self.loop_time)
-            for pc_index in range(len(self.mpcs)):
-                pc_mem = self.mpcs[pc_index].get_memory_info()[0] / float(2 ** 20)
-                self.redis_conn.setex('pc-mem-'+str(pc_index), pc_mem, 2*self.loop_time)
+                self.redis_conn.setex('pc-cpu-'+str(self.pcids[pc_index]), pc_cpu, timeout)
+                pc_mem = self.mpcs[pc_index].get_memory_info()[0] / mb_div
+                self.redis_conn.setex('pc-mem-'+str(self.pcids[pc_index]), pc_mem, timeout)
 
 
 def usage(argv):
