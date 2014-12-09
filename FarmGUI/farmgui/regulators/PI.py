@@ -24,8 +24,16 @@ class PI(Regulator):
         if self.is_executable(inputs):
             p = inputs['diff'] * self.constants['K_p'].value
             self.esum += inputs['diff']
+            self.limit_esum()
             i = self.constants['K_i'].value * self.constants['T_i'].value * self.esum
             ret_dict['result'] = round(p + i, 2)
         else:
             ret_dict['result'] = None
         return ret_dict
+
+    def limit_esum(self):
+        max_esum = 200
+        if self.esum > max_esum:
+            self.esum = max_esum
+        elif self.esum < -max_esum:
+            self.esum = -max_esum

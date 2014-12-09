@@ -24,6 +24,7 @@ from farmgui.models import DeviceType
 
 from farmgui.communication import SerialShell
 from farmgui.communication import get_redis_conn
+from farmgui.communication import get_redis_number
 
 
 class PeripheryControllerWorker(Process):
@@ -104,11 +105,20 @@ class PeripheryControllerWorker(Process):
         logging.info('saved id=' + str(self.controller_id) + ' on controller')
 
     def get_actuator_value_from_redis(self, actuator):
-        value = self.redis_conn.get(actuator.redis_key)
-        if value is None or value == b'None':
+        value = get_redis_number(self.redis_conn, actuator.redis_key)
+        if value is None:
             # no setpoint, use default
             return actuator.default_value
-        return float(value)
+        elif actuator.device_type.unit == '%':
+            if value > 100:
+                return 100
+            elif value < 0:
+                return 0
+        elif actuator.device_type.unit == '0/1':
+            if value == 0:
+                return 0
+            return 1
+        return value
 
     def publish_sensor_values(self):
         try:

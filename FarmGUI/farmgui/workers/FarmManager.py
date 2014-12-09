@@ -343,6 +343,8 @@ class FarmManager(Process):
                 self.handle_component_property_changes(data)
             elif message['channel'] == b'field_setting_changes':
                 self.loop_time = FieldSetting.get_loop_time(self.db_session)
+                self.reload_parameters()
+                self.reload_devices()
 
     def handle_parameters(self, now):
         for param_key in self.parameters:
