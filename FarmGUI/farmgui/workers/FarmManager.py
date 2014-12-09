@@ -250,6 +250,17 @@ class FarmManager(Process):
                 real_reg = self.real_regulators[cp.component_id]
                 real_reg.initialize(reg)
 
+    def handle_field_setting_changes(self, msg):
+        if msg == 'loop_time':
+            self.loop_time = FieldSetting.get_loop_time(self.db_session)
+        elif msg == 'cultivation_start':
+            self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
+            # make shure calendars are recomputed
+            for key in self.parameters:
+                self.parameters[key].current_calendar_entry = None
+            for key in self.devices:
+                self.devices[key].current_calendar_entry = None
+
     def handle_regulator_changes(self, msg):
         print('handle regulator changes')
         logging.info('handling regulator changes')
@@ -342,9 +353,7 @@ class FarmManager(Process):
             elif message['channel'] == b'component_property_changes':
                 self.handle_component_property_changes(data)
             elif message['channel'] == b'field_setting_changes':
-                self.loop_time = FieldSetting.get_loop_time(self.db_session)
-                self.reload_parameters()
-                self.reload_devices()
+                self.handle_field_setting_changes(data)
 
     def handle_parameters(self, now):
         for param_key in self.parameters:

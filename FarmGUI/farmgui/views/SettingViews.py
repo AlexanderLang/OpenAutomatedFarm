@@ -59,5 +59,5 @@ class SettingViews(object):
         fs.value = vals['value']
         ret_dict['form'] = form.render(field_setting=fs)
         ret_dict['field_setting'] = fs.serialize
-        self.request.redis.publish('field_setting_changes', str(fs.serialize))
+        self.request.redis.publish('field_setting_changes', fs.name)
         return ret_dict
