@@ -75,13 +75,19 @@ class FarmSupervisor(object):
             last_run = now
             # make sure all processes are running
             for pc_index in range(len(self.pcs)):
-                if not self.pcs[pc_index].is_alive():
+                if not self.pcs[pc_index].is_alive() or self.mpcs[pc_index].status() == psutil.STATUS_ZOMBIE:
+                    logging.info('restarting periphery controller: ' + str(pc_index))
                     # restart
+                    self.pcs[pc_index].terminate()
+                    self.pcs[pc_index].join()
                     restarted_pc = PeripheryControllerWorker(self.devs[pc_index], self.config_uri)
                     self.pcs[pc_index] = restarted_pc
                     restarted_pc.start()
                     self.mpcs[pc_index] = psutil.Process(restarted_pc.pid)
-            if not self.fm.is_alive():
+            if not self.fm.is_alive() or self.mfm.status() == psutil.STATUS_ZOMBIE:
+                logging.info('restarting farm manager')
+                self.fm.terminate()
+                self.fm.join()
                 self.fm = FarmManager(self.config_uri)
                 self.fm.start()
                 self.mfm = psutil.Process(self.fm.pid)
