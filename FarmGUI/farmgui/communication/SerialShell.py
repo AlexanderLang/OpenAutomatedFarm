@@ -1,6 +1,5 @@
 import serial
 import logging
-import time
 
 
 class SerialShell(object):
@@ -94,10 +93,8 @@ class SerialShell(object):
             logging.error('SerialShell: error setting calibration gain')
 
     def execute_cmd(self, cmd):
-        start = time.time()
         self.serial.write(bytearray(cmd + '\n', 'ascii'))
         line = self.read_line()
-        logging.debug('SerialShell: \"' + cmd + '\"-->\"' + line + '\" in %.4f [s]' % (time.time()-start))
         return line
 
     def read_line(self):

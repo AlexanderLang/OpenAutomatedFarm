@@ -415,5 +415,6 @@ class FarmManager(Process):
                 print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
             worktime = datetime.now() - st
-            logging.debug('worktime: '+str(worktime))
+            if worktime.total_seconds() > self.loop_time:
+                logging.error('FM: worktime='+str(worktime.total_seconds())+' looptime='+str)
 
