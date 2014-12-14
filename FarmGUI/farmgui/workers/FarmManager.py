@@ -30,6 +30,7 @@ class FarmManager(FarmProcess):
 
     def __init__(self, config_uri):
         FarmProcess.__init__(self, 'FM', config_uri)
+        logging.info('Initializing Farm Manager')
         self.parameters = None
         self.regulators = None
         self.real_regulators = None
@@ -54,7 +55,7 @@ class FarmManager(FarmProcess):
                               'periphery_controller_changes',
                               'component_input_changes',
                               'component_property_changes')
-        logging.info('Farm Manager initialized')
+        logging.info('Farm Manager initialized\n\n')
 
     def reload_parameters(self):
         logging.info('reloading parameters')
@@ -386,19 +387,26 @@ class FarmManager(FarmProcess):
             now = self.unprecise_now(datetime.now())
             last_run = now
             self.handle_messages()
+            t_m = datetime.now()-st
             # calculate setpoints, log parameters
             self.handle_parameters(now)
+            t_p = datetime.now()-t_m
             self.handle_device_setpoints(now)
+            t_ds = datetime.now()-t_p
             self.handle_regulators(now)
+            t_r = datetime.now()-t_ds
             self.handle_device_values(now)
+            t_dv = datetime.now()-t_r
             try:
                 self.db_session.commit()
             except IntegrityError as e:
                 print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
+            t_c = datetime.now()-t_dv
             self.reset_watchdog()
             worktime = datetime.now() - st
             if worktime > self.loop_time:
-                logging.error('FM: worktime=' + str(worktime.total_seconds()) + ' looptime=' + str(
-                    self.loop_time.total_seconds()))
+                msg = 'FM: t_w=%.2f ' % worktime.total_seconds()
+                msg += ' t_m=%.3f t_p=%.3f t_ds=%.3f t_r=%.3f t_dv=%.3f t_c=%.3f' % (t_m, t_p, t_ds, t_r, t_dv, t_c)
+                logging.error(msg)
 

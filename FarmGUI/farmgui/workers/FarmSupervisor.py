@@ -34,6 +34,7 @@ class FarmSupervisor(object):
         self.redis_conn = redis
         self.db_sessionmaker = db_sm
         self.config_uri = config_uri
+        logging.info('FS: Initializing')
         self.db_session = db_sm(expire_on_commit=False, autoflush=False)
         self.devs = glob('/dev/ttyA*')
         self.pcs = []
@@ -41,6 +42,7 @@ class FarmSupervisor(object):
         self.mpcs = []
         self.wdpcs = []
         self.loop_time = FieldSetting.get_loop_time(self.db_session)
+        logging.info('FS: Starting PCs')
         for dev in self.devs:
             pc = PeripheryControllerWorker(dev, config_uri)
             self.pcs.append(pc)
@@ -51,6 +53,7 @@ class FarmSupervisor(object):
         # wait for last pc to start working (i.e. reset watchdog)
         while get_redis_number(self.redis_conn, self.wdpcs[-1]) != 1:
             sleep(0.25)
+        logging.info('FS: Starting FM')
         self.fm = FarmManager(config_uri)
         self.wdfm = self.fm.watchdog_key
         self.fm.start()
@@ -70,9 +73,10 @@ class FarmSupervisor(object):
         # wait for farm manager to start working
         while get_redis_number(self.redis_conn, self.wdfm) != 1:
             sleep(0.25)
+        logging.info('FS: Initialisation finished\n\n')
 
     def work(self):
-        logging.info('Farm Monitor entered work loop')
+        logging.info('FS: Entered work loop')
         last_run = datetime.now()
         loop_counter = 0
         while True:
@@ -85,7 +89,7 @@ class FarmSupervisor(object):
             # make sure all processes are running
             for pc_index in range(len(self.pcs)):
                 if get_redis_number(self.redis_conn, self.wdpcs[pc_index]) != 1:
-                    logging.error('restarting periphery controller: ' + str(pc_index))
+                    logging.error('FS: restarting periphery controller: ' + str(pc_index))
                     # restart
                     self.pcs[pc_index].terminate()
                     self.pcs[pc_index].join()
@@ -97,7 +101,7 @@ class FarmSupervisor(object):
                     while get_redis_number(self.redis_conn, self.wdpcs[pc_index]) != 1:
                         sleep(0.25)
             if get_redis_number(self.redis_conn, self.wdfm) != 1:
-                logging.error('restarting farm manager')
+                logging.error('FS: restarting farm manager')
                 self.fm.terminate()
                 self.fm.join()
                 self.fm = FarmManager(self.config_uri)

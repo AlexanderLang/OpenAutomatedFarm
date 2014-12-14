@@ -31,7 +31,7 @@ class PeripheryControllerWorker(FarmProcess):
     def __init__(self, devicename, config_uri):
         dev_path = devicename.split('/')
         FarmProcess.__init__(self, 'PC'+dev_path[-1], config_uri)
-        logging.info('\n\nInitializing Periphery Controller Worker')
+        logging.info('PC: Initializing')
         # connect with serial port
         self.serial = SerialShell(devicename)
         logging.info('connected to serial port ' + devicename)
@@ -57,9 +57,10 @@ class PeripheryControllerWorker(FarmProcess):
         # listen for changes in the database
         self.pubsub = self.redis_conn.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('periphery_controller_changes', 'field_setting_changes')
+        logging.info('PC: Initialisation finished\n\n')
 
     def register_new_controller(self, db_session):
-        logging.info('Register new controller:')
+        logging.info('PC: Register new controller')
         fw_name = self.serial.get_firmware_name()
         fw_version = self.serial.get_firmware_version()
         new_name = 'new ' + fw_name + ' (version ' + fw_version + ')'
@@ -87,6 +88,7 @@ class PeripheryControllerWorker(FarmProcess):
         self.controller_id = self.periphery_controller.id
         self.serial.set_id(self.controller_id)
         logging.info('saved id=' + str(self.controller_id) + ' on controller')
+        logging.info('PC: Register new controller finished\n')
 
     def get_actuator_value_from_redis(self, actuator):
         value = get_redis_number(self.redis_conn, actuator.redis_key)

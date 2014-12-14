@@ -41,7 +41,7 @@ class FarmProcess(Process):
         self.loop_time = FieldSetting.get_loop_time(self.db_session)
 
     def reset_watchdog(self):
-        self.redis_conn.setex(self.watchdog_key, 1, 3*self.loop_time)
+        self.redis_conn.setex(self.watchdog_key, 1, 5*self.loop_time)
 
     @property
     def watchdog_key(self):
