@@ -49,7 +49,6 @@ class FarmSupervisor(object):
             pc.start()
             self.mpcs.append(psutil.Process(pc.pid))
         # wait for last pc to start working (i.e. reset watchdog)
-        print('watchdog key: '+str(self.wdpcs[-1]))
         while get_redis_number(self.redis_conn, self.wdpcs[-1]) != 1:
             sleep(0.25)
         self.fm = FarmManager(config_uri)
@@ -94,15 +93,19 @@ class FarmSupervisor(object):
                     self.pcs[pc_index] = restarted_pc
                     restarted_pc.start()
                     self.mpcs[pc_index] = psutil.Process(restarted_pc.pid)
+                    # wait for pc to start working
+                    while get_redis_number(self.redis_conn, self.wdpcs[pc_index]) != 1:
+                        sleep(0.25)
             if get_redis_number(self.redis_conn, self.wdfm) != 1:
-                logging.error('fm watchdog key: '+str(self.wdfm))
-                logging.error('fm watchdog value: '+str(get_redis_number(self.redis_conn, self.wdfm)))
                 logging.error('restarting farm manager')
                 self.fm.terminate()
                 self.fm.join()
                 self.fm = FarmManager(self.config_uri)
                 self.fm.start()
                 self.mfm = psutil.Process(self.fm.pid)
+                # wait for farm manager to start working
+                while get_redis_number(self.redis_conn, self.wdfm) != 1:
+                    sleep(0.25)
             # publish cpu and memory usage
             total_cpu = 0
             total_mem = 0
