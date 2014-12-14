@@ -383,28 +383,34 @@ class FarmManager(FarmProcess):
             # sleep
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
-            st = datetime.now()
+            t0 = datetime.now()
             now = self.unprecise_now(datetime.now())
             last_run = now
             self.handle_messages()
-            t_m = datetime.now()-st
+            t1 = datetime.now()
+            t_m = t1 - t0
             # calculate setpoints, log parameters
             self.handle_parameters(now)
-            t_p = datetime.now()-t_m
+            t2 = datetime.now()
+            t_p = t2 - t1
             self.handle_device_setpoints(now)
-            t_ds = datetime.now()-t_p
+            t3 = datetime.now()
+            t_ds = t3 - t2
             self.handle_regulators(now)
-            t_r = datetime.now()-t_ds
+            t4 = datetime.now()
+            t_r = t4 - t3
             self.handle_device_values(now)
-            t_dv = datetime.now()-t_r
+            t5 = datetime.now()
+            t_dv = t5 - t4
             try:
                 self.db_session.commit()
             except IntegrityError as e:
                 print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
-            t_c = datetime.now()-t_dv
+            t6 = datetime.now()
+            t_c = t6 - t5
             self.reset_watchdog()
-            worktime = datetime.now() - st
+            worktime = datetime.now() - t0
             if worktime > self.loop_time:
                 msg = 'FM: t_w=%.2f ' % worktime.total_seconds()
                 msg += ' t_m=%.3f t_p=%.3f' % (t_m.total_seconds(), t_p.total_seconds())
