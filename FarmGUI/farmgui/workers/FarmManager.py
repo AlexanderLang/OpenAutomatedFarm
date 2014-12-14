@@ -407,6 +407,8 @@ class FarmManager(FarmProcess):
             worktime = datetime.now() - st
             if worktime > self.loop_time:
                 msg = 'FM: t_w=%.2f ' % worktime.total_seconds()
-                msg += ' t_m=%.3f t_p=%.3f t_ds=%.3f t_r=%.3f t_dv=%.3f t_c=%.3f' % (t_m, t_p, t_ds, t_r, t_dv, t_c)
+                msg += ' t_m=%.3f t_p=%.3f' % (t_m.total_seconds(), t_p.total_seconds())
+                msg += ' t_ds=%.3f t_r=%.3f' % (t_ds.total_seconds(), t_r.total_seconds())
+                msg += ' t_dv=%.3f t_c=%.3f' % (t_dv.total_seconds(), t_c.total_seconds())
                 logging.error(msg)
 
