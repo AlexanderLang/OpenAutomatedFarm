@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 import os
 import sys
 import psutil
+from psutil import NoSuchProcess
 from datetime import datetime
 from time import sleep
 from glob import glob
@@ -128,9 +129,14 @@ class FarmSupervisor(object):
             total_mem += fs_mem
             self.redis_conn.setex('fs-mem', '%.2f' % fs_mem, timeout)
             if self.mps is not None:
-                ps_cpu = self.mps.get_cpu_percent()
+                try:
+                    ps_cpu = self.mps.get_cpu_percent()
+                    ps_mem = self.mps.get_memory_info()[0] / mb_div
+                except NoSuchProcess:
+                    ps_cpu = 0
+                    ps_mem = 0
+                    self.mps = None
                 total_cpu += ps_cpu
-                ps_mem = self.mps.get_memory_info()[0] / mb_div
                 total_mem += ps_mem
             else:
                 ps_cpu = 0
@@ -163,7 +169,7 @@ class FarmSupervisor(object):
                 total_mem += ps_mem
                 self.redis_conn.setex('pc-mem-'+str(self.pcids[pc_index]), '%.2f' % pc_mem, timeout)
 
-            self.redis_conn.setex('total-cpu', total_cpu, timeout)
+            self.redis_conn.setex('total-cpu', '%.2f' % total_cpu, timeout)
             self.redis_conn.setex('total-mem', '%.2f' % total_mem, timeout)
 
 

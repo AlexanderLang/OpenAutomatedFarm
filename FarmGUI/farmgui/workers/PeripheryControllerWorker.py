@@ -94,6 +94,7 @@ class PeripheryControllerWorker(FarmProcess):
         value = get_redis_number(self.redis_conn, actuator.redis_key)
         if value is None:
             # no setpoint, use default
+            self.redis_conn.setex(actuator.redis_key, actuator.default_value, 2 * self.loop_time)
             return actuator.default_value
         elif actuator.device_type.unit == '%':
             if value > 100:
