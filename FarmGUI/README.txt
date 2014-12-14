@@ -26,6 +26,6 @@ Production Setup
 
 - start pserve in daemon mode
 
-    pserve --daemon --pid-file=pserve_5000.pid production.ini http_port=5000
+    nice -5 pserve --daemon --pid-file=pserve_5000.pid production.ini http_port=5000
 
 

@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from datetime import datetime
-import calendar
 from time import sleep
 
 import logging
@@ -24,41 +23,14 @@ from farmgui.regulators import regulator_factory
 from farmgui.workers import FarmProcess
 
 
-def unprecise_now(now):
-    s = now.second
-    m = now.minute
-    h = now.hour
-    d = now.day
-    M = now.month
-    Y = now.year
-    if now.microsecond >= 500000:
-        s += 1
-        if s > 59:
-            s = 0
-            m += 1
-        if m > 59:
-            m = 0
-            h += 1
-        if h > 23:
-            h = 0
-            d += 1
-        if d > calendar.monthrange(Y, M)[1]:
-            d = 1
-            M +=1
-        if M > 12:
-            M = 1
-            Y += 1
-    return datetime(Y, M, d, h, m, s)
-
-
-class FarmManager(FarmProcess):
+class FarmLogger(FarmProcess):
     """
     classdocs
     """
 
     def __init__(self, config_uri):
-        FarmProcess.__init__(self, 'FM', config_uri)
-        logging.info('Initializing Farm Manager')
+        FarmProcess.__init__(self, 'FL', config_uri)
+        logging.info('Initializing Farm Logger')
         self.parameters = None
         self.regulators = None
         self.real_regulators = None
@@ -395,6 +367,12 @@ class FarmManager(FarmProcess):
                     for outp in regulator.outputs:
                         self.redis_conn.setex(regulator.outputs[outp].redis_key, str(outputs[outp]), 2 * self.loop_time)
 
+    def unprecise_now(self, now):
+        second = now.second
+        if now.microsecond >= 500000:
+            second += 1
+        return datetime(now.year, now.month, now.day, now.hour, now.minute, second)
+
     def run(self):
         logging.info('Farm Manager entered work loop')
         print('Farm Manager entered work loop')
@@ -406,7 +384,7 @@ class FarmManager(FarmProcess):
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
             t0 = datetime.now()
-            now = unprecise_now(datetime.now())
+            now = self.unprecise_now(datetime.now())
             last_run = now
             self.handle_messages()
             t1 = datetime.now()
