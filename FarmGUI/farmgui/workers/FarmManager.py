@@ -3,18 +3,12 @@ from __future__ import (absolute_import, division, print_function,
 
 from datetime import datetime
 from time import sleep
-from multiprocessing import Process
 
 import logging
 
-from pyramid.paster import get_appsettings
-
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import ObjectDeletedError
 
-from farmgui.models import Base
 from farmgui.models import Parameter
 from farmgui.models import Device
 from farmgui.models import FieldSetting
@@ -22,31 +16,20 @@ from farmgui.models import Regulator
 from farmgui.models import ComponentInput
 from farmgui.models import ComponentProperty
 
-from farmgui.communication import get_redis_conn
 from farmgui.communication import get_redis_number
 
 from farmgui.regulators import regulator_factory
 
+from farmgui.workers import FarmProcess
 
-class FarmManager(Process):
+
+class FarmManager(FarmProcess):
     """
     classdocs
     """
 
     def __init__(self, config_uri):
-        super(FarmManager, self).__init__()
-        settings = get_appsettings(config_uri)
-        db_engine = engine_from_config(settings, 'sqlalchemy.')
-        db_sm = sessionmaker(bind=db_engine)
-        Base.metadata.bind = db_engine
-        redis = get_redis_conn(config_uri)
-        logging.basicConfig(filename=settings['log_directory'] + '/farm_manager.log',
-                            format='%(levelname)s:%(asctime)s: %(message)s',
-                            datefmt='%Y.%m.%d %H:%M:%S',
-                            level=logging.DEBUG)
-        self.redis_conn = redis
-        self.db_sessionmaker = db_sm
-        self.db_session = self.db_sessionmaker(expire_on_commit=False, autoflush=False)
+        FarmProcess.__init__(self, 'FM', config_uri)
         self.parameters = None
         self.regulators = None
         self.real_regulators = None
@@ -55,7 +38,6 @@ class FarmManager(Process):
         now = datetime.now()
         # query database
         self.cultivation_start = FieldSetting.get_cultivation_start(self.db_session)
-        self.loop_time = FieldSetting.get_loop_time(self.db_session)
         self.reload_parameters()
         self.reload_devices()
         self.handle_parameters(now)
@@ -63,7 +45,7 @@ class FarmManager(Process):
         self.reload_regulators()
         self.handle_regulators(now)
         # listen for database changes (broadcat on redis channels)
-        self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
+        self.pubsub = self.redis_conn.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('parameter_changes',
                               'device_changes',
                               'calendar_changes',
@@ -414,6 +396,7 @@ class FarmManager(Process):
             except IntegrityError as e:
                 print('\n\nError: ' + str(e) + '\n\n')
                 self.db_session.rollback()
+            self.reset_watchdog()
             worktime = datetime.now() - st
             if worktime > self.loop_time:
                 logging.error('FM: worktime=' + str(worktime.total_seconds()) + ' looptime=' + str(

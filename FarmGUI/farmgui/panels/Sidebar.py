@@ -12,7 +12,10 @@ from farmgui.models import PeripheryController
 
 @panel_config(name='sidebar', renderer='farmgui:panels/templates/sidebar.pt')
 def sidebar(context, request):
-    processes = [{'name': 'Farm Supervisor',
+    processes = [{'name': 'Total',
+                  'cpu_key': 'total-cpu',
+                  'mem_key': 'total-mem'},
+                 {'name': 'Farm Supervisor',
                   'cpu_key': 'fs-cpu',
                   'mem_key': 'fs-mem'},
                  {'name': 'Farm Manager',

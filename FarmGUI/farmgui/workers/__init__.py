@@ -1,3 +1,4 @@
+from .FarmProcess import FarmProcess
 from .PeripheryControllerWorker import PeripheryControllerWorker
 from .FarmManager import FarmManager
 from .FarmSupervisor import FarmSupervisor

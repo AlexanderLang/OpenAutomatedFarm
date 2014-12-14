@@ -3,18 +3,13 @@ from __future__ import (absolute_import, division, print_function,
 
 from datetime import datetime
 from time import sleep
-from multiprocessing import Process
 
 import logging
 
 from serial import SerialException
-from pyramid.paster import get_appsettings
 
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-from farmgui.models import Base
 from farmgui.models import FieldSetting
 from farmgui.models import ParameterType
 from farmgui.models import PeripheryController
@@ -23,35 +18,24 @@ from farmgui.models import Actuator
 from farmgui.models import DeviceType
 
 from farmgui.communication import SerialShell
-from farmgui.communication import get_redis_conn
 from farmgui.communication import get_redis_number
 
+from farmgui.workers import FarmProcess
 
-class PeripheryControllerWorker(Process):
+
+class PeripheryControllerWorker(FarmProcess):
     """
     classdocs
     """
 
     def __init__(self, devicename, config_uri):
-        super(PeripheryControllerWorker, self).__init__()
-        settings = get_appsettings(config_uri)
-        db_engine = engine_from_config(settings, 'sqlalchemy.')
-        db_sm = sessionmaker(bind=db_engine)
-        Base.metadata.bind = db_engine
-        redis = get_redis_conn(config_uri)
-        logging.basicConfig(filename=settings['log_directory'] + '/farm_manager.log',
-                            format='%(levelname)s:%(asctime)s: %(message)s',
-                            datefmt='%Y.%m.%d %H:%M:%S',
-                            level=logging.DEBUG)
-        self.redis_conn = redis
-        self.db_sessionmaker = db_sm
+        dev_path = devicename.split('/')
+        FarmProcess.__init__(self, 'PC'+dev_path[-1], config_uri)
         logging.info('\n\nInitializing Periphery Controller Worker')
         # connect with serial port
         self.serial = SerialShell(devicename)
         logging.info('connected to serial port ' + devicename)
         # register in database
-        self.db_session = self.db_sessionmaker(expire_on_commit=False)
-        self.loop_time = FieldSetting.get_loop_time(self.db_session)
         self.controller_id = self.serial.get_id()
         if self.controller_id == 0:
             # new controller
@@ -71,7 +55,7 @@ class PeripheryControllerWorker(Process):
         # let scheduler know the available sensors changed
         self.redis_conn.publish('periphery_controller_changes', 'connected ' + str(self.controller_id))
         # listen for changes in the database
-        self.pubsub = redis.pubsub(ignore_subscribe_messages=True)
+        self.pubsub = self.redis_conn.pubsub(ignore_subscribe_messages=True)
         self.pubsub.subscribe('periphery_controller_changes', 'field_setting_changes')
 
     def register_new_controller(self, db_session):
@@ -164,6 +148,7 @@ class PeripheryControllerWorker(Process):
             self.handle_messages()
             self.publish_sensor_values()
             self.apply_actuator_values()
+            self.reset_watchdog()
 
     def close(self):
         db_session = self.db_sessionmaker()
