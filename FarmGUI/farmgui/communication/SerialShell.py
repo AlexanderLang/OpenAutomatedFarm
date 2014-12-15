@@ -1,3 +1,4 @@
+from time import sleep
 import serial
 import logging
 
@@ -7,10 +8,22 @@ class SerialShell(object):
     classdocs
     """
 
-    def __init__(self, devicename):
-        self.serial = serial.Serial(devicename, 57600)
+    def __init__(self, device_name):
+        self.device_name = device_name
+        self.serial = serial.Serial(device_name,
+                                    baudrate=57600,
+                                    bytesize=serial.EIGHTBITS,
+                                    parity=serial.PARITY_NONE,
+                                    stopbits=serial.STOPBITS_ONE,
+                                    timeout=1,
+                                    xonxoff=0,
+                                    rtscts=0)
+        # Toggle DTR to reset Arduino
+        self.serial.setDTR(False)
+        sleep(1)
         self.serial.flushInput()
         self.serial.flushOutput()
+        self.serial.setDTR(True)
         # wait for "ready!" greeting from arduino 
         self.read_line()
 
@@ -21,7 +34,7 @@ class SerialShell(object):
         response = self.execute_cmd('I' + str(_id))
         if int(response) != _id:
             # error occurred
-            logging.error('SerialShell: error setting id')
+            logging.error('SerialShell ' + self.device_name + ': error setting id ('+str(_id)+ ' != '+response+')')
 
     def get_firmware_name(self):
         return self.execute_cmd('f')
@@ -67,7 +80,7 @@ class SerialShell(object):
             if values[i] != float(return_values[i]):
                 error = True
         if error is True:
-            logging.error('SerialShell: error setting actuator values')
+            logging.error('SerialShell' + self.device_name + ': error setting actuator values (res: '+response+')')
 
     def get_sensor_values(self):
         response = self.execute_cmd('s')
@@ -79,7 +92,7 @@ class SerialShell(object):
         return values
 
     def get_sensor_calibration(self, sensor_number):
-        response = self.execute_cmd('C'+str(sensor_number))
+        response = self.execute_cmd('C' + str(sensor_number))
         response = response.split(';')
         return {'offset': float(response[0]),
                 'gain': float(response[1])}
@@ -114,3 +127,6 @@ class SerialShell(object):
             else:
                 line += c
         return line
+
+    def close(self):
+        self.serial.close()

@@ -160,6 +160,7 @@ class PeripheryControllerWorker(FarmProcess):
             periphery_controller.active = False
             db_session.commit()
             db_session.close()
+            self.serial.close()
             # let scheduler know the available sensors changed
             self.redis_conn.publish('periphery_controller_changes', 'disconnected ' + str(self.controller_id))
         except NoResultFound:
