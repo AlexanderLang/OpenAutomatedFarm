@@ -44,8 +44,8 @@
 
     <div class="panel-body">
 
-        <a data-toggle="modal" href="#add_parameter_link_modal" class="btn btn-primary">Add Parameter Link</a>
-        <div class="modal" id="add_parameter_link_modal">
+        <a data-toggle="modal" href="#add_parameter_link_modal_${log_diagram.id}" class="btn btn-primary">Add Parameter Link</a>
+        <div class="modal" id="add_parameter_link_modal_${log_diagram.id}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -59,8 +59,8 @@
             </div>
         </div>
 
-        <a data-toggle="modal" href="#add_device_link_modal" class="btn btn-primary">Add Device Link</a>
-        <div class="modal" id="add_device_link_modal">
+        <a data-toggle="modal" href="#add_device_link_modal_${log_diagram.id}" class="btn btn-primary">Add Device Link</a>
+        <div class="modal" id="add_device_link_modal_${log_diagram.id}">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

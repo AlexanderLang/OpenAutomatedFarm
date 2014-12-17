@@ -69,13 +69,13 @@ function edit_device_link(response) {
 function add_parameter_link(response) {
     // dismiss modal dialog (if there was no error)
     if (response.error == false) {
-        $('#add_parameter_link_modal').modal('hide');
+        $('#add_parameter_link_modal_' + response.parameter_link.display_id).modal('hide');
         // append new parameter to list
         var param_link_list = $('#parameter_link_list_' + response.parameter_link.display_id);
         param_link_list.append("<div class=\"panel_container\">" + response.parameter_link_panel + "</div>");
     }
     // insert form again
-    $('#add_parameter_link_modal').find('.modal-body').append(response.form);
+    $('#add_parameter_link_modal_' + response.parameter_link.display_id).find('.modal-body').append(response.form);
 
     deform.processCallbacks();
 }
@@ -84,13 +84,13 @@ function add_parameter_link(response) {
 function add_device_link(response) {
     // dismiss modal dialog (if there was no error)
     if (response.error == false) {
-        $('#add_device_link_modal').modal('hide');
+        $('#add_device_link_modal_' + response.device_link.display_id).modal('hide');
         // append new parameter to list
         var device_link_list = $('#device_link_list_' + response.device_link.display_id);
         device_link_list.append("<div class=\"panel_container\">" + response.device_link_panel + "</div>");
     }
     // insert form again
-    $('#add_device_link_modal').find('.modal-body').append(response.form);
+    $('#add_device_link_modal_' + response.device_link.display_id).find('.modal-body').append(response.form);
 
     deform.processCallbacks();
 }
