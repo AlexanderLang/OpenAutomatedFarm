@@ -21,6 +21,9 @@ def sidebar(context, request):
                  {'name': 'Farm Manager',
                   'cpu_key': 'fm-cpu',
                   'mem_key': 'fm-mem'},
+                 {'name': 'Periphery Controller',
+                  'cpu_key': 'pc-cpu',
+                  'mem_key': 'pc-mem'},
                  {'name': 'Pyramid',
                   'cpu_key': 'ps-cpu',
                   'mem_key': 'ps-mem'},
@@ -30,11 +33,6 @@ def sidebar(context, request):
                  {'name': 'Redis',
                   'cpu_key': 'redis-cpu',
                   'mem_key': 'redis-mem'}]
-    pcs = DBSession.query(PeripheryController).all()
-    for pc in pcs:
-        processes.append({'name': pc.name,
-                          'cpu_key': 'pc-cpu-' + str(pc.id),
-                          'mem_key': 'pc-mem-' + str(pc.id)})
     return {'processes': processes}
 
 

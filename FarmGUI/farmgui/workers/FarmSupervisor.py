@@ -7,7 +7,6 @@ import psutil
 from psutil import NoSuchProcess
 from datetime import datetime
 from time import sleep
-from glob import glob
 
 import logging
 
@@ -37,24 +36,16 @@ class FarmSupervisor(object):
         self.config_uri = config_uri
         logging.info('FS: Initializing')
         self.db_session = db_sm(expire_on_commit=False, autoflush=False)
-        self.devs = glob('/dev/ttyA*')
-        self.pcs = []
-        self.pcids = []
-        self.mpcs = []
-        self.wdpcs = []
         self.loop_time = FieldSetting.get_loop_time(self.db_session)
-        logging.info('FS: Starting PCs')
-        for dev in self.devs:
-            pc = PeripheryControllerWorker(dev, config_uri)
-            self.pcs.append(pc)
-            self.pcids.append(pc.periphery_controller.id)
-            self.wdpcs.append(pc.watchdog_key)
-            pc.start()
-            self.mpcs.append(psutil.Process(pc.pid))
-        # wait for last pc to start working (i.e. reset watchdog)
-        while get_redis_number(self.redis_conn, self.wdpcs[-1]) != 1:
+        logging.info('FS: Starting Periphery Controller')
+        self.pc = PeripheryControllerWorker(config_uri)
+        self.wdpc = self.pc.watchdog_key
+        self.pc.start()
+        self.mpc = psutil.Process(self.pc.pid)
+        # wait for pc to start working (i.e. reset watchdog)
+        while get_redis_number(self.redis_conn, self.wdpc) != 1:
             sleep(0.25)
-        logging.info('FS: Starting FM')
+        logging.info('FS: Starting Farm Manager')
         self.fm = FarmManager(config_uri)
         self.wdfm = self.fm.watchdog_key
         self.fm.start()
@@ -88,19 +79,16 @@ class FarmSupervisor(object):
             now = datetime.now()
             last_run = now
             # make sure all processes are running
-            for pc_index in range(len(self.pcs)):
-                if get_redis_number(self.redis_conn, self.wdpcs[pc_index]) != 1:
-                    logging.error('FS: restarting periphery controller: ' + str(pc_index))
-                    # restart
-                    self.pcs[pc_index].terminate()
-                    self.pcs[pc_index].join()
-                    restarted_pc = PeripheryControllerWorker(self.devs[pc_index], self.config_uri)
-                    self.pcs[pc_index] = restarted_pc
-                    restarted_pc.start()
-                    self.mpcs[pc_index] = psutil.Process(restarted_pc.pid)
-                    # wait for pc to start working
-                    while get_redis_number(self.redis_conn, self.wdpcs[pc_index]) != 1:
-                        sleep(0.25)
+            if get_redis_number(self.redis_conn, self.wdpc) != 1:
+                logging.error('FS: restarting periphery controller: ' + str(pc_index))
+                self.pc.terminate()
+                self.pc.join()
+                self.pc = PeripheryControllerWorker(self.config_uri)
+                self.pc.start()
+                self.mpc = psutil.Process(self.pc.pid)
+                # wait for pc to start working
+                while get_redis_number(self.redis_conn, self.wdpc) != 1:
+                    sleep(0.25)
             if get_redis_number(self.redis_conn, self.wdfm) != 1:
                 logging.error('FS: restarting farm manager')
                 self.fm.terminate()
@@ -116,12 +104,21 @@ class FarmSupervisor(object):
             total_mem = 0
             mb_div = float(2 ** 20)
             timeout = 2 * self.loop_time
+
+            pc_cpu = self.mpc.get_cpu_percent()
+            total_cpu += pc_cpu
+            self.redis_conn.setex('pc-cpu', pc_cpu, timeout)
+            pc_mem = self.mpc.get_memory_info()[0] / mb_div
+            total_mem += pc_mem
+            self.redis_conn.setex('pc-mem', '%.2f' % pc_mem, timeout)
+
             fm_cpu = self.mfm.get_cpu_percent()
             total_cpu += fm_cpu
             self.redis_conn.setex('fm-cpu', fm_cpu, timeout)
             fm_mem = self.mfm.get_memory_info()[0] / mb_div
             total_mem += fm_mem
             self.redis_conn.setex('fm-mem', '%.2f' % fm_mem, timeout)
+
             fs_cpu = self.mfs.get_cpu_percent()
             total_cpu += fs_cpu
             self.redis_conn.setex('fs-cpu', fs_cpu, timeout)
@@ -160,14 +157,6 @@ class FarmSupervisor(object):
             total_mem += redis_mem
             self.redis_conn.setex('redis-cpu', redis_cpu, timeout)
             self.redis_conn.setex('redis-mem', '%.2f' % redis_mem, timeout)
-
-            for pc_index in range(len(self.mpcs)):
-                pc_cpu = self.mpcs[pc_index].get_cpu_percent()
-                total_cpu += ps_cpu
-                self.redis_conn.setex('pc-cpu-'+str(self.pcids[pc_index]), pc_cpu, timeout)
-                pc_mem = self.mpcs[pc_index].get_memory_info()[0] / mb_div
-                total_mem += ps_mem
-                self.redis_conn.setex('pc-mem-'+str(self.pcids[pc_index]), '%.2f' % pc_mem, timeout)
 
             self.redis_conn.setex('total-cpu', '%.2f' % total_cpu, timeout)
             self.redis_conn.setex('total-mem', '%.2f' % total_mem, timeout)
