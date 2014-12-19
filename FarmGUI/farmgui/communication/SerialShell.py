@@ -11,11 +11,11 @@ class SerialShell(object):
     def __init__(self, device_name):
         self.device_name = device_name
         self.serial = serial.Serial(device_name,
-                                    baudrate=57600,
+                                    baudrate=38400,
                                     bytesize=serial.EIGHTBITS,
                                     parity=serial.PARITY_NONE,
                                     stopbits=serial.STOPBITS_ONE,
-                                    timeout=1,
+                                    timeout=0.5,
                                     xonxoff=0,
                                     rtscts=0)
         # Toggle DTR to reset Arduino
