@@ -1,8 +1,29 @@
 #include <EEPROM.h>
 #include <Wire.h>
 
-#define OAF_SERIALSHELL_BAUD 57600
+#define OAF_SERIALSHELL_BAUD 38400
 #define ADDRESS_ID 0
+
+
+void EEPROM_writeFloat(int ee, const float& value)
+{
+    const byte* p = (const byte*)(const void*)&value;
+    int i;
+    for (i = 0; i < 4; i++) {
+        EEPROM.write(ee++, *p++);
+    }
+}
+
+float EEPROM_readFloat(int ee)
+{
+    float ret;
+    byte* p = (byte*)(void*)&ret;
+    int i;
+    for (i = 0; i < 4; i++) {
+        *p++ = EEPROM.read(ee++);
+    }
+    return ret;
+}
 
 namespace OAF_Sensor {
 typedef struct {
@@ -12,6 +33,8 @@ typedef struct {
 	float precision;
 	float min;
 	float max;
+	float offset;
+	float gain;
 } Sensor;
 }
 
@@ -21,7 +44,62 @@ typedef struct {
     float value;
     float default_value;
     String unit;
+    int pin_number;
+    int offset;
+    float gain;
 } Actuator;
+}
+
+void calculate_sensor_value(OAF_Sensor::Sensor *sensor, float value){
+    sensor->value = sensor->offset + value * sensor->gain;
+}
+
+int sensor_offset_address(int sensor_number){
+    return 1 + 8 * sensor_number;
+}
+
+int sensor_gain_address(int sensor_number){
+    return 5 + 8 * sensor_number;
+}
+
+int actuator_offset_address(int number_sensors, int actuator_number){
+    return 1 + (8 * number_sensors) + (8 * actuator_number);
+}
+
+int actuator_gain_address(int number_sensors, int actuator_number){
+    return 5 + (8 * number_sensors) + (8 * actuator_number);
+}
+
+float get_sensor_offset(int sensor_number){
+    return EEPROM_readFloat(sensor_offset_address(sensor_number));
+}
+
+float get_sensor_gain(int sensor_number){
+    return EEPROM_readFloat(sensor_gain_address(sensor_number));
+}
+
+float get_actuator_offset(int number_sensors, int actuator_number){
+    return EEPROM_readFloat(actuator_offset_address(number_sensors, actuator_number));
+}
+
+float get_actuator_gain(int number_sensors, int actuator_number){
+    return EEPROM_readFloat(actuator_gain_address(number_sensors, actuator_number));
+}
+
+void set_sensor_offset(int sensor_number, float value){
+    return EEPROM_writeFloat(sensor_offset_address(sensor_number), value);
+}
+
+void set_sensor_gain(int sensor_number, float value){
+    return EEPROM_writeFloat(sensor_gain_address(sensor_number), value);
+}
+
+void set_actuator_offset(int number_sensors, int actuator_number, float value){
+    return EEPROM_writeFloat(actuator_offset_address(number_sensors, actuator_number), value);
+}
+
+void set_actuator_gain(int number_sensors, int actuator_number, float value){
+    return EEPROM_writeFloat(actuator_gain_address(number_sensors, actuator_number), value);
 }
 
 /**********************************************************************
@@ -246,6 +324,54 @@ void execute_cmd(char cmd) {
 		}
 		Serial.println();
 	    break;
+	case 'C':
+	    // get sensor calibration
+	    {
+	        char buffer[3];
+	        com_arg1.toCharArray(buffer, 3);
+	        index = atoi(buffer);
+    	    Serial.print(sensors[index].offset);
+	        Serial.print(';');
+	        Serial.print(sensors[index].gain);
+    	    Serial.println();
+    	}
+	    break;
+	case 'c':
+	    // set sensor calibration
+	    {
+	        char buffer[3];
+	        com_arg1.toCharArray(buffer, 3);
+	        index = atoi(buffer);
+	        al = com_arg2.length() + 1;
+	        char carray[al];
+	        com_arg2.toCharArray(carray, al);
+	        char data[al];
+	        int i = 0;
+	        int j = 0;
+	        while(carray[i] != ';'){
+	            data[j] = carray[i];
+	            i++;
+	            j++;
+	        }
+	        data[j] = '\0';
+	        sensors[index].offset = atof(data);
+	        set_sensor_offset(index, sensors[index].offset);
+	        Serial.print(sensors[index].offset);
+	        Serial.print(';');
+	        i++;
+	        j = 0;
+	        while(carray[i] != ';'){
+	            data[j] = carray[i];
+	            i++;
+	            j++;
+	        }
+	        data[j] = '\0';
+	        sensors[index].gain = atof(data);
+	        set_sensor_gain(index, sensors[index].gain);
+	        Serial.print(sensors[index].gain);
+	        Serial.println();
+	    }
+        break;
 	case 'A':
 	    // get actuator list
 	    for (int i = 0; i < num_actuators; i++) {
@@ -274,9 +400,11 @@ void execute_cmd(char cmd) {
 	        }
 	        setpoint[j] = '\0';
 	        actuators[i].value = atof(setpoint);
+	        Serial.print(actuators[i].value);
+	        Serial.print(';');
 	        index++;
 	    }
-	    Serial.println(0);
+	    Serial.println();
 	    }
 	    break;
 	default:

@@ -1,6 +1,6 @@
 #include <EEPROM.h>
 
-#define OAF_SERIALSHELL_BAUD 57600
+#define OAF_SERIALSHELL_BAUD 38400
 #define ADDRESS_ID 0
 
 
