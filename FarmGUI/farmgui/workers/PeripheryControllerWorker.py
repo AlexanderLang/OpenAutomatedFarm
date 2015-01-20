@@ -52,7 +52,7 @@ class PeripheryControllerWorker(FarmProcess):
         c_id = self.shells[dev_name].get_id()
         if c_id == 0:
             # new controller
-            self.register_new_controller(self.db_session)
+            self.register_new_controller(self.db_session, dev_name)
         else:
             # known controller (set active)
             self.controller_ids[dev_name] = c_id
