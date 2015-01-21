@@ -74,6 +74,7 @@ class SerialShell(object):
             cmd += str(val) + ';'
         response = self.execute_cmd(cmd)
         return_values = response.split(';')
+        return_values.pop()
         # compare response to values (should be equal)
         error = False
         for i in range(len(return_values)):
