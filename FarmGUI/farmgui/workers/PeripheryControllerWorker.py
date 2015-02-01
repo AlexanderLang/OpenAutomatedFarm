@@ -131,9 +131,9 @@ class PeripheryControllerWorker(FarmProcess):
 
     def apply_actuator_values(self):
         for dev_name in self.dev_names:
-            values = []
+            values = range(len(self.periphery_controllers[dev_name].actuators))
             for actuator in self.periphery_controllers[dev_name].actuators:
-                values.append(self.get_actuator_value_from_redis(actuator))
+                values[actuator.index] = self.get_actuator_value_from_redis(actuator)
             try:
                 self.shells[dev_name].set_actuator_values(values)
             except SerialException:
