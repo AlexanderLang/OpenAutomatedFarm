@@ -240,12 +240,13 @@ class CalendarViews(object):
         inter.plot('', filename)
         return HTTPFound(location=self.request.route_url('calendar_home', parameter_id=param.id))
 
-    @view_config(route_name='interpolation_knot_update', renderer='templates/error_form.pt', layout='default')
+    @view_config(route_name='interpolation_knot_update', renderer='json')
     def interpolation_knot_update(self):
+        ret_dict = {}
         try:
             knot = DBSession.query(InterpolationKnot).filter_by(_id=self.request.matchdict['knot_id']).first()
             inter = DBSession.query(SetpointInterpolation).filter_by(
-                _id=self.request.matchdict['interpolation_id']).first()
+                _id=self.request.matchdict['inter_id']).first()
         except DBAPIError:
             return Response('database error (query InterpolationKnot)', content_type='text/plain', status_int=500)
         form = Form(InterpolationKnotSchema().bind(knot=knot), buttons=('Save',))
@@ -260,12 +261,12 @@ class CalendarViews(object):
         filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(inter.id) + '.png'
         inter.plot('', filename)
         self.request.redis.publish('parameter_changes', 'interpolation changed')
-        return HTTPFound(
-            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        ret_dict['form'] = form.render()
+        ret_dict['knot_panel'] = self.request.layout_manager.render_panel('interpolation_knot_panel', context=knot)
+        return ret_dict
 
-    @view_config(route_name='interpolation_knot_delete')
+    @view_config(route_name='interpolation_knot_delete', renderer='json')
     def interpolation_knot_delete(self):
         interpolation_knot = DBSession.query(InterpolationKnot).filter_by(_id=self.request.matchdict['knot_id']).first()
         DBSession.delete(interpolation_knot)
-        return HTTPFound(
-            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return {'delete': True}
