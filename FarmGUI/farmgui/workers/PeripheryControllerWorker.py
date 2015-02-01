@@ -131,7 +131,7 @@ class PeripheryControllerWorker(FarmProcess):
 
     def apply_actuator_values(self):
         for dev_name in self.dev_names:
-            values = range(len(self.periphery_controllers[dev_name].actuators))
+            values = [i for i in range(len(self.periphery_controllers[dev_name].actuators))]
             for actuator in self.periphery_controllers[dev_name].actuators:
                 values[actuator.index] = self.get_actuator_value_from_redis(actuator)
             try:
