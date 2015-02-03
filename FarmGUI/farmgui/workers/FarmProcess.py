@@ -4,6 +4,8 @@ from __future__ import (absolute_import, division, print_function,
 from multiprocessing import Process
 
 import logging
+from datetime import datetime
+import calendar
 
 from pyramid.paster import get_appsettings
 
@@ -14,9 +16,6 @@ from farmgui.models import Base
 from farmgui.models import FieldSetting
 
 from farmgui.communication import get_redis_conn
-from farmgui.communication import get_redis_number
-
-from farmgui.regulators import regulator_factory
 
 
 class FarmProcess(Process):
@@ -46,3 +45,30 @@ class FarmProcess(Process):
     @property
     def watchdog_key(self):
         return self.name+'_status'
+
+    @staticmethod
+    def unprecise_now(now):
+        s = now.second
+        m = now.minute
+        h = now.hour
+        d = now.day
+        M = now.month
+        Y = now.year
+        if now.microsecond >= 500000:
+            s += 1
+            if s > 59:
+                s = 0
+                m += 1
+            if m > 59:
+                m = 0
+                h += 1
+            if h > 23:
+                h = 0
+                d += 1
+            if d > calendar.monthrange(Y, M)[1]:
+                d = 1
+                M +=1
+            if M > 12:
+                M = 1
+                Y += 1
+        return datetime(Y, M, d, h, m, s)

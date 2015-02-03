@@ -382,7 +382,7 @@ class FarmManager(FarmProcess):
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
             t0 = datetime.now()
-            now = self.unprecise_now(datetime.now())
+            now = FarmProcess.unprecise_now(datetime.now())
             last_run = now
             self.handle_messages()
             t1 = datetime.now()
