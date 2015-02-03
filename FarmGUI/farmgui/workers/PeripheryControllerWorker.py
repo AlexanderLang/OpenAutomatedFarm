@@ -155,11 +155,14 @@ class PeripheryControllerWorker(FarmProcess):
                         if self.controller_ids[key] == int(pc_id_str):
                             dev_name = key
                             break
-                    self.controller_ids.pop(dev_name)
-                    self.periphery_controllers.pop(dev_name)
-                    self.shells[dev_name].close()
-                    self.shells.pop(dev_name)
-                    self.dev_names.pop(self.dev_names.index(dev_name))
+                    try:
+                        self.controller_ids.pop(dev_name)
+                        self.periphery_controllers.pop(dev_name)
+                        self.shells[dev_name].close()
+                        self.shells.pop(dev_name)
+                        self.dev_names.pop(self.dev_names.index(dev_name))
+                    except KeyError:
+                        pass
             elif message['channel'] == b'field_setting_changes':
                 self.loop_time = FieldSetting.get_loop_time(self.db_session)
 
