@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from datetime import datetime
-import calendar
 from time import sleep
 
 import logging
@@ -22,33 +21,6 @@ from farmgui.communication import get_redis_number
 from farmgui.regulators import regulator_factory
 
 from farmgui.workers import FarmProcess
-
-
-def unprecise_now(now):
-    s = now.second
-    m = now.minute
-    h = now.hour
-    d = now.day
-    M = now.month
-    Y = now.year
-    if now.microsecond >= 500000:
-        s += 1
-        if s > 59:
-            s = 0
-            m += 1
-        if m > 59:
-            m = 0
-            h += 1
-        if h > 23:
-            h = 0
-            d += 1
-        if d > calendar.monthrange(Y, M)[1]:
-            d = 1
-            M +=1
-        if M > 12:
-            M = 1
-            Y += 1
-    return datetime(Y, M, d, h, m, s)
 
 
 class FarmManager(FarmProcess):
@@ -86,20 +58,20 @@ class FarmManager(FarmProcess):
         logging.info('Farm Manager initialized\n\n')
 
     def reload_parameters(self):
-        logging.info('reloading parameters')
-        print('reloading parameters')
+        logging.info('FM: reloading parameters')
+        print('FM: reloading parameters')
         self.parameters = {}
         # look for parameters with associated sensors
         for param in self.db_session.query(Parameter).filter(Parameter.sensor_id != None).all():
             # make sure sensors are active
             if param.sensor.periphery_controller.active is True:
-                print('using: ' + param.name)
-                logging.info('using: ' + str(param.name))
+                print('FM: using \"' + param.name + '\"')
+                logging.info('FM: using \"' + str(param.name) + '\"')
                 self.parameters[param.id] = param
 
     def handle_parameter_changes(self, msg):
-        print('handling parameter changes')
-        logging.info('handling parameter changes')
+        print('FM: handling parameter changes')
+        logging.info('FM: handling parameter changes')
         change_type, param_id_str = msg.split(' ')
         param_id = int(param_id_str)
         if change_type == 'added':
@@ -107,20 +79,20 @@ class FarmManager(FarmProcess):
             if new_param.sensor is not None:
                 if new_param.sensor.periphery_controller.active is True:
                     self.parameters[new_param.id] = new_param
-                    logging.info('adding parameter: ' + new_param.name)
-                    print('adding parameter: ' + new_param.name)
+                    logging.info('FM: adding parameter \"' + new_param.name + '\"')
+                    print('FM: adding parameter \"' + new_param.name + '\"')
                 else:
-                    logging.info('not adding parameter (inactive sensor): ' + new_param.name)
-                    print('not adding parameter (inactive sensor): ' + new_param.name)
+                    logging.info('FM: not adding parameter (inactive sensor): ' + new_param.name)
+                    print('FM: not adding parameter (inactive sensor): ' + new_param.name)
             else:
-                logging.info('not adding parameter (not connected): ' + new_param.name)
-                print('not adding parameter (not connected): ' + new_param.name)
+                logging.info('FM: not adding parameter (not connected): ' + new_param.name)
+                print('FM: not adding parameter (not connected): ' + new_param.name)
         elif change_type == 'changed':
             look_for_duplicates = True
             if param_id in self.parameters.keys():
                 # refresh device
-                logging.info('refreshing parameter: ' + self.parameters[param_id].name)
-                print('refreshing parameter: ' + self.parameters[param_id].name)
+                logging.info('FM: refreshing parameter: ' + self.parameters[param_id].name)
+                print('FM: refreshing parameter: ' + self.parameters[param_id].name)
                 self.db_session.refresh(self.parameters[param_id])
                 if self.parameters[param_id].sensor_id is not None:
                     if not self.parameters[param_id].sensor.periphery_controller.active:
@@ -132,32 +104,32 @@ class FarmManager(FarmProcess):
             else:
                 new_param = self.db_session.query(Parameter).filter_by(_id=param_id).one()
                 self.parameters[new_param.id] = new_param
-                logging.info('adding parameter: ' + new_param.name)
-                print('adding parameter: ' + new_param.name)
+                logging.info('FM: adding parameter: ' + new_param.name)
+                print('FM: adding parameter: ' + new_param.name)
             # check if another device was using that actuator
             if look_for_duplicates:
                 for pid in self.parameters:
                     if self.parameters[pid].sensor_id == self.parameters[param_id].sensor_id and pid != param_id:
-                        logging.info('colateral remove: ' + self.parameters[pid].name)
-                        print('colateral remove: ' + self.parameters[pid].name)
+                        logging.info('FM: colateral remove: ' + self.parameters[pid].name)
+                        print('FM: colateral remove: ' + self.parameters[pid].name)
                         self.parameters.pop(pid, None)
                         break
         elif change_type == 'removed':
-            logging.info('removing parameter: ' + str(param_id))
-            print('removing parameter: ' + str(param_id))
+            logging.info('FM: removing parameter: ' + str(param_id))
+            print('FM: removing parameter: ' + str(param_id))
             if param_id in self.parameters.keys():
-                print('found match in self.parameters, removing')
-                print('old: ' + str(self.parameters.keys()))
+                print('FM: found match in self.parameters, removing')
+                print('FM: old: ' + str(self.parameters.keys()))
                 param = self.parameters.pop(param_id)
                 try:
                     self.db_session.expunge(param)
                 except ObjectDeletedError:
                     pass
-                print('new: ' + str(self.parameters.keys()))
+                print('FM: new: ' + str(self.parameters.keys()))
 
     def handle_device_changes(self, msg):
-        print('handling device changes')
-        logging.info('handling device changes')
+        print('FM: handling device changes')
+        logging.info('FM: handling device changes')
         change_type, dev_id_str = msg.split(' ')
         dev_id = int(dev_id_str)
         if change_type == 'added':
@@ -166,20 +138,20 @@ class FarmManager(FarmProcess):
                 if new_dev.actuator.periphery_controller.active is True:
                     # device usable, add it
                     self.devices[new_dev.id] = new_dev
-                    logging.info('adding device: ' + new_dev.name)
-                    print('adding device: ' + new_dev.name)
+                    logging.info('FM: adding device: ' + new_dev.name)
+                    print('FM: adding device: ' + new_dev.name)
                 else:
-                    logging.info('not adding device (inactive controller): ' + new_dev.name)
-                    print('not adding device (inactive controller): ' + new_dev.name)
+                    logging.info('FM: not adding device (inactive controller): ' + new_dev.name)
+                    print('FM: not adding device (inactive controller): ' + new_dev.name)
             else:
-                logging.info('not adding device (not connected): ' + new_dev.name)
-                print('not adding device (not connected): ' + new_dev.name)
+                logging.info('FM: not adding device (not connected): ' + new_dev.name)
+                print('FM: not adding device (not connected): ' + new_dev.name)
         elif change_type == 'changed':
             look_for_duplicates = True
             if dev_id in self.devices.keys():
                 # refresh device
-                logging.info('refreshing device: ' + self.devices[dev_id].name)
-                print('refreshing device: ' + self.devices[dev_id].name)
+                logging.info('FM: refreshing device: ' + self.devices[dev_id].name)
+                print('FM: refreshing device: ' + self.devices[dev_id].name)
                 self.db_session.refresh(self.devices[dev_id])
                 if self.devices[dev_id].actuator_id is not None:
                     if not self.devices[dev_id].actuator.periphery_controller.active:
@@ -191,14 +163,14 @@ class FarmManager(FarmProcess):
             else:
                 new_dev = self.db_session.query(Device).filter_by(_id=dev_id).one()
                 self.devices[new_dev.id] = new_dev
-                logging.info('adding device: ' + new_dev.name)
-                print('adding device: ' + new_dev.name)
+                logging.info('FM: adding device: ' + new_dev.name)
+                print('FM: adding device: ' + new_dev.name)
             # check if another device was using that actuator
             if look_for_duplicates:
                 for did in self.devices:
                     if self.devices[did].actuator_id == self.devices[dev_id].actuator_id and did != dev_id:
-                        logging.info('colateral remove: ' + self.devices[did].name)
-                        print('colateral remove: ' + self.devices[did].name)
+                        logging.info('FM: colateral remove: ' + self.devices[did].name)
+                        print('FM: colateral remove: ' + self.devices[did].name)
                         self.devices.pop(did, None)
                         break
         elif change_type == 'removed':
@@ -379,8 +351,12 @@ class FarmManager(FarmProcess):
 
     def handle_device_values(self, now):
         for dev_key in self.devices:
-            self.devices[dev_key].update_value(self.db_session, self.redis_conn, now, 2 * self.loop_time)
-            # self.devices[dev_key].log_value(now, self.redis_conn)
+            dev = self.devices[dev_key]
+            if dev.inputs['value'].connected_output is not None:
+                dev.update_value(self.db_session, self.redis_conn, now, 2 * self.loop_time)
+            elif dev.outputs['setpoint'].value is not None:
+                self.redis_conn.setex(dev.actuator.redis_key, dev.outputs['setpoint'].value, 2 * self.loop_time)
+            # dev.log_value(now, self.redis_conn)
 
     def handle_regulators(self, now):
         for order in range(self.max_regulation_order + 1):
@@ -406,7 +382,7 @@ class FarmManager(FarmProcess):
             while datetime.now() - last_run < self.loop_time:
                 sleep(0.05)
             t0 = datetime.now()
-            now = unprecise_now(datetime.now())
+            now = self.unprecise_now(datetime.now())
             last_run = now
             self.handle_messages()
             t1 = datetime.now()
