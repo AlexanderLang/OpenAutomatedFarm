@@ -187,6 +187,7 @@ void execute_cmd(char cmd) {
 	byte found = 0;
 	int index = 0;
 	int al = 0;
+	byte cmd_error = 0;
 	// look for commands
 	switch (cmd) {
 	case 'f':
@@ -302,13 +303,25 @@ void execute_cmd(char cmd) {
 	        while(carray[index] != ';'){
 	            setpoint[j] = carray[index];
 	            index++;
+	            if(index >= al - 1){
+	                cmd_error = 1;
+	                break;
+	            }
 	            j++;
 	        }
-	        setpoint[j] = '\0';
-	        actuators[i].value = atof(setpoint);
-	        Serial.print(actuators[i].value);
-	        Serial.print(';');
-	        index++;
+	        if(!cmd_error){
+    	        setpoint[j] = '\0';
+	            actuators[i].value = atof(setpoint);
+	            Serial.print(actuators[i].value);
+	            Serial.print(';');
+	            index++;
+	        } else{
+	            Serial.print("Error");
+	            break;
+	        }
+	    }
+	    if(index < al -1){
+	        Serial.print("Error");
 	    }
 	    Serial.println();
 	    }

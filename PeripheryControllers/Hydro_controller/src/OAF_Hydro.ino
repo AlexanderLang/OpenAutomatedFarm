@@ -117,11 +117,11 @@ OAF_Sensor::Sensor sensors[] = {
 
 int num_actuators = 7;
 OAF_Actuator::Actuator actuators[] = {
-    {"P1", 0.0, 0.0, "%"},    //Pump 1
-    {"P2", 0.0, 0.0, "1/0"},  //Pump 2
-    {"P3", 0.0, 0.0, "%"},    //Pump 3
-    {"P4", 0.0, 0.0, "%"},    //Pump 4
-    {"WC", 0.0, 0.0, "%"},    //Water-Circulation
+    {"P1", 0.0, 0.0, "1/0"},    //Pump 1
+    {"P2", 0.0, 0.0, "1/0"},    //Pump 2
+    {"P3", 0.0, 0.0, "1/0"},    //Pump 3
+    {"P4", 0.0, 0.0, "1/0"},    //Pump 4
+    {"WC", 0.0, 0.0, "1/0"},    //Water-Circulation
     {"WI", 0.0, 0.0, "1/0"},   //Water IN
     {"WO", 0.0, 0.0, "1/0"}   //Water OUT
 };
@@ -281,6 +281,7 @@ void execute_cmd(char cmd) {
 	byte found = 0;
 	int index = 0;
 	int al = 0;
+	byte cmd_error = 0;
 	// look for commands
 	switch (cmd) {
 	case 'f':
@@ -396,13 +397,25 @@ void execute_cmd(char cmd) {
 	        while(carray[index] != ';'){
 	            setpoint[j] = carray[index];
 	            index++;
+	            if(index >= al - 1){
+	                cmd_error = 1;
+	                break;
+	            }
 	            j++;
 	        }
-	        setpoint[j] = '\0';
-	        actuators[i].value = atof(setpoint);
-	        Serial.print(actuators[i].value);
-	        Serial.print(';');
-	        index++;
+	        if(!cmd_error){
+    	        setpoint[j] = '\0';
+	            actuators[i].value = atof(setpoint);
+	            Serial.print(actuators[i].value);
+	            Serial.print(';');
+	            index++;
+	        } else{
+	            Serial.print("Error");
+	            break;
+	        }
+	    }
+	    if(index < al -1){
+	        Serial.print("Error");
 	    }
 	    Serial.println();
 	    }
