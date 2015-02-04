@@ -141,7 +141,10 @@ class CalendarViews(object):
             ret_dict['form'] = e.render()
             return ret_dict
         inter = DBSession.query(SetpointInterpolation).filter_by(_id=vals['interpolation']).one()
-        new_entry = DeviceCalendarEntry(dev, last_entry.entry_number + 1, inter)
+        if last_entry is not None:
+            new_entry = DeviceCalendarEntry(dev, last_entry.entry_number + 1, inter)
+        else:
+            new_entry = DeviceCalendarEntry(dev, 1, inter)
         DBSession.add(new_entry)
         DBSession.flush()
         ret_dict['form'] = add_form.render()
