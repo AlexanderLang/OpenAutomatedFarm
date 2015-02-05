@@ -155,7 +155,7 @@ class CalendarViews(object):
     @view_config(route_name='calendar_dev_entry_delete', renderer='json')
     def calendar_dev_entry_delete(self):
         entry_id = self.request.matchdict['entry_id']
-        entry = DBSession.query(CalendarEntry).filter_by(_id=entry_id).one()
+        entry = DBSession.query(DeviceCalendarEntry).filter_by(_id=entry_id).one()
         self.request.redis.publish('calendar_changes', 'removed ' + str(entry_id))
         DBSession.delete(entry)
         return {'delete': True}
