@@ -108,6 +108,9 @@ class Device(Component):
     def update_value(self, db_session, redis_conn, now, timeout):
         if self.actuator is not None:
             value = get_redis_number(redis_conn, self._inputs['value'].redis_key)
+            if value is None:
+                # set actuator default
+                value = self.actuator.default_value
             self.old_value_logs = DeviceValueLog.log(db_session, self, now, value, self.old_value_logs)
             redis_conn.setex(self.actuator.redis_key, value, timeout)
 
