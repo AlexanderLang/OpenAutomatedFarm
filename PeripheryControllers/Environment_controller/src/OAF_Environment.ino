@@ -6,8 +6,8 @@
 #define ADDRESS_ID 0
 
 // Specify data and clock connections and instantiate SHT1x object
-#define dataPin  A4
-#define clockPin A5
+#define dataPin  5
+#define clockPin 3
 SHT1x sht1x(dataPin, clockPin);
 
 
@@ -170,8 +170,10 @@ void setup() {
 
 void loop() {
   sensors[0].value = SHT2x.GetTemperature();
+  delay(5);
   sensors[1].value = sht1x.readTemperatureC();
   sensors[2].value = SHT2x.GetHumidity();
+  delay(5);
   sensors[3].value = sht1x.readHumidity();
   
   analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
