@@ -135,10 +135,10 @@ int lc = 0;
 int lcc = 0;
 
 //DO-Pins
-int ex = 9;
+int ex = 11;
 int fo = 8;
 int rf = 10;
-int ac = 11;
+int ac = 9;
 int cf = 6;
 int cp = 4;
 
@@ -170,17 +170,15 @@ void setup() {
 
 void loop() {
   sensors[0].value = SHT2x.GetTemperature();
-  delay(5);
   sensors[1].value = sht1x.readTemperatureC();
   sensors[2].value = SHT2x.GetHumidity();
-  delay(5);
   sensors[3].value = sht1x.readHumidity();
   
   analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
   digitalWrite(fo, (int) actuators[1].value);  //Set Fog
   analogWrite(rf, (int) actuators[2].value);  //Set Rootfan
   analogWrite(ac, (int) actuators[3].value);  //Set Aircirculation
-  analogWrite(ex, (int) actuators[4].value);  //Set CT-Fan  
+  analogWrite(cf, (int) actuators[4].value);  //Set CT-Fan  
   digitalWrite(cp, (int) actuators[5].value); //Set CT-Pump
   
   
