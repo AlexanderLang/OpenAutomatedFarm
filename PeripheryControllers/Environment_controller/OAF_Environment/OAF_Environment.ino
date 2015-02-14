@@ -1,35 +1,11 @@
 #include <EEPROM.h>
 #include <Wire.h>
-#include <SHT1x.h>
 #include <SHT2x.h>
-#define OAF_SERIALSHELL_BAUD 38400
+#include <JeeLib.h>
+#include <PortsSHT21.h>
+
+#define OAF_SERIALSHELL_BAUD 57600
 #define ADDRESS_ID 0
-
-// Specify data and clock connections and instantiate SHT1x object
-#define dataPin  A4
-#define clockPin A5
-SHT1x sht1x(dataPin, clockPin);
-
-
-void EEPROM_writeFloat(int ee, const float& value)
-{
-    const byte* p = (const byte*)(const void*)&value;
-    int i;
-    for (i = 0; i < 4; i++) {
-        EEPROM.write(ee++, *p++);
-    }
-}
-
-float EEPROM_readFloat(int ee)
-{
-    float ret;
-    byte* p = (byte*)(void*)&ret;
-    int i;
-    for (i = 0; i < 4; i++) {
-        *p++ = EEPROM.read(ee++);
-    }
-    return ret;
-}
 
 namespace OAF_Sensor {
 typedef struct {
@@ -39,8 +15,6 @@ typedef struct {
 	float precision;
 	float min;
 	float max;
-	float offset;
-	float gain;
 } Sensor;
 }
 
@@ -50,62 +24,7 @@ typedef struct {
     float value;
     float default_value;
     String unit;
-    int pin_number;
-    int offset;
-    float gain;
 } Actuator;
-}
-
-void calculate_sensor_value(OAF_Sensor::Sensor *sensor, float value){
-    sensor->value = sensor->offset + value * sensor->gain;
-}
-
-int sensor_offset_address(int sensor_number){
-    return 1 + 8 * sensor_number;
-}
-
-int sensor_gain_address(int sensor_number){
-    return 5 + 8 * sensor_number;
-}
-
-int actuator_offset_address(int number_sensors, int actuator_number){
-    return 1 + (8 * number_sensors) + (8 * actuator_number);
-}
-
-int actuator_gain_address(int number_sensors, int actuator_number){
-    return 5 + (8 * number_sensors) + (8 * actuator_number);
-}
-
-float get_sensor_offset(int sensor_number){
-    return EEPROM_readFloat(sensor_offset_address(sensor_number));
-}
-
-float get_sensor_gain(int sensor_number){
-    return EEPROM_readFloat(sensor_gain_address(sensor_number));
-}
-
-float get_actuator_offset(int number_sensors, int actuator_number){
-    return EEPROM_readFloat(actuator_offset_address(number_sensors, actuator_number));
-}
-
-float get_actuator_gain(int number_sensors, int actuator_number){
-    return EEPROM_readFloat(actuator_gain_address(number_sensors, actuator_number));
-}
-
-void set_sensor_offset(int sensor_number, float value){
-    return EEPROM_writeFloat(sensor_offset_address(sensor_number), value);
-}
-
-void set_sensor_gain(int sensor_number, float value){
-    return EEPROM_writeFloat(sensor_gain_address(sensor_number), value);
-}
-
-void set_actuator_offset(int number_sensors, int actuator_number, float value){
-    return EEPROM_writeFloat(actuator_offset_address(number_sensors, actuator_number), value);
-}
-
-void set_actuator_gain(int number_sensors, int actuator_number, float value){
-    return EEPROM_writeFloat(actuator_gain_address(number_sensors, actuator_number), value);
 }
 
 /**********************************************************************
@@ -134,11 +53,15 @@ OAF_Actuator::Actuator actuators[] = {
 int lc = 0;
 int lcc = 0;
 
+//SHT softTWI
+SHT21 hsensor1 (1);
+float humO, tempO;
+
 //DO-Pins
-int ex = 9;
-int fo = 8;
+int ex = 8;
+int fo = 11;
 int rf = 10;
-int ac = 11;
+int ac = 9;
 int cf = 6;
 int cp = 4;
 
@@ -169,10 +92,13 @@ void setup() {
 }
 
 void loop() {
+  hsensor1.measure(SHT21::HUMI);
+  hsensor1.measure(SHT21::TEMP);
+  hsensor1.calculate(humO, tempO);
   sensors[0].value = SHT2x.GetTemperature();
-  sensors[1].value = sht1x.readTemperatureC();
+  sensors[1].value = tempO;
   sensors[2].value = SHT2x.GetHumidity();
-  sensors[3].value = sht1x.readHumidity();
+  sensors[3].value = humO;
   
   analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
   digitalWrite(fo, (int) actuators[1].value);  //Set Fog
@@ -198,7 +124,6 @@ void execute_cmd(char cmd) {
 	byte found = 0;
 	int index = 0;
 	int al = 0;
-	byte cmd_error = 0;
 	// look for commands
 	switch (cmd) {
 	case 'f':
@@ -242,54 +167,6 @@ void execute_cmd(char cmd) {
 		}
 		Serial.println();
 	    break;
-	case 'C':
-	    // get sensor calibration
-	    {
-	        char buffer[3];
-	        com_arg1.toCharArray(buffer, 3);
-	        index = atoi(buffer);
-    	    Serial.print(sensors[index].offset);
-	        Serial.print(';');
-	        Serial.print(sensors[index].gain);
-    	    Serial.println();
-    	}
-	    break;
-	case 'c':
-	    // set sensor calibration
-	    {
-	        char buffer[3];
-	        com_arg1.toCharArray(buffer, 3);
-	        index = atoi(buffer);
-	        al = com_arg2.length() + 1;
-	        char carray[al];
-	        com_arg2.toCharArray(carray, al);
-	        char data[al];
-	        int i = 0;
-	        int j = 0;
-	        while(carray[i] != ';'){
-	            data[j] = carray[i];
-	            i++;
-	            j++;
-	        }
-	        data[j] = '\0';
-	        sensors[index].offset = atof(data);
-	        set_sensor_offset(index, sensors[index].offset);
-	        Serial.print(sensors[index].offset);
-	        Serial.print(';');
-	        i++;
-	        j = 0;
-	        while(carray[i] != ';'){
-	            data[j] = carray[i];
-	            i++;
-	            j++;
-	        }
-	        data[j] = '\0';
-	        sensors[index].gain = atof(data);
-	        set_sensor_gain(index, sensors[index].gain);
-	        Serial.print(sensors[index].gain);
-	        Serial.println();
-	    }
-        break;
 	case 'A':
 	    // get actuator list
 	    for (int i = 0; i < num_actuators; i++) {
@@ -314,27 +191,13 @@ void execute_cmd(char cmd) {
 	        while(carray[index] != ';'){
 	            setpoint[j] = carray[index];
 	            index++;
-	            if(index >= al - 1){
-	                cmd_error = 1;
-	                break;
-	            }
 	            j++;
 	        }
-	        if(!cmd_error){
-    	        setpoint[j] = '\0';
-	            actuators[i].value = atof(setpoint);
-	            Serial.print(actuators[i].value);
-	            Serial.print(';');
-	            index++;
-	        } else{
-	            Serial.print("Error");
-	            break;
-	        }
+	        setpoint[j] = '\0';
+	        actuators[i].value = atof(setpoint);
+	        index++;
 	    }
-	    if(index < al -1){
-	        Serial.print("Error");
-	    }
-	    Serial.println();
+	    Serial.println(0);
 	    }
 	    break;
 	default:
