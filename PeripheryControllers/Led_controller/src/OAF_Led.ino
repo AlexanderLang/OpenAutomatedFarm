@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <EEPROM.h>
+#include <avr/wdt.h> 
 
 #define OAF_SERIALSHELL_BAUD 38400
 #define ADDRESS_ID 0
@@ -145,6 +146,7 @@ void setup() {
   pinMode(red2_pwm_pin, OUTPUT);
   analogWrite(red2_pwm_pin, 0);
   
+  wdt_enable(WDTO_8S);
   Serial.println("ready!");
 }
 
@@ -173,6 +175,7 @@ String com_arg1 = "";
 String com_arg2 = "";
 
 void execute_cmd(char cmd) {
+	wdt_reset();
 	byte found = 0;
 	int index = 0;
 	int al = 0;
