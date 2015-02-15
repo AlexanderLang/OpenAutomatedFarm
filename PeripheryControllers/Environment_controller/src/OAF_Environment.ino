@@ -166,7 +166,7 @@ void setup() {
   TCCR2B = TCCR2B & 0b11111000 | 0x01;
   TCCR1B = TCCR1B & 0b11111000 | 0x01;
   
-  wdt_enable(WDTO_4S);
+  wdt_enable(WDTO_8S);
   Serial.println("ready!");
 }
 
@@ -197,7 +197,8 @@ String com_arg1 = "";
 String com_arg2 = "";
 
 void execute_cmd(char cmd) {
-	byte found = 0;
+	wdt_reset();
+        byte found = 0;
 	int index = 0;
 	int al = 0;
 	byte cmd_error = 0;
