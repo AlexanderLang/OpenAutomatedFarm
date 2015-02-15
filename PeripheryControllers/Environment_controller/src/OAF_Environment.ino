@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <SHT1x.h>
 #include <SHT2x.h>
+#include <avr/wdt.h> 
 #define OAF_SERIALSHELL_BAUD 38400
 #define ADDRESS_ID 0
 
@@ -165,6 +166,7 @@ void setup() {
   TCCR2B = TCCR2B & 0b11111000 | 0x01;
   TCCR1B = TCCR1B & 0b11111000 | 0x01;
   
+  wdt_enable(WDTO_4S);
   Serial.println("ready!");
 }
 
@@ -174,12 +176,12 @@ void loop() {
   sensors[2].value = SHT2x.GetHumidity();
   sensors[3].value = sht1x.readHumidity();
   
-  analogWrite(ex, (int) actuators[0].value);  //Set Exhaust
-  digitalWrite(fo, (int) actuators[1].value);  //Set Fog
-  analogWrite(rf, (int) actuators[2].value);  //Set Rootfan
-  analogWrite(ac, (int) actuators[3].value);  //Set Aircirculation
-  analogWrite(cf, (int) actuators[4].value);  //Set CT-Fan  
-  digitalWrite(cp, (int) actuators[5].value); //Set CT-Pump
+  analogWrite(ex, (int) actuators[0].value * 2.5);  //Set Exhaust
+  digitalWrite(fo, (int) actuators[1].value);       //Set Fog
+  analogWrite(rf, (int) actuators[2].value * 2.5);  //Set Rootfan
+  analogWrite(ac, (int) actuators[3].value * 2.5);  //Set Aircirculation
+  analogWrite(cf, (int) actuators[4].value * 2.5);  //Set CT-Fan  
+  digitalWrite(cp, (int) actuators[5].value);       //Set CT-Pump
   
   
 }
@@ -301,6 +303,7 @@ void execute_cmd(char cmd) {
 	        Serial.print('|');
 	    }
 	    Serial.println();
+            wdt_reset();
 	    break;
 	case 'a':
 	    // set actuators
