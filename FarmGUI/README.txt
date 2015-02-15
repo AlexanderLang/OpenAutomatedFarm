@@ -24,8 +24,15 @@ Production Setup
 
     systemctl restart nginx
 
-- start pserve in daemon mode
+- start farmgui and oafd at boot
 
-    nice -5 pserve --daemon --pid-file=pserve_5000.pid production.ini http_port=5000
+    cp ../systemd/*.service /etc/systemd/system
+    systemctl daemon-reload
+    systemctl enable farmgui
+    systemctl enable oafd
+    systemctl start farmgui
+    systemctl start oafd
+
+
 
 

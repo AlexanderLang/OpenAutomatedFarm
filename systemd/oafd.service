@@ -1,12 +1,12 @@
 [Unit]
-Description=Open Automated Farm Web Interface Service
+Description=Open Automated Farm Daemon Service
 After=network.target
 
 [Service]
 Type=simple
 User=oaf
 SyslogLevel=err
-ExecStart=/home/oaf/OpenAutomatedFarm/systemd/farmgui.sh
+ExecStart=/home/oaf/OpenAutomatedFarm/systemd/oafd.sh
 
 [Install]
 WantedBy=multi-user.target

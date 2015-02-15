@@ -52,22 +52,9 @@ Getting Started
 	./setup_virtualenv.sh
 	source env34/bin/activate
 
-2) Initialize the database(s)
+2) Setup software part: read the README file in FarmGUI
 
-	initialize_FarmGUI_db
-
-3) Start the workers
-
-	oaf_pc development.ini /dev/ttyACM0
-	oaf_fm development.ini
-
-4) Run pserve
-
-	pserve development.ini --reload
-
-5) start hacking :)
-
-6) building arduino firmware with ino (on arm)
+3) building arduino firmware with ino (on arm)
 
     ino build --cppflags="-fno-use-cxa-atexit -ffunction-sections -fdata-sections -g -Os -w"
 
