@@ -166,16 +166,10 @@ class PeripheryControllerWorker(FarmProcess):
             elif message['channel'] == b'field_setting_changes':
                 self.loop_time = FieldSetting.get_loop_time(self.db_session)
 
-    def run(self):
-        last_run = datetime.now()
-        while True:
-            while datetime.now() - last_run < self.loop_time:
-                sleep(0.05)
-            last_run = datetime.now()
-            self.handle_messages()
-            self.publish_sensor_values()
-            self.apply_actuator_values()
-            self.reset_watchdog()
+    def work(self, now):
+        self.handle_messages()
+        self.publish_sensor_values()
+        self.apply_actuator_values()
 
     def close(self):
         db_session = self.db_sessionmaker()

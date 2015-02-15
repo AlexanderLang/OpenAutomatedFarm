@@ -55,6 +55,6 @@ setup(name='FarmGUI',
       [console_scripts]
       oaf_init_db = farmgui.scripts:initialize_db_main
       oaf_pc_reset = farmgui.scripts:reset_main
-      oaf_fs = farmgui.workers:farm_supervisor_main
+      oafd = farmgui.scripts:daemon_main
       """,
 )

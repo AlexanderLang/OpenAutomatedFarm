@@ -1,11 +1,13 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+import abc
 
 from multiprocessing import Process
 
 import logging
 from datetime import datetime
 import calendar
+from time import sleep
 
 from pyramid.paster import get_appsettings
 
@@ -22,6 +24,7 @@ class FarmProcess(Process):
     """
     classdocs
     """
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, config_uri):
         super(FarmProcess, self).__init__()
@@ -72,3 +75,20 @@ class FarmProcess(Process):
                 M = 1
                 Y += 1
         return datetime(Y, M, d, h, m, s)
+
+    def run(self):
+        logging.info('{name}: entered work loop'.format(name=self.name))
+        print('{name}: entered work loop'.format(name=self.name))
+        last_run = datetime.now() - self.loop_time
+        while True:
+            # sleep
+            while datetime.now() - last_run < self.loop_time:
+                sleep(0.05)
+            last_run = datetime.now()
+            now = FarmProcess.unprecise_now(last_run)
+            self.reset_watchdog()
+            self.work(now)
+
+    @abc.abstractmethod
+    def work(self, now):
+        return

@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from datetime import datetime
-from time import sleep
 
 import logging
 
@@ -30,7 +29,7 @@ class FarmManager(FarmProcess):
 
     def __init__(self, config_uri):
         FarmProcess.__init__(self, 'FM', config_uri)
-        logging.info('Initializing Farm Manager')
+        logging.info('FM: Initializing')
         self.parameters = None
         self.regulators = None
         self.real_regulators = None
@@ -55,7 +54,7 @@ class FarmManager(FarmProcess):
                               'periphery_controller_changes',
                               'component_input_changes',
                               'component_property_changes')
-        logging.info('Farm Manager initialized\n\n')
+        logging.info('FM: initialisation finished')
 
     def reload_parameters(self):
         logging.info('FM: reloading parameters')
@@ -286,20 +285,20 @@ class FarmManager(FarmProcess):
                 self.devices.pop(r_id, None)
 
     def reload_devices(self):
-        logging.info('reloading devices')
-        print('reloading devices')
+        logging.info('FM: reloading devices')
+        print('FM: reloading devices')
         self.devices = {}
         for dev in self.db_session.query(Device).filter(Device.actuator_id != None).all():
             # make sure actuators are active
             if dev.actuator.periphery_controller.active is True:
                 # print('using: '+str(dev))
-                logging.info('using: ' + str(dev.name))
-                print('using: ' + str(dev.name))
+                logging.info('FM: using \"{name}\"'.format(name=str(dev.name)))
+                print('FM: using \"{name}\"'.format(name=str(dev.name)))
                 self.devices[dev.id] = dev
 
     def reload_regulators(self):
-        logging.info('reloading regulators')
-        print('reloading regulators')
+        logging.info('FM: reloading regulators')
+        print('FM: reloading regulators')
         self.max_regulation_order = 0
         self.regulators = {}
         self.real_regulators = {}
@@ -309,12 +308,12 @@ class FarmManager(FarmProcess):
             real_reg.initialize(reg)
             # print('input['+inp+'] = '+str(inputs[inp])+', redis: '+reg.inputs[inp].redis_key)
             # print('maybe addind '+reg.name)
-            logging.info('using: ' + str(reg.name))
-            print('using: ' + reg.name)
+            logging.info('FM: using: ' + str(reg.name))
+            print('FM: using: ' + reg.name)
             self.regulators[reg.id] = reg
             self.real_regulators[reg.id] = real_reg
             if reg.order > self.max_regulation_order:
-                print('setting max order: ' + str(reg.order))
+                print('FM: setting max order: ' + str(reg.order))
                 self.max_regulation_order = reg.order
 
     def handle_messages(self):
@@ -371,48 +370,15 @@ class FarmManager(FarmProcess):
                     for outp in regulator.outputs:
                         self.redis_conn.setex(regulator.outputs[outp].redis_key, str(outputs[outp]), 2 * self.loop_time)
 
-    def run(self):
-        logging.info('Farm Manager entered work loop')
-        print('Farm Manager entered work loop')
-        last_run = datetime.now()
-        loop_counter = 0
-        while True:
-            loop_counter += 1
-            # sleep
-            while datetime.now() - last_run < self.loop_time:
-                sleep(0.05)
-            t0 = datetime.now()
-            now = FarmProcess.unprecise_now(datetime.now())
-            last_run = now
-            self.handle_messages()
-            t1 = datetime.now()
-            t_m = t1 - t0
-            # calculate setpoints, log parameters
-            self.handle_parameters(now)
-            t2 = datetime.now()
-            t_p = t2 - t1
-            self.handle_device_setpoints(now)
-            t3 = datetime.now()
-            t_ds = t3 - t2
-            self.handle_regulators(now)
-            t4 = datetime.now()
-            t_r = t4 - t3
-            self.handle_device_values(now)
-            t5 = datetime.now()
-            t_dv = t5 - t4
-            try:
-                self.db_session.commit()
-            except IntegrityError as e:
-                print('\n\nError: ' + str(e) + '\n\n')
-                self.db_session.rollback()
-            t6 = datetime.now()
-            t_c = t6 - t5
-            self.reset_watchdog()
-            worktime = datetime.now() - t0
-            if worktime > self.loop_time:
-                msg = 'FM: t_w=%.2f ' % worktime.total_seconds()
-                msg += ' t_m=%.3f t_p=%.3f' % (t_m.total_seconds(), t_p.total_seconds())
-                msg += ' t_ds=%.3f t_r=%.3f' % (t_ds.total_seconds(), t_r.total_seconds())
-                msg += ' t_dv=%.3f t_c=%.3f' % (t_dv.total_seconds(), t_c.total_seconds())
-                logging.error(msg)
+    def work(self, now):
+        self.handle_messages()
+        self.handle_parameters(now)
+        self.handle_device_setpoints(now)
+        self.handle_regulators(now)
+        self.handle_device_values(now)
+        try:
+            self.db_session.commit()
+        except IntegrityError as e:
+            print('\n\nError: ' + str(e) + '\n\n')
+            self.db_session.rollback()
 
