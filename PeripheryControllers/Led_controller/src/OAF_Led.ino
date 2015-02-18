@@ -155,10 +155,10 @@ void loop() {
     actuators[1].value = 180;
   };
   
-  analogWrite(white_pwm_pin, (int) actuators[0].value);  //Set white LED
-  analogWrite(blue_pwm_pin, (int) actuators[1].value);  //Set blue LED
-  analogWrite(red1_pwm_pin, (int) actuators[2].value);  //Set red 1 LED
-  analogWrite(red2_pwm_pin, (int) actuators[2].value);  //Set red 2 LED
+  analogWrite(white_pwm_pin, (int) actuators[0].value * 2.5);  //Set white LED
+  analogWrite(blue_pwm_pin, (int) actuators[1].value * 1.8);   //Set blue LED
+  analogWrite(red1_pwm_pin, (int) actuators[2].value * 2.5);   //Set red 1 LED
+  analogWrite(red2_pwm_pin, (int) actuators[2].value * 2.5);   //Set red 2 LED
  
   
   

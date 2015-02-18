@@ -122,7 +122,7 @@ OAF_Actuator::Actuator actuators[] = {
     {"P2", 0.0, 0.0, "1/0"},    //Pump 2
     {"P3", 0.0, 0.0, "1/0"},    //Pump 3
     {"P4", 0.0, 0.0, "1/0"},    //Pump 4
-    {"WC", 0.0, 0.0, "1/0"},    //Water-Circulation
+    {"WC", 0.0, 0.0, "%"},    //Water-Circulation
     {"WI", 0.0, 0.0, "1/0"},   //Water IN
     {"WO", 0.0, 0.0, "1/0"}   //Water OUT
 };
@@ -171,8 +171,8 @@ int  count_water_in = 0;
 
 
 float measure_tanklevel() {
-  float offset = 24.2;
-  float gain = -0.1;
+  float offset = 39;
+  float gain = -0.2;
   int meansteps = 10;
   tanklevel_sum += analogRead(tanklevel_pin);
   loopcounter_tank += 1;
@@ -245,7 +245,7 @@ void setup() {
   digitalWrite(pump_2_pin, LOW);
   digitalWrite(pump_3_pin, LOW);
   digitalWrite(pump_4_pin, LOW);
-  digitalWrite(circulation_pin, LOW);
+  analogWrite(circulation_pin, LOW);
   digitalWrite(water_in_pin, LOW);
   digitalWrite(water_out_pin, LOW);
   attachInterrupt(1, count_water_in_pulse, CHANGE);
@@ -264,7 +264,7 @@ void loop() {
   digitalWrite(pump_2_pin, (int) actuators[1].value);  //Pump 2	
   digitalWrite(pump_3_pin, (int) actuators[2].value);  //Pump 3	
   digitalWrite(pump_4_pin, (int) actuators[3].value);  //Pump 4
-  digitalWrite(circulation_pin, (int) actuators[4].value);  //Water-Circulation
+  analogWrite(circulation_pin, (int) actuators[4].value);  //Water-Circulation
   digitalWrite(water_in_pin, (int) actuators[5].value);  //Water IN valve	
   digitalWrite(water_out_pin, (int) actuators[6].value);  //Water OUT valve	
   	
