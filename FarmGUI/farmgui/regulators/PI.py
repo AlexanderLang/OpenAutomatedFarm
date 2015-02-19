@@ -16,6 +16,8 @@ class PI(Regulator):
         self.constants['K_p'] = RegulatorProperty(1, 'Proportional constant')
         self.constants['K_i'] = RegulatorProperty(0.1, 'Integral constant')
         self.constants['T_i'] = RegulatorProperty(1, 'Sampling time interval')
+        self.constants['min'] = RegulatorProperty(0, 'Minimum Output value')
+        self.constants['max'] = RegulatorProperty(0, 'Maximum Output value')
         self.outputs['result'] = RegulatorProperty(0, 'Regulator output')
         self.esum = 0
 
@@ -27,6 +29,10 @@ class PI(Regulator):
             self.limit_esum()
             i = self.constants['K_i'].value * self.constants['T_i'].value * self.esum
             ret_dict['result'] = round(p + i, 2)
+            if ret_dict['result'] > self.constants['max']:
+                ret_dict['result'] = self.constants['max']
+            elif ret_dict['result'] < self.constants['min']:
+                ret_dict['result'] = self.constants['min']
         else:
             ret_dict['result'] = None
         return ret_dict
