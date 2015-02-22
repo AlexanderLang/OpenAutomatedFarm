@@ -135,9 +135,9 @@ int pump_1_pin = 13;
 int pump_2_pin = 12;
 int pump_3_pin = 11;
 int pump_4_pin = 10;
-int circulation_pin = 9;
+int circulation_pin = 5;
 int water_in_pin = 8;
-int water_out_pin = 7;
+int water_out_pin = 9;
 int water_in_sensor = 2;
 
 //AnalogInput-Pins
