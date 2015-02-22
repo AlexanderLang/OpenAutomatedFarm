@@ -5,6 +5,7 @@ from .PI import PI
 from .Difference import Difference
 from .RootHumidifier import RootHumidifier
 from .HysteresisController import HysteresisController
+from .ProportionalPulse import ProportionalPulse
 
 
 class UnknownRegulator(Exception):
@@ -26,6 +27,8 @@ def regulator_factory(name):
         return RootHumidifier()
     elif name == 'HysteresisController':
         return HysteresisController()
+    elif name == 'ProportionalPulse':
+        return ProportionalPulse()
     else:
         raise UnknownRegulator(name)
 
