@@ -199,7 +199,7 @@ class CalendarViews(object):
     def interpolation_update(self):
         try:
             spip = DBSession.query(SetpointInterpolation).filter_by(
-                _id=self.request.matchdict['interpolation_id']).first()
+                _id=self.request.matchdict['inter_id']).first()
         except DBAPIError:
             return Response('database error (query SetpointInterpolation)', content_type='text/plain', status_int=500)
         form = Form(SetpointInterpolationSchema().bind(interpolation=spip), buttons=('Save',))
@@ -224,7 +224,7 @@ class CalendarViews(object):
     @view_config(route_name='interpolation_delete')
     def interpolation_delete(self):
         interpolation = DBSession.query(SetpointInterpolation).filter_by(
-            _id=self.request.matchdict['interpolation_id']).first()
+            _id=self.request.matchdict['inter_id']).first()
         DBSession.delete(interpolation)
         self.request.redis.publish('calendar_changes', 'interpolation deleted')
         return HTTPFound(
@@ -234,7 +234,7 @@ class CalendarViews(object):
     def interpolation_knot_save(self):
         controls = self.request.POST
         param = DBSession.query(Parameter).filter_by(_id=self.request.matchdict['parameter_id']).first()
-        inter = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['interpolation_id']).first()
+        inter = DBSession.query(SetpointInterpolation).filter_by(_id=self.request.matchdict['inter_id']).first()
         add_form = Form(InterpolationKnotSchema().bind())
         try:
             p = add_form.validate(controls.items())
