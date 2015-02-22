@@ -27,7 +27,7 @@ class HysteresisController(Regulator):
             uh = self.constants['uh'].value
             lh = self.constants['lh'].value
             if self.state == 'OK':
-                if diff > -uh:
+                if -diff > uh:
                     ret_dict['inc'] = 0
                     ret_dict['dec'] = 1
                     self.state = 'dec'
