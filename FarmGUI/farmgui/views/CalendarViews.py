@@ -218,8 +218,7 @@ class CalendarViews(object):
         filename = self.request.registry.settings['plot_directory'] + '/interpolation_' + str(spip.id) + '.png'
         spip.plot('', filename)
         self.request.redis.publish('calendar_changes', 'interpolation changed')
-        return HTTPFound(
-            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return {'updated': True}
 
     @view_config(route_name='interpolation_delete')
     def interpolation_delete(self):
@@ -227,8 +226,7 @@ class CalendarViews(object):
             _id=self.request.matchdict['inter_id']).first()
         DBSession.delete(interpolation)
         self.request.redis.publish('calendar_changes', 'interpolation deleted')
-        return HTTPFound(
-            location=self.request.route_url('calendar_home', parameter_id=self.request.matchdict['parameter_id']))
+        return {'deleted': True}
 
     @view_config(route_name='interpolation_knot_save', renderer='templates/error_form.pt', layout='default')
     def interpolation_knot_save(self):
