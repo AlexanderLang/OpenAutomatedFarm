@@ -43,6 +43,6 @@ class ProportionalPulse(Regulator):
                     return {'output': 1}
             else:
                 diff = inputs['now'] - self.last_change
-                if diff > timedelta(self.constants['t_off'].value):
+                if diff > timedelta(seconds=self.constants['t_off'].value):
                     self.state = 'ready'
                 return {'output': 0}
