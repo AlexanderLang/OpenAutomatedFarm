@@ -264,7 +264,7 @@ void loop() {
   digitalWrite(pump_2_pin, (int) actuators[1].value);  //Pump 2	
   digitalWrite(pump_3_pin, (int) actuators[2].value);  //Pump 3	
   digitalWrite(pump_4_pin, (int) actuators[3].value);  //Pump 4
-  analogWrite(circulation_pin, (int) actuators[4].value);  //Water-Circulation
+  analogWrite(circulation_pin, (int) actuators[4].value * 2.5);  //Water-Circulation
   digitalWrite(water_in_pin, (int) actuators[5].value);  //Water IN valve	
   digitalWrite(water_out_pin, (int) actuators[6].value);  //Water OUT valve	
   	
