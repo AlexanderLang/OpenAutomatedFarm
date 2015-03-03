@@ -1,6 +1,15 @@
 #include <EEPROM.h>
 #include <Wire.h>
-#include <avr/wdt.h> 
+#include <avr/wdt.h>
+#include <NewPing.h>
+
+
+//Ultrasonic Tank Level Measurement
+#define TRIGGER_PIN  3  // Arduino pin tied to trigger pin on the ultrasonic sensor.
+#define ECHO_PIN     2  // Arduino pin tied to echo pin on the ultrasonic sensor.
+#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 #define OAF_SERIALSHELL_BAUD 38400
 #define ADDRESS_ID 0
@@ -138,7 +147,6 @@ int pump_4_pin = 10;
 int circulation_pin = 5;
 int water_in_pin = 8;
 int water_out_pin = 9;
-int water_in_sensor = 2;
 
 //AnalogInput-Pins
 int ph_pin = 2;
@@ -166,15 +174,13 @@ int loopcounter_watertemperature = 0;
 long int watertemperature_sum = 0;
 float watertemperature_value = 0;
 
-//Water-In-Sensor
-int  count_water_in = 0;
 
 
 float measure_tanklevel() {
-  float offset = 39;
-  float gain = -0.2;
+  float offset = 10;
+  float gain = -1;
   int meansteps = 10;
-  tanklevel_sum += analogRead(tanklevel_pin);
+  tanklevel_sum += sonar.ping();;
   loopcounter_tank += 1;
   if(loopcounter_tank > meansteps){
     tanklevel_value = tanklevel_sum * gain / meansteps + offset;
@@ -226,9 +232,6 @@ float measure_watertemperature() {
   return watertemperature_value;
 }
 
-void count_water_in_pulse() {
-  count_water_in ++;
-}
 
 void setup() {
   Wire.begin();
@@ -240,7 +243,6 @@ void setup() {
   pinMode(circulation_pin, OUTPUT);
   pinMode(water_in_pin, OUTPUT);
   pinMode(water_out_pin, OUTPUT);
-  pinMode(water_in_sensor, INPUT);
   digitalWrite(pump_1_pin, LOW);
   digitalWrite(pump_2_pin, LOW);
   digitalWrite(pump_3_pin, LOW);
@@ -248,7 +250,6 @@ void setup() {
   analogWrite(circulation_pin, LOW);
   digitalWrite(water_in_pin, LOW);
   digitalWrite(water_out_pin, LOW);
-  attachInterrupt(1, count_water_in_pulse, CHANGE);
   
   wdt_enable(WDTO_8S);	
   Serial.println("ready!");
