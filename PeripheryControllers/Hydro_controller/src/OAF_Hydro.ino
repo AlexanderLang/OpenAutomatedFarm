@@ -177,13 +177,13 @@ float watertemperature_value = 0;
 
 
 float measure_tanklevel() {
-  float offset = 0;
-  float gain = 1;
+  float offset = -33.1;
+  float gain = 0.00714;
   int meansteps = 10;
-  tanklevel_sum += sonar.ping();;
+  tanklevel_sum += sonar.ping() * gain + offset;
   loopcounter_tank += 1;
-  if(loopcounter_tank > meansteps){
-    tanklevel_value = tanklevel_sum * gain / meansteps + offset;
+  if(loopcounter_tank >= meansteps){
+    tanklevel_value = tanklevel_sum / meansteps;
     loopcounter_tank = 0;
     tanklevel_sum = 0;
   }
